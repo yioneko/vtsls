@@ -32,7 +32,7 @@
   },
   "pnpm": {
     "patchedDependencies": {
-      "jsonc-parser@3.2.0": "patches/jsonc-parser@3.2.0.patch"
+      "jsonc-parser@3.2.0": "patches/packages/jsonc-parser@3.2.0.patch"
     }
   }
 }
