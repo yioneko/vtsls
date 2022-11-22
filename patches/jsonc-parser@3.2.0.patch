@@ -1,0 +1,13 @@
+diff --git a/package.json b/package.json
+index 448d814b0d4a5a2ed76b517cdfa6c545905b409a..b70e30cfc848ff3067c21e1fe8dbc86f9e7ec021 100644
+--- a/package.json
++++ b/package.json
+@@ -2,7 +2,7 @@
+   "name": "jsonc-parser",
+   "version": "3.2.0",
+   "description": "Scanner and parser for JSON with comments.",
+-  "main": "./lib/umd/main.js",
++  "main": "./lib/esm/main.js",
+   "typings": "./lib/umd/main.d.ts",
+   "module": "./lib/esm/main.js",
+   "author": "Microsoft Corporation",
