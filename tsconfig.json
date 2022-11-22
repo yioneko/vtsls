@@ -1,18 +1,6 @@
 {
+  "extends": "./tsconfig.base.json",
   "compilerOptions": {
-    "baseUrl": ".",
-    "module": "CommonJS",
-    "moduleResolution": "node",
-    "noImplicitAny": true,
-    "noImplicitOverride": true,
-    "noImplicitReturns": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "outDir": "./dist",
-    "strictNullChecks": true,
-    "strict": true,
-    "target": "ES6",
-    "types": ["node"],
     "paths": {
       "@vsc-ts/*": ["typescript-language-features/src/*"],
       "vscode": ["vscode/src/vscode-dts/vscode.d.ts"]

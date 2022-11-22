@@ -1,7 +1,7 @@
-# Language Features for TypeScript and JavaScript files
+# vtsls
 
-**Notice:** This extension is bundled with Visual Studio Code. It can be disabled but not uninstalled.
+**Notice:** The server has not been well tested, use it at your own risk. Feedback welcome.
 
-## Features
+This is an LSP wrapper around [TypeScript extension bundled with VSCode](https://github.com/microsoft/vscode/tree/838b48504cd9a2338e2ca9e854da9cec990c4d57/extensions/typescript-language-features). All features and performance are nearly the same.
 
-See [TypeScript in Visual Studio Code](https://code.visualstudio.com/docs/languages/typescript) and [JavaScript in Visual Studio Code](https://code.visualstudio.com/docs/languages/javascript) to learn about the features of this extension.
+## More TODO

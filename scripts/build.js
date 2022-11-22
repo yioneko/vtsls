@@ -22,6 +22,7 @@ const args = process.argv.slice(2);
 
 esbuild.build({
   entryPoints: ["./src/cli.ts"],
+  tsconfig: "tsconfig.build.json",
   bundle: true,
   outfile: "dist/main.js",
   format: "cjs",
