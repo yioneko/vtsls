@@ -1,0 +1,13 @@
+diff --git a/src/languageFeatures/fileReferences.ts b/src/languageFeatures/fileReferences.ts
+index fcc2bbc..9772a01 100644
+--- a/src/languageFeatures/fileReferences.ts
++++ b/src/languageFeatures/fileReferences.ts
+@@ -60,7 +60,7 @@ class FileReferencesCommand implements Command {
+ 
+ 			const locations: vscode.Location[] = response.body.refs.map(reference =>
+ 				typeConverters.Location.fromTextSpan(this.client.toResource(reference.file), reference));
+-
++			return locations;
+ 			const config = vscode.workspace.getConfiguration('references');
+ 			const existingSetting = config.inspect<string>('preferredLocation');
+ 

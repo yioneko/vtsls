@@ -1,0 +1,82 @@
+diff --git a/src/extension.ts b/src/extension.ts
+index 32be9c9..fef7084 100644
+--- a/src/extension.ts
++++ b/src/extension.ts
+@@ -5,12 +5,12 @@
+ 
+ import * as fs from 'fs';
+ import * as vscode from 'vscode';
+-import VsCodeTelemetryReporter from '@vscode/extension-telemetry';
++// import VsCodeTelemetryReporter from '@vscode/extension-telemetry';
+ import { Api, getExtensionApi } from './api';
+ import { CommandManager } from './commands/commandManager';
+ import { registerBaseCommands } from './commands/index';
+-import { ExperimentationService } from './experimentationService';
+-import { ExperimentationTelemetryReporter, IExperimentationTelemetryReporter } from './experimentTelemetryReporter';
++// import { ExperimentationService } from './experimentationService';
++// import { ExperimentationTelemetryReporter, IExperimentationTelemetryReporter } from './experimentTelemetryReporter';
+ import { createLazyClientHost, lazilyActivateClient } from './lazyClientHost';
+ import { nodeRequestCancellerFactory } from './tsServer/cancellation.electron';
+ import { NodeLogDirectoryProvider } from './tsServer/logDirectoryProvider.electron';
+@@ -22,7 +22,7 @@ import { ElectronServiceConfigurationProvider } from './utils/configuration.elec
+ import { onCaseInsensitiveFileSystem } from './utils/fileSystem.electron';
+ import { PluginManager } from './utils/plugins';
+ import * as temp from './utils/temp.electron';
+-import { getPackageInfo } from './utils/packageInfo';
++// import { getPackageInfo } from './utils/packageInfo';
+ 
+ export function activate(
+ 	context: vscode.ExtensionContext
+@@ -45,18 +45,18 @@ export function activate(
+ 	const jsWalkthroughState = new JsWalkthroughState();
+ 	context.subscriptions.push(jsWalkthroughState);
+ 
+-	let experimentTelemetryReporter: IExperimentationTelemetryReporter | undefined;
+-	const packageInfo = getPackageInfo(context);
+-	if (packageInfo) {
+-		const { name: id, version, aiKey } = packageInfo;
+-		const vscTelemetryReporter = new VsCodeTelemetryReporter(aiKey);
+-		experimentTelemetryReporter = new ExperimentationTelemetryReporter(vscTelemetryReporter);
+-		context.subscriptions.push(experimentTelemetryReporter);
+-
+-		// Currently we have no experiments, but creating the service adds the appropriate
+-		// shared properties to the ExperimentationTelemetryReporter we just created.
+-		new ExperimentationService(experimentTelemetryReporter, id, version, context.globalState);
+-	}
++	// let experimentTelemetryReporter: IExperimentationTelemetryReporter | undefined;
++	// const packageInfo = getPackageInfo(context);
++	// if (packageInfo) {
++	// 	const { name: id, version, aiKey } = packageInfo;
++	// 	const vscTelemetryReporter = new VsCodeTelemetryReporter(aiKey);
++	// 	experimentTelemetryReporter = new ExperimentationTelemetryReporter(vscTelemetryReporter);
++	// 	context.subscriptions.push(experimentTelemetryReporter);
++	//
++	// 	// Currently we have no experiments, but creating the service adds the appropriate
++	// 	// shared properties to the ExperimentationTelemetryReporter we just created.
++	// 	new ExperimentationService(experimentTelemetryReporter, id, version, context.globalState);
++	// }
+ 
+ 	const lazyClientHost = createLazyClientHost(context, onCaseInsensitiveFileSystem(), {
+ 		pluginManager,
+@@ -67,7 +67,7 @@ export function activate(
+ 		processFactory: new ElectronServiceProcessFactory(),
+ 		activeJsTsEditorTracker,
+ 		serviceConfigurationProvider: new ElectronServiceConfigurationProvider(),
+-		experimentTelemetryReporter,
++		experimentTelemetryReporter: undefined,
+ 	}, item => {
+ 		onCompletionAccepted.fire(item);
+ 	});
+@@ -75,9 +75,9 @@ export function activate(
+ 	registerBaseCommands(commandManager, lazyClientHost, pluginManager, activeJsTsEditorTracker);
+ 	registerJsNodeWalkthrough(commandManager, jsWalkthroughState);
+ 
+-	import('./task/taskProvider').then(module => {
+-		context.subscriptions.push(module.register(lazyClientHost.map(x => x.serviceClient)));
+-	});
++	// import('./task/taskProvider').then(module => {
++	// 	context.subscriptions.push(module.register(lazyClientHost.map(x => x.serviceClient)));
++	// });
+ 
+ 	import('./languageFeatures/tsconfig').then(module => {
+ 		context.subscriptions.push(module.register());

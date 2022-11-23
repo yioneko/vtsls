@@ -1,0 +1,63 @@
+diff --git a/src/languageFeatures/sourceDefinition.ts b/src/languageFeatures/sourceDefinition.ts
+index b4b431c..935dedc 100644
+--- a/src/languageFeatures/sourceDefinition.ts
++++ b/src/languageFeatures/sourceDefinition.ts
+@@ -22,24 +22,24 @@ class SourceDefinitionCommand implements Command {
+ 		private readonly client: ITypeScriptServiceClient
+ 	) { }
+ 
+-	public async execute() {
++	public async execute(document: vscode.TextDocument, position: vscode.Position) {
+ 		if (this.client.apiVersion.lt(SourceDefinitionCommand.minVersion)) {
+ 			vscode.window.showErrorMessage(vscode.l10n.t("Go to Source Definition failed. Requires TypeScript 4.7+."));
+ 			return;
+ 		}
+ 
+-		const activeEditor = vscode.window.activeTextEditor;
+-		if (!activeEditor) {
+-			vscode.window.showErrorMessage(vscode.l10n.t("Go to Source Definition failed. No resource provided."));
+-			return;
+-		}
++		// const activeEditor = vscode.window.activeTextEditor;
++		// if (!activeEditor) {
++		// 	vscode.window.showErrorMessage(vscode.l10n.t("Go to Source Definition failed. No resource provided."));
++		// 	return;
++		// }
+ 
+-		const resource = activeEditor.document.uri;
+-		const document = await vscode.workspace.openTextDocument(resource);
+-		if (!isSupportedLanguageMode(document)) {
+-			vscode.window.showErrorMessage(vscode.l10n.t("Go to Source Definition failed. Unsupported file type."));
+-			return;
+-		}
++		// const resource = activeEditor.document.uri;
++		// const document = await vscode.workspace.openTextDocument(resource);
++		// if (!isSupportedLanguageMode(document)) {
++		// 	vscode.window.showErrorMessage(vscode.l10n.t("Go to Source Definition failed. Unsupported file type."));
++		// 	return;
++		// }
+ 
+ 		const openedFiledPath = this.client.toOpenedFilePath(document);
+ 		if (!openedFiledPath) {
+@@ -47,18 +47,18 @@ class SourceDefinitionCommand implements Command {
+ 			return;
+ 		}
+ 
+-		await vscode.window.withProgress({
++		return await vscode.window.withProgress({
+ 			location: vscode.ProgressLocation.Window,
+ 			title: vscode.l10n.t("Finding source definitions")
+ 		}, async (_progress, token) => {
+ 
+-			const position = activeEditor.selection.anchor;
++			// const position = activeEditor.selection.anchor;
+ 			const args = typeConverters.Position.toFileLocationRequestArgs(openedFiledPath, position);
+ 			const response = await this.client.execute('findSourceDefinition', args, token);
+ 			if (response.type === 'response' && response.body) {
+ 				const locations: vscode.Location[] = response.body.map(reference =>
+ 					typeConverters.Location.fromTextSpan(this.client.toResource(reference.file), reference));
+-
++				return locations;
+ 				if (locations.length) {
+ 					if (locations.length === 1) {
+ 						vscode.commands.executeCommand('vscode.open', locations[0].uri.with({

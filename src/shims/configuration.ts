@@ -61,9 +61,9 @@ export class ConfigurationShimService {
 
   private pkgJsonRead: Promise<any>;
 
-  constructor(extRoot: string) {
+  constructor(assetsRoot: string) {
     this.pkgJsonRead = fs
-      .readFile(path.resolve(extRoot, "package.json"), "utf8")
+      .readFile(path.resolve(assetsRoot, "package.json"), "utf8")
       .then(JSON.parse);
   }
 

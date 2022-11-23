@@ -1,0 +1,61 @@
+diff --git a/src/languageFeatures/completions.ts b/src/languageFeatures/completions.ts
+index fa04ed1..6a668f6 100644
+--- a/src/languageFeatures/completions.ts
++++ b/src/languageFeatures/completions.ts
+@@ -660,7 +660,7 @@ namespace CompletionConfiguration {
+ 	}
+ }
+ 
+-class TypeScriptCompletionItemProvider implements vscode.CompletionItemProvider<MyCompletionItem> {
++export class TypeScriptCompletionItemProvider implements vscode.CompletionItemProvider<MyCompletionItem> {
+ 
+ 	public static readonly triggerCharacters = ['.', '"', '\'', '`', '/', '@', '<', '#', ' '];
+ 
+diff --git a/src/languageFeatures/refactor.ts b/src/languageFeatures/refactor.ts
+index 4465fe1..7fbcb46 100644
+--- a/src/languageFeatures/refactor.ts
++++ b/src/languageFeatures/refactor.ts
+@@ -162,7 +162,7 @@ const Rewrite_Property_GenerateAccessors = Object.freeze<CodeActionKind>({
+ 	matches: refactor => refactor.name.startsWith('Generate \'get\' and \'set\' accessors')
+ });
+ 
+-const allKnownCodeActionKinds = [
++export const allKnownCodeActionKinds = [
+ 	Extract_Function,
+ 	Extract_Constant,
+ 	Extract_Type,
+diff --git a/src/languageFeatures/semanticTokens.ts b/src/languageFeatures/semanticTokens.ts
+index 10aec53..e8c41e3 100644
+--- a/src/languageFeatures/semanticTokens.ts
++++ b/src/languageFeatures/semanticTokens.ts
+@@ -175,7 +175,7 @@ function getTokenModifierFromClassification(tsClassification: number) {
+ 	return tsClassification & TokenEncodingConsts.modifierMask;
+ }
+ 
+-const tokenTypes: string[] = [];
++export const tokenTypes: string[] = [];
+ tokenTypes[TokenType.class] = 'class';
+ tokenTypes[TokenType.enum] = 'enum';
+ tokenTypes[TokenType.interface] = 'interface';
+@@ -189,7 +189,7 @@ tokenTypes[TokenType.property] = 'property';
+ tokenTypes[TokenType.function] = 'function';
+ tokenTypes[TokenType.method] = 'method';
+ 
+-const tokenModifiers: string[] = [];
++export const tokenModifiers: string[] = [];
+ tokenModifiers[TokenModifier.async] = 'async';
+ tokenModifiers[TokenModifier.declaration] = 'declaration';
+ tokenModifiers[TokenModifier.readonly] = 'readonly';
+diff --git a/src/languageFeatures/signatureHelp.ts b/src/languageFeatures/signatureHelp.ts
+index 8bde8b4..14c25f7 100644
+--- a/src/languageFeatures/signatureHelp.ts
++++ b/src/languageFeatures/signatureHelp.ts
+@@ -11,7 +11,7 @@ import { DocumentSelector } from '../utils/documentSelector';
+ import * as Previewer from '../utils/previewer';
+ import * as typeConverters from '../utils/typeConverters';
+ 
+-class TypeScriptSignatureHelpProvider implements vscode.SignatureHelpProvider {
++export class TypeScriptSignatureHelpProvider implements vscode.SignatureHelpProvider {
+ 
+ 	public static readonly triggerCharacters = ['(', ',', '<'];
+ 	public static readonly retriggerCharacters = [')'];

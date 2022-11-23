@@ -7,6 +7,12 @@
     "node": ">=14",
     "vscode": "^1.30.0"
   },
+  "bin": {
+    "vtsls": "dist/main.js"
+  },
+  "keywords": [
+    "language-server-protocol"
+  ],
   "dependencies": {
     "@vscode/l10n": "^0.0.10",
     "jsonc-parser": "^3.2.0",
@@ -23,7 +29,8 @@
   },
   "scripts": {
     "build": "node scripts/build.js",
-    "build:watch": "node scripts/build.js watch"
+    "build:watch": "node scripts/build.js watch",
+    "patch-extension": "node scripts/patch.js"
   },
   "main": "./dist/main.js",
   "repository": {

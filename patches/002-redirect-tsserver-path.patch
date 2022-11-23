@@ -1,0 +1,25 @@
+diff --git a/src/tsServer/versionProvider.electron.ts b/src/tsServer/versionProvider.electron.ts
+index dca0fb2..00d3c7c 100644
+--- a/src/tsServer/versionProvider.electron.ts
++++ b/src/tsServer/versionProvider.electron.ts
+@@ -78,14 +78,16 @@ export class DiskTypeScriptVersionProvider implements ITypeScriptVersionProvider
+ 
+ 	private getContributedVersion(source: TypeScriptVersionSource, extensionId: string, pathToTs: readonly string[]): TypeScriptVersion | undefined {
+ 		try {
+-			const extension = vscode.extensions.getExtension(extensionId);
+-			if (extension) {
+-				const serverPath = path.join(extension.extensionPath, ...pathToTs, 'typescript', 'lib', 'tsserver.js');
++			// const extension = vscode.extensions.getExtension(extensionId);
++			// if (extension) {
++				const tsPath = require.resolve("typescript")
++				const serverPath = path.join(path.dirname(tsPath), 'tsserver.js');
++
+ 				const bundledVersion = new TypeScriptVersion(source, serverPath, DiskTypeScriptVersionProvider.getApiVersion(serverPath), '');
+ 				if (bundledVersion.isValid) {
+ 					return bundledVersion;
+ 				}
+-			}
++			// }
+ 		} catch {
+ 			// noop
+ 		}

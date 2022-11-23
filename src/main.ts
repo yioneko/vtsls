@@ -1,4 +1,5 @@
 import * as path from "path";
+import * as os from "os";
 import * as vscode from "vscode";
 import {
   CancellationTokenSource,
@@ -27,9 +28,9 @@ async function startVsTsExtension(context: vscode.ExtensionContext) {
 }
 
 function prepareShims() {
-  const extRoot = path.resolve(__dirname, "../");
+  const assetsRoot = path.resolve(__dirname, "./assets");
 
-  const configurationShim = new ConfigurationShimService(extRoot);
+  const configurationShim = new ConfigurationShimService(assetsRoot);
   const workspaceShim = new WorkspaceShimService(configurationShim);
   const commandsShim = new CommandsShimService();
   const diagnosticsShim = new DiagnosticsShimService(
@@ -39,8 +40,9 @@ function prepareShims() {
     diagnosticsShim
   );
   const windowShim = new WindowShimService();
-  const contextShim = createContextShim("/tmp");
-  const l10nShim = createL10nShim(extRoot);
+  // TODO: config from cli
+  const contextShim = createContextShim(os.tmpdir());
+  const l10nShim = createL10nShim(assetsRoot);
   const extensionsShim = createExtensionsShim();
 
   const vscUri = Object.assign(URI, Utils);
