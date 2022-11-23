@@ -142,8 +142,6 @@ export class TsLspServer implements ITsLspServerHandle {
   async intialize(params: InitializeParams): Promise<InitializeResult> {
     this.lspClientCapabilities = params.capabilities;
 
-    this.conn.tracer.initialize(params.capabilities);
-
     const registeredHandles: Promise<void>[] = [];
     for (const handler of this.initHanlders.values()) {
       registeredHandles.push(handler(params));

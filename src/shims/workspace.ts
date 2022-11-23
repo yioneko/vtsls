@@ -1,7 +1,7 @@
 import * as path from "path";
 import { onCaseInsensitiveFileSystem } from "src/utils/fs";
 import * as vscode from "vscode";
-import { Emitter, Range, URI as LspURI } from "vscode-languageserver";
+import { Emitter, MessageType, Range, URI as LspURI } from "vscode-languageserver";
 import { TextDocument } from "vscode-languageserver-textdocument";
 import { URI, Utils as uriUtils } from "vscode-uri";
 import { ResourceMap } from "../../src/utils/resourceMap";
@@ -110,7 +110,7 @@ export class WorkspaceShimService {
       ({ textDocument: { uri, version }, contentChanges: changes }) => {
         const doc = this._documents.get(URI.parse(uri));
         if (!doc) {
-          // TODO: how to deal with this?
+          this._lspServerHandle.logMessage(MessageType.Error, `File ${uri} not found`);
           return;
         }
         TextDocument.update(doc, changes, version);
@@ -172,11 +172,22 @@ export class WorkspaceShimService {
     });
 
     server.workspaceHandle.onDidRenameFiles(({ files }) => {
+      const renamedFiles = [];
+      for (const f of files) {
+        const oldUri = URI.parse(f.oldUri);
+        const newUri = URI.parse(f.newUri);
+        const oldDoc = this._documents.get(oldUri);
+        if (oldDoc) {
+          const newDoc = TextDocument.create(f.newUri, oldDoc.languageId, oldDoc.version, oldDoc.getText());
+          this._documents.delete(oldUri);
+          this._documents.set(newUri, newDoc);
+          renamedFiles.push({ oldUri, newUri });
+        } else {
+          this._lspServerHandle.logMessage(MessageType.Error, `File ${f.oldUri} not found for rename`);
+        }
+      }
       this._onDidRenameFiles.fire({
-        files: files.map(({ newUri, oldUri }) => ({
-          newUri: URI.parse(newUri),
-          oldUri: URI.parse(oldUri),
-        })),
+        files: renamedFiles,
       });
     });
   }

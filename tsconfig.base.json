@@ -6,7 +6,6 @@
     "moduleResolution": "node",
     "noImplicitAny": true,
     "noImplicitOverride": true,
-    "noImplicitReturns": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "outDir": "./dist",

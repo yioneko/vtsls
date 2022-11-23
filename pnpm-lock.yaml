@@ -21,6 +21,7 @@ dependencies:
   '@vscode/l10n': 0.0.10
   jsonc-parser: 3.2.0_ne247dqjm6vxz63mmx4ol3xega
   semver: 5.5.1
+  typescript: 4.9.3
   vscode-languageserver: 8.0.2
   vscode-languageserver-textdocument: 1.0.7
   vscode-uri: 3.0.6
@@ -29,7 +30,6 @@ devDependencies:
   '@types/node': 14.18.33
   '@types/semver': 5.5.0
   esbuild: 0.15.15
-  typescript: 4.9.3
 
 packages:
 
@@ -287,7 +287,7 @@ packages:
     resolution: {integrity: sha512-CIfGzTelbKNEnLpLdGFgdyKhG23CKdKgQPOBc+OUNrkJ2vr+KSzsSV5kq5iWhEQbok+quxgGzrAtGWCyU7tHnA==}
     engines: {node: '>=4.2.0'}
     hasBin: true
-    dev: true
+    dev: false
 
   /vscode-jsonrpc/8.0.2:
     resolution: {integrity: sha512-RY7HwI/ydoC1Wwg4gJ3y6LpU9FJRZAUnTYMXthqhFXXu77ErDd/xkREpGuk4MyYkk4a+XDWAMqe0S3KkelYQEQ==}
