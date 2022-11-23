@@ -3,12 +3,11 @@ lockfileVersion: 5.4
 patchedDependencies:
   jsonc-parser@3.2.0:
     hash: ne247dqjm6vxz63mmx4ol3xega
-    path: patches/jsonc-parser@3.2.0.patch
+    path: patches/packages/jsonc-parser@3.2.0.patch
 
 specifiers:
   '@types/node': 14.x
   '@types/semver': ^5.5.0
-  '@types/vscode': ^1.73.1
   '@vscode/l10n': ^0.0.10
   esbuild: ^0.15.14
   jsonc-parser: ^3.2.0
@@ -29,7 +28,6 @@ dependencies:
 devDependencies:
   '@types/node': 14.18.33
   '@types/semver': 5.5.0
-  '@types/vscode': 1.73.1
   esbuild: 0.15.15
   typescript: 4.9.3
 
@@ -59,10 +57,6 @@ packages:
 
   /@types/semver/5.5.0:
     resolution: {integrity: sha512-41qEJgBH/TWgo5NFSvBCJ1qkoi3Q6ONSF2avrHq1LVEZfYpdHmj0y9SuTK+u9ZhG1sYQKBL1AWXKyLWP4RaUoQ==}
-    dev: true
-
-  /@types/vscode/1.73.1:
-    resolution: {integrity: sha512-eArfOrAoZVV+Ao9zQOCaFNaeXj4kTCD+bGS2gyNgIFZH9xVMuLMlRrEkhb22NyxycFWKV1UyTh03vhaVHmqVMg==}
     dev: true
 
   /@vscode/l10n/0.0.10:
