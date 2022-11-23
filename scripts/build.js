@@ -35,7 +35,7 @@ function build({ watch }) {
     format: "cjs",
     target: "node14",
     platform: "node",
-    sourcemap: true,
+    sourcemap: "external",
     plugins: [trimVscodeImportPlugin],
     watch,
   });
