@@ -44,6 +44,10 @@ function prepareShims() {
   const contextShim = createContextShim(os.tmpdir());
   const l10nShim = createL10nShim(assetsRoot);
   const extensionsShim = createExtensionsShim();
+  const envShim = {
+    language: "en",
+    openExternal: (uri: vscode.Uri) => Promise.resolve(false),
+  };
 
   const vscUri = Object.assign(URI, Utils);
 
@@ -55,7 +59,7 @@ function prepareShims() {
     l10n: l10nShim,
     extensions: extensionsShim,
     window: windowShim,
-    env: { language: "en", openExternal: () => {} },
+    env: envShim,
 
     // types
     CallHierarchyIncomingCall: typesShim.CallHierarchyIncomingCall,
@@ -129,6 +133,7 @@ function prepareShims() {
     windowShim,
     languageFeaturesShim,
     contextShim,
+    envShim,
     commandsShim,
   };
 }
@@ -142,6 +147,7 @@ export async function startServer() {
     windowShim,
     configurationShim,
     commandsShim,
+    envShim,
   } = prepareShims();
 
   // this contains side effects, wait for shims ready
@@ -157,6 +163,9 @@ export async function startServer() {
   workspaceShim.$injectServerHandle(server);
   windowShim.$injectServerHandle(server);
   configurationShim.$injectServerHandle(server);
+  envShim.openExternal = (uri: vscode.Uri) => {
+    return server.openExternal(uri.toString(true));
+  };
 
   conn.onInitialize(async (params) => {
     await startVsTsExtension(contextShim);

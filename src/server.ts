@@ -88,6 +88,7 @@ export interface ITsLspServerHandle {
   readonly converter: LspConverter;
 
   openTextDocument(uri: LspURI): Promise<TextDocument>;
+  openExternal(uri: LspURI): Promise<boolean>;
   applyWorkspaceEdit(edit: WorkspaceEdit): Promise<boolean>;
   requestConfiguration(params: ConfigurationParams, token?: CancellationToken): Promise<any[]>;
   logMessage(type: MessageType, message: string): void;
@@ -1005,6 +1006,11 @@ export class TsLspServer implements ITsLspServerHandle {
       }
     }
     throw new Error(`Cannot open doc ${uri}`);
+  }
+
+  async openExternal(uri: string): Promise<boolean> {
+    const result = await this.windowHandle.showDocument({ uri, external: true })
+    return result.success;
   }
 
   registerInitRequestHandler(handler: (params: InitializeParams) => Promise<void>) {

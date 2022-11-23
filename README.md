@@ -20,6 +20,7 @@ See [available server capabilities](./src/utils/capabilities.ts).
 - `typescript.openTsServerLog`
 - `typescript.restartTsServer`
 - `typescript.reloadProjects`
+- `typescript.selectTypeScriptVersion`
 
 ### Special
 
@@ -38,6 +39,10 @@ See [available server capabilities](./src/utils/capabilities.ts).
 
 => Location[]
 ```
+
+- Update paths on rename
+
+  Should work if client is capable of sending [`workspace/didRenameFiles`](https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#workspace_didRenameFiles) notification. No special handling is needed on client side.
 
 ## Configuration
 
@@ -66,11 +71,12 @@ Same as VSCode. The list below may not be complete.
 
 ## TODO
 
-- Update paths on rename
-- Choose tsserver version
-- Typescript plugin
 - E2E test
 - Diagnostics polling
+
+## Not Planned
+
+- Read TypeScript plugin from VSCode extensions
 
 ## Similar Projects
 

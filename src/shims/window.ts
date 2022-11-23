@@ -127,7 +127,7 @@ export class WindowShimService {
       (i) => !!i
     ) as MessageActionItem[];
     const selected = await method(message, ...transformedItems);
-    if (selected && selected.tsId && typeof selected.tsId === "number") {
+    if (selected && selected.tsId !== undefined && typeof selected.tsId === "number") {
       return items[selected.tsId];
     } else {
       return selected;

@@ -30,6 +30,9 @@ export class WorkspaceShimService {
   readonly onDidChangeWorkspaceFolders =
     this._onDidChangeWorkspaceFolders.event;
 
+  private _onDidGrantWorkspaceTrust = new Emitter();
+  readonly onDidGrantWorkspaceTrust = this._onDidGrantWorkspaceTrust.event;
+
   private _documents: ResourceMap<TextDocument>;
 
   private _workspaceFolderIdGen = 0;
@@ -254,5 +257,14 @@ export class WorkspaceShimService {
     return this._lspServerHandle.applyWorkspaceEdit(
       this._lspServerHandle.converter.convertWorkspaceEdit(edit)
     );
+  }
+
+  get isTrusted() {
+    // TODO: should we handle this?
+    return true;
+  }
+
+  async requestWorkspaceTrust() {
+    return true;
   }
 }
