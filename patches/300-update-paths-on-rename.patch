@@ -1,0 +1,19 @@
+diff --git a/src/languageFeatures/updatePathsOnRename.ts b/src/languageFeatures/updatePathsOnRename.ts
+index 9a7bcd7..8209768 100644
+--- a/src/languageFeatures/updatePathsOnRename.ts
++++ b/src/languageFeatures/updatePathsOnRename.ts
+@@ -205,10 +205,10 @@ class UpdateImportsOnFileRenameHandler extends Disposable {
+ 			return undefined;
+ 		}
+ 
+-		if (await isDirectory(resource)) {
+-			const files = await vscode.workspace.findFiles(new vscode.RelativePattern(resource, '**/*.{ts,tsx,js,jsx}'), '**/node_modules/**', 1);
+-			return files[0];
+-		}
++		// if (await isDirectory(resource)) {
++		// 	const files = await vscode.workspace.findFiles(new vscode.RelativePattern(resource, '**/*.{ts,tsx,js,jsx}'), '**/node_modules/**', 1);
++		// 	return files[0];
++		// }
+ 
+ 		return (await this._handles(resource)) ? resource : undefined;
+ 	}

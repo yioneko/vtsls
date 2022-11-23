@@ -1,3 +1,4 @@
+import { isPrimitive } from "src/utils/types";
 import * as vscode from "vscode";
 import { Emitter, MessageActionItem, MessageType } from "vscode-languageserver";
 import { ITsLspServerHandle } from "../server";
@@ -39,24 +40,38 @@ export class WindowShimService {
     return newChannel;
   }
 
-  showErrorMessage(message: string, ...items: (string | vscode.MessageItem)[]) {
-    return this.serverWindowHandle.showErrorMessage(
+  showErrorMessage(
+    message: string,
+    ...items: (vscode.MessageOptions | string | vscode.MessageItem)[]
+  ) {
+    return this._showMessagePrompt(
+      this.serverWindowHandle.showErrorMessage.bind(this.serverWindowHandle),
       message,
-      ...this._transformMessageItemToLsp(items)
+      items
     );
   }
 
-  showInformationMessage(message: string, ...items: (string | vscode.MessageItem)[]) {
-    return this.serverWindowHandle.showInformationMessage(
+  async showInformationMessage(
+    message: string,
+    ...items: (vscode.MessageOptions | string | vscode.MessageItem)[]
+  ) {
+    return this._showMessagePrompt(
+      this.serverWindowHandle.showInformationMessage.bind(
+        this.serverWindowHandle
+      ),
       message,
-      ...this._transformMessageItemToLsp(items)
+      items
     );
   }
 
-  showWarningMessage(message: string, ...items: (string | vscode.MessageItem)[]) {
-    return this.serverWindowHandle.showWarningMessage(
+  async showWarningMessage(
+    message: string,
+    ...items: (vscode.MessageOptions | string | vscode.MessageItem)[]
+  ) {
+    return this._showMessagePrompt(
+      this.serverWindowHandle.showWarningMessage.bind(this.serverWindowHandle),
       message,
-      ...this._transformMessageItemToLsp(items)
+      items
     );
   }
 
@@ -92,14 +107,31 @@ export class WindowShimService {
     return this._lspServerHandle.openTextDocument(document.uri.toString());
   }
 
-  private _transformMessageItemToLsp(items: (string | vscode.MessageItem)[]): MessageActionItem[] {
-    if (items.length <= 0) {
-      return [];
-    }
-    return items.map((i) => {
-      const title = typeof i === "string" ? i : i.title;
-      return { title };
+  async _showMessagePrompt(
+    method: (
+      message: string,
+      ...actions: MessageActionItem[]
+    ) => Promise<MessageActionItem | undefined>,
+    message: string,
+    items: (vscode.MessageOptions | string | vscode.MessageItem)[]
+  ) {
+    const allTitles = items.map((i, id) => {
+      if (typeof i === "string") {
+        return { title: i, tsId: id };
+      } else if (!isPrimitive(i) && "title" in i) {
+        return { title: i.title, tsId: id };
+      }
+      return;
     });
+    const transformedItems = allTitles.filter(
+      (i) => !!i
+    ) as MessageActionItem[];
+    const selected = await method(message, ...transformedItems);
+    if (selected && selected.tsId && typeof selected.tsId === "number") {
+      return items[selected.tsId];
+    } else {
+      return selected;
+    }
   }
 
   $injectServerHandle(server: ITsLspServerHandle) {

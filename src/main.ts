@@ -72,6 +72,7 @@ function prepareShims() {
     CompletionItem: typesShim.CompletionItem,
     CompletionList: typesShim.CompletionList,
     CompletionTriggerKind: typesShim.CompletionTriggerKind,
+    ConfigurationTarget: typesShim.ConfigurationTarget,
     Diagnostic: typesShim.Diagnostic,
     DiagnosticRelatedInformation: typesShim.DiagnosticRelatedInformation,
     DiagnosticSeverity: typesShim.DiagnosticSeverity,
