@@ -8,4 +8,16 @@ This is an LSP wrapper around [TypeScript extension bundled with VSCode](https:/
 
 Install by `npm install -g vtsls`, then run `vtsls --stdio`.
 
-## TODO
+## Supported LSP Features
+
+See [available server capabilities](./src/utils/capabilities.ts).
+
+## Nonstandard Features
+
+- Go to source definition
+- File references
+
+## Similar Projects
+
+- [typescript-language-server](https://github.com/typescript-language-server/typescript-language-server)
+- [coc-tsserver](https://github.com/neoclide/coc-tsserver)
