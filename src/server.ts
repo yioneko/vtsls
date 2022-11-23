@@ -171,7 +171,7 @@ export class TsLspServer implements ITsLspServerHandle {
       capabilities: serverCapabilities,
       serverInfo: {
         name: "typescript",
-        version: "0.0.1",
+        version: VTSLS_VRESION,
       },
     };
   }

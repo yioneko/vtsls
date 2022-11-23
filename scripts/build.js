@@ -26,7 +26,12 @@ const trimVscodeImportPlugin = {
 /**
  * @param args {{ watch: boolean }}
  */
-function build({ watch }) {
+async function build({ watch }) {
+  const pkgJson = await fs.promises.readFile(
+    path.resolve(__dirname, "../package.json"),
+    "utf8"
+  );
+  const { version } = JSON.parse(pkgJson);
   return esbuild.build({
     entryPoints: [path.resolve(srcDir, "cli.js")],
     tsconfig: path.resolve(__dirname, "../tsconfig.build.json"),
@@ -36,6 +41,7 @@ function build({ watch }) {
     target: "node14",
     platform: "node",
     sourcemap: "external",
+    define: { VTSLS_VRESION: `"${version}"` },
     plugins: [trimVscodeImportPlugin],
     watch,
   });
