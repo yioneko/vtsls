@@ -63,6 +63,7 @@ import {
   WorkspaceFoldersChangeEvent,
   WorkspaceSymbolParams,
 } from "vscode-languageserver/node";
+import { URI } from "vscode-uri";
 import { CommandsShimService } from "./shims/commands";
 import { ConfigurationShimService } from "./shims/configuration";
 import {
@@ -573,21 +574,30 @@ export class TsLspServer implements ITsLspServerHandle {
         }
       }
     } else {
-      if (params.command === "typescript.goToSourceDefinition") {
-        const uri = args[0];
-        const doc = this.workspace.$getDocumentByLspUri(uri);
-        if (!doc) {
-          throw new ResponseError(ErrorCodes.InvalidParams, `Cannot find document for ${uri}`);
+      switch (params.command) {
+        case  "typescript.goToSourceDefinition": {
+          const uri = args[0];
+          const doc = this.workspace.$getDocumentByLspUri(uri);
+          if (!doc) {
+            throw new ResponseError(ErrorCodes.InvalidParams, `Cannot find document for ${uri}`);
+          }
+          const locations =
+            (await this.commands.executeCommand(
+              params.command,
+              this.converter.convertTextDocuemntFromLsp(doc),
+              Position.of(args[1])
+            )) || [];
+          return locations.map(this.converter.convertLocation);
         }
-        const locations =
-          (await this.commands.executeCommand(
-            params.command,
-            this.converter.convertTextDocuemntFromLsp(doc),
-            Position.of(args[1])
-          )) || [];
-        return locations.map(this.converter.convertLocation);
+        case "typescript.findAllFileReferences": {
+          const uri = args[0];
+          const locations =
+            (await this.commands.executeCommand(params.command, URI.parse(uri))) || [];
+          return locations.map(this.converter.convertLocation);
+        }
+        default:
+          return await this.commands.executeCommand(params.command, ...args);
       }
-      return await this.commands.executeCommand(params.command, ...args);
     }
   }
 
@@ -968,6 +978,11 @@ export class TsLspServer implements ITsLspServerHandle {
   }
 
   async openTextDocument(uri: LspURI) {
+    const doc = this.workspace.$getDocumentByLspUri(uri);
+    // already opened
+    if (doc) {
+      return doc;
+    }
     const result = await this.conn.sendRequest(ShowDocumentRequest.type, {
       uri: uri,
       external: false,

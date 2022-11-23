@@ -1,12 +1,20 @@
 diff --git a/src/languageFeatures/fileReferences.ts b/src/languageFeatures/fileReferences.ts
-index fcc2bbc..9772a01 100644
+index bf758a7..502177b 100644
 --- a/src/languageFeatures/fileReferences.ts
 +++ b/src/languageFeatures/fileReferences.ts
-@@ -60,7 +60,7 @@ class FileReferencesCommand implements Command {
+@@ -46,7 +46,7 @@ class FileReferencesCommand implements Command {
+ 			return;
+ 		}
+ 
+-		await vscode.window.withProgress({
++		return await vscode.window.withProgress({
+ 			location: vscode.ProgressLocation.Window,
+ 			title: vscode.l10n.t("Finding file references")
+ 		}, async (_progress, token) => {
+@@ -60,6 +60,7 @@ class FileReferencesCommand implements Command {
  
  			const locations: vscode.Location[] = response.body.refs.map(reference =>
  				typeConverters.Location.fromTextSpan(this.client.toResource(reference.file), reference));
--
 +			return locations;
  			const config = vscode.workspace.getConfiguration('references');
  			const existingSetting = config.inspect<string>('preferredLocation');
