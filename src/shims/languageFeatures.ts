@@ -18,7 +18,10 @@ export class LanguagesFeaturesShimService {
 
   private _providers = {
     callHierarchy: {} as ProviderRegistrations<vscode.CallHierarchyProvider>,
-    codeActions: {} as ProviderRegistrations<vscode.CodeActionProvider>,
+    codeActions: {} as ProviderRegistrations<
+      vscode.CodeActionProvider,
+      { metadata?: vscode.CodeActionProviderMetadata }
+    >,
     codeLens: {} as ProviderRegistrations<vscode.CodeLensProvider>,
     completionItem: {} as ProviderRegistrations<
       vscode.CompletionItemProvider,
@@ -98,11 +101,13 @@ export class LanguagesFeaturesShimService {
 
   registerCodeActionsProvider(
     selector: vscode.DocumentSelector,
-    provider: vscode.CodeActionProvider
+    provider: vscode.CodeActionProvider,
+    metadata?: vscode.CodeActionProviderMetadata
   ) {
     return this._register(this._providers.codeActions, {
       selector,
       provider,
+      metadata,
     });
   }
 

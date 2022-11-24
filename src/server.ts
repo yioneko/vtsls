@@ -284,12 +284,6 @@ export class TsLspServer implements ITsLspServerHandle {
           )
         )
       );
-      // delete cache on document closed
-      this.onDidCloseTextDocument(({ textDocument }) => {
-        if (textDocument.uri.toString() === params.textDocument.uri) {
-          this.completionItemCache.delete(cacheId);
-        }
-      });
     }
     return CompletionList.create(merged, isIncomplete);
   }
@@ -308,11 +302,14 @@ export class TsLspServer implements ITsLspServerHandle {
 
     const { provider } = this.prepareProviderById(
       providerId,
-      this.languageFeatures.$providers.completionItem,
-      (reg) => !!reg.provider.resolveCompletionItem
+      this.languageFeatures.$providers.completionItem
     );
 
-    const result = await provider.resolveCompletionItem!(cachedItem, token);
+    if (!provider.resolveCompletionItem) {
+      return item;
+    }
+
+    const result = await provider.resolveCompletionItem(cachedItem, token);
     if (result) {
       const converted = this.converter.convertCompletionItem(result, idData);
       if (converted.command) {
@@ -449,62 +446,75 @@ export class TsLspServer implements ITsLspServerHandle {
     );
 
     const ctx = params.context;
-    let only: any = ctx.only;
-    if (ctx.only && ctx.only.length > 0) {
-      only = new CodeActionKind(ctx.only[0]);
-      for (let i = 1; i < ctx.only.length; ++i) {
-        only.append(ctx.only[i]);
-      }
-    }
-    const vscCtx = {
-      only,
+    const baseVscCtx = {
       diagnostics: ctx.diagnostics.map(this.converter.convertDiagnosticFromLsp),
       triggerKind: (ctx.triggerKind ??
         CodeActionTriggerKind.Invoked) as vscode.CodeActionTriggerKind,
     };
 
-    const results = await Promise.all(
-      providers.map(async ({ id, provider }) => {
+    const merged: (vscode.Command | vscode.CodeAction)[] = [];
+    const cacheId = this.codeActionCache.store(merged);
+
+    let results: (Command | CodeAction)[] = [];
+    // if no kinds passed, assume requesting all
+    const kinds = ctx.only?.sort() || [""];
+
+    let lastPrefix: number = -1;
+    for (let i = 0; i < kinds.length; ++i) {
+      const kind = kinds[i];
+      // filter out kinds with same prefix
+      if (lastPrefix >= 0 && kind.startsWith(kinds[lastPrefix])) {
+        continue;
+      } else {
+        lastPrefix = i;
+      }
+
+      const vscKind = new CodeActionKind(kind);
+      const vscCtx = {
+        only: vscKind,
+        ...baseVscCtx,
+      };
+
+      for (const { id, provider, args } of providers) {
+        if (
+          kind &&
+          args.metadata &&
+          args.metadata.providedCodeActionKinds?.every((k) => !k.contains(vscKind))
+        ) {
+          continue;
+        }
         let actions = await provider.provideCodeActions(doc, Range.of(params.range), vscCtx, token);
+        if (!actions) {
+          continue;
+        }
         // filter out disabled actions
         if (!this.clientCapabilities.textDocument?.codeAction?.disabledSupport) {
-          actions = actions?.filter((item) => !("disabled" in item));
+          actions = actions.filter((item) => !("disabled" in item));
         }
-        return { actions, providerId: id };
-      })
-    );
-
-    let merged: (Command | CodeAction)[] = [];
-    for (const r of results) {
-      if (!r) {
-        continue;
-      }
-      const { actions, providerId } = r;
-      if (!actions || !Array.isArray(actions)) {
-        continue;
-      }
-
-      const cacheId = this.codeActionCache.store(actions);
-      merged = merged.concat(
-        actions.map((action, index) => {
-          const idData = TsIdData.create(CODE_ACTION_DATA_TAG, providerId, index, cacheId);
-          let converted = this.converter.convertCodeAction(action, idData);
-          if (typeof converted.command !== "string") {
-            // is codeAction
-            if (converted.command) {
-              converted.command = this.replaceCommandWithIdData(converted.command, idData);
+        merged.push(...actions);
+        const indexOffset = results.length;
+        results = results.concat(
+          actions.map((action, index) => {
+            const idData = TsIdData.create(CODE_ACTION_DATA_TAG, id, index + indexOffset, cacheId);
+            let converted = this.converter.convertCodeAction(action, idData);
+            if (typeof converted.command !== "string") {
+              // is codeAction
+              if (converted.command) {
+                converted.command = this.replaceCommandWithIdData(converted.command, idData);
+              }
+            } else {
+              converted = this.replaceCommandWithIdData(converted as Command, idData);
             }
-          } else {
-            converted = this.replaceCommandWithIdData(converted as Command, idData);
-          }
-          return converted;
-        })
-      );
+            return converted;
+          })
+        );
+      }
     }
 
-    if (merged.length > 0) {
-      return merged;
+    if (results.length > 0) {
+      return results;
     } else {
+      this.codeActionCache.delete(cacheId);
       return null;
     }
   }
@@ -521,12 +531,15 @@ export class TsLspServer implements ITsLspServerHandle {
     }
     const { provider } = this.prepareProviderById(
       providerId,
-      this.languageFeatures.$providers.codeActions,
-      (reg) => !!reg.provider.resolveCodeAction
+      this.languageFeatures.$providers.codeActions
     );
 
+    if (!provider.resolveCodeAction) {
+      return item;
+    }
+
     // TODO: The code action is same instance as before, we do not need to update in cahce
-    const result = await provider.resolveCodeAction!(cachedItem as vscode.CodeAction, token);
+    const result = await provider.resolveCodeAction(cachedItem as vscode.CodeAction, token);
     if (result) {
       // preserve idData
       const idData = item.data;
@@ -574,7 +587,7 @@ export class TsLspServer implements ITsLspServerHandle {
       }
     } else {
       switch (params.command) {
-        case  "typescript.goToSourceDefinition": {
+        case "typescript.goToSourceDefinition": {
           const uri = args[0];
           const doc = this.workspace.$getDocumentByLspUri(uri);
           if (!doc) {
@@ -1009,7 +1022,7 @@ export class TsLspServer implements ITsLspServerHandle {
   }
 
   async openExternal(uri: string): Promise<boolean> {
-    const result = await this.windowHandle.showDocument({ uri, external: true })
+    const result = await this.windowHandle.showDocument({ uri, external: true });
     return result.success;
   }
 
