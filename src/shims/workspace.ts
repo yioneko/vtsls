@@ -4,7 +4,7 @@ import * as vscode from "vscode";
 import { Emitter, MessageType, Range, URI as LspURI } from "vscode-languageserver";
 import { TextDocument } from "vscode-languageserver-textdocument";
 import { URI, Utils as uriUtils } from "vscode-uri";
-import { ResourceMap } from "../../src/utils/resourceMap";
+import { ResourceMap } from "../utils/resourceMap";
 import type { ITsLspServerHandle } from "../server";
 import { ConfigurationShimService } from "./configuration";
 
@@ -15,20 +15,16 @@ export class WorkspaceShimService {
   private _onDidCloseTextDocument = new Emitter<vscode.TextDocument>();
   readonly onDidCloseTextDocument = this._onDidCloseTextDocument.event;
 
-  private _onDidChangeTextDocument =
-    new Emitter<vscode.TextDocumentChangeEvent>();
+  private _onDidChangeTextDocument = new Emitter<vscode.TextDocumentChangeEvent>();
   readonly onDidChangeTextDocument = this._onDidChangeTextDocument.event;
 
   private _onDidRenameFiles = new Emitter<vscode.FileRenameEvent>();
   readonly onDidRenameFiles = this._onDidRenameFiles.event;
 
-  readonly onDidChangeConfiguration =
-    this.configurationShim.onDidChangeConfiguration;
+  readonly onDidChangeConfiguration = this.configurationShim.onDidChangeConfiguration;
 
-  private _onDidChangeWorkspaceFolders =
-    new Emitter<vscode.WorkspaceFoldersChangeEvent>();
-  readonly onDidChangeWorkspaceFolders =
-    this._onDidChangeWorkspaceFolders.event;
+  private _onDidChangeWorkspaceFolders = new Emitter<vscode.WorkspaceFoldersChangeEvent>();
+  readonly onDidChangeWorkspaceFolders = this._onDidChangeWorkspaceFolders.event;
 
   private _onDidGrantWorkspaceTrust = new Emitter();
   readonly onDidGrantWorkspaceTrust = this._onDidGrantWorkspaceTrust.event;
@@ -52,9 +48,7 @@ export class WorkspaceShimService {
   get textDocuments(): vscode.TextDocument[] {
     const result = [];
     for (const doc of this._documents.values) {
-      result.push(
-        this._lspServerHandle.converter.convertTextDocuemntFromLsp(doc)
-      );
+      result.push(this._lspServerHandle.converter.convertTextDocuemntFromLsp(doc));
     }
     return result;
   }
@@ -78,36 +72,28 @@ export class WorkspaceShimService {
   $injectServerHandle(server: ITsLspServerHandle) {
     this._lspServerHandle = server;
 
-    server.registerInitRequestHandler(
-      async ({ rootUri, rootPath, workspaceFolders }) => {
-        const root =
-          rootUri ?? (rootPath ? URI.file(rootPath).toString() : undefined);
-        const folders =
-          workspaceFolders ?? (root && [{ name: undefined, uri: root }]);
-        if (!folders) {
-          return Promise.reject("Cannot initialize with no workspace folders");
-        }
-        for (const f of folders) {
-          const id = this._workspaceFolderIdGen++;
-          const uri = URI.parse(f.uri);
-          this._workspaceFolders.set(uri, {
-            name: f.name || uriUtils.basename(uri),
-            index: id,
-            uri,
-          });
-        }
+    server.registerInitRequestHandler(async ({ rootUri, rootPath, workspaceFolders }) => {
+      const root = rootUri ?? (rootPath ? URI.file(rootPath).toString() : undefined);
+      const folders = workspaceFolders ?? (root && [{ name: undefined, uri: root }]);
+      if (!folders) {
+        return Promise.reject("Cannot initialize with no workspace folders");
       }
-    );
+      for (const f of folders) {
+        const id = this._workspaceFolderIdGen++;
+        const uri = URI.parse(f.uri);
+        this._workspaceFolders.set(uri, {
+          name: f.name || uriUtils.basename(uri),
+          index: id,
+          uri,
+        });
+      }
+    });
 
-    server.onDidOpenTextDocument(
-      ({ textDocument: { uri, languageId, version, text } }) => {
-        const doc = TextDocument.create(uri, languageId, version, text);
-        this._documents.set(URI.parse(uri), doc);
-        this._onDidOpenTextDocument.fire(
-          server.converter.convertTextDocuemntFromLsp(doc)
-        );
-      }
-    );
+    server.onDidOpenTextDocument(({ textDocument: { uri, languageId, version, text } }) => {
+      const doc = TextDocument.create(uri, languageId, version, text);
+      this._documents.set(URI.parse(uri), doc);
+      this._onDidOpenTextDocument.fire(server.converter.convertTextDocuemntFromLsp(doc));
+    });
 
     server.onDidChangeTextDocument(
       ({ textDocument: { uri, version }, contentChanges: changes }) => {
@@ -137,11 +123,8 @@ export class WorkspaceShimService {
     server.onDidCloseTextDocument(({ textDocument: { uri } }) => {
       const vsUri = URI.parse(uri);
       const doc = this._documents.get(vsUri);
-      // TODO: lifecycle
       if (doc) {
-        this._onDidCloseTextDocument.fire(
-          server.converter.convertTextDocuemntFromLsp(doc)
-        );
+        this._onDidCloseTextDocument.fire(server.converter.convertTextDocuemntFromLsp(doc));
         this._documents.delete(vsUri);
       }
     });
@@ -181,12 +164,20 @@ export class WorkspaceShimService {
         const newUri = URI.parse(f.newUri);
         const oldDoc = this._documents.get(oldUri);
         if (oldDoc) {
-          const newDoc = TextDocument.create(f.newUri, oldDoc.languageId, oldDoc.version, oldDoc.getText());
+          const newDoc = TextDocument.create(
+            f.newUri,
+            oldDoc.languageId,
+            oldDoc.version,
+            oldDoc.getText()
+          );
           this._documents.delete(oldUri);
           this._documents.set(newUri, newDoc);
           renamedFiles.push({ oldUri, newUri });
         } else {
-          this._lspServerHandle.logMessage(MessageType.Error, `File ${f.oldUri} not found for rename`);
+          this._lspServerHandle.logMessage(
+            MessageType.Error,
+            `File ${f.oldUri} not found for rename`
+          );
         }
       }
       this._onDidRenameFiles.fire({
@@ -202,9 +193,7 @@ export class WorkspaceShimService {
   getWorkspaceFolder(uri: vscode.Uri): vscode.WorkspaceFolder | undefined {
     for (const folder of this._workspaceFolders.values) {
       const fUri = folder.uri;
-      const fPathWithSlash = fUri.path.endsWith("/")
-        ? fUri.path
-        : fUri.path + "/";
+      const fPathWithSlash = fUri.path.endsWith("/") ? fUri.path : fUri.path + "/";
       // ignore query and fragment
       if (
         fUri.scheme === uri.scheme &&
@@ -217,21 +206,14 @@ export class WorkspaceShimService {
     }
   }
 
-  asRelativePath(
-    pathOrUri: string | vscode.Uri,
-    includeWorkspace?: boolean
-  ): string {
-    const uri = URI.isUri(pathOrUri)
-      ? pathOrUri
-      : URI.file(pathOrUri as string);
+  asRelativePath(pathOrUri: string | vscode.Uri, includeWorkspace?: boolean): string {
+    const uri = URI.isUri(pathOrUri) ? pathOrUri : URI.file(pathOrUri as string);
     const workspaceFolder = this.getWorkspaceFolder(uri);
     if (!workspaceFolder) {
       return uri.fsPath;
     }
     let includeFolder =
-      typeof includeWorkspace === "undefined"
-        ? this._workspaceFolders.size > 1
-        : includeWorkspace;
+      typeof includeWorkspace === "undefined" ? this._workspaceFolders.size > 1 : includeWorkspace;
 
     const result = path.relative(workspaceFolder.uri.fsPath, uri.fsPath);
     if (includeFolder) {
@@ -245,9 +227,7 @@ export class WorkspaceShimService {
     return this.configurationShim.getConfiguration(section);
   }
 
-  async openTextDocument(
-    nameOrUri: vscode.Uri | string
-  ): Promise<vscode.TextDocument> {
+  async openTextDocument(nameOrUri: vscode.Uri | string): Promise<vscode.TextDocument> {
     const uri = typeof nameOrUri === "string" ? URI.file(nameOrUri) : nameOrUri;
     const doc = await this._lspServerHandle.openTextDocument(uri.toString());
     return this._lspServerHandle.converter.convertTextDocuemntFromLsp(doc);

@@ -970,7 +970,7 @@ export class TsLspServer implements ITsLspServerHandle {
     throw new ResponseError(ErrorCodes.InvalidParams, `No handler found for provider id [${id}]`);
   }
 
-  private replaceCommandWithIdData(command: Command, idData: TsIdData.ITsIdData) {
+  private replaceCommandWithIdData(command: Command, idData: TsIdData.IData) {
     return {
       command: command.command,
       title: command.title,
@@ -1055,23 +1055,18 @@ export class TsLspServer implements ITsLspServerHandle {
 }
 
 namespace TsIdData {
-  export interface ITsIdData {
+  export interface IData {
     _tsTag: string;
     index: number;
     cacheId: number;
     providerId: string;
   }
 
-  export function is(data: any): data is ITsIdData {
+  export function is(data: any): data is IData {
     return !isPrimitive(data) && "_tsTag" in data;
   }
 
-  export function create(
-    tag: string,
-    providerId: string,
-    index: number,
-    cacheId: number
-  ): ITsIdData {
+  export function create(tag: string, providerId: string, index: number, cacheId: number): IData {
     return {
       _tsTag: tag,
       providerId,
@@ -1085,6 +1080,6 @@ namespace TsIdData {
     if ([_tsTag, providerId, index, cacheId].some(isNil)) {
       return;
     }
-    return { _tsTag, providerId, index, cacheId } as ITsIdData;
+    return { _tsTag, providerId, index, cacheId } as IData;
   }
 }
