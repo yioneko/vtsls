@@ -53,6 +53,17 @@ See [available server capabilities](./src/utils/capabilities.ts).
 
   Should work if client is capable of sending [`workspace/didRenameFiles`](https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#workspace_didRenameFiles) notification on file rename. No special handling is needed on client side.
 
+- Directly invoke tsserver command
+
+  See [CommandTypes](https://github.com/microsoft/TypeScript/blob/f6628a4573cd37c26912f78de3d08cd1dbf687a5/lib/protocol.d.ts) for available commands.
+
+```typescript
+{
+  command: "typescript.tsserverRequest",
+  arguments: [RequestType, args, config]
+} => Response
+```
+
 ## Configuration
 
 Almost the same as [TypeScript extension of VSCode](https://github.com/microsoft/vscode/blob/838b48504cd9a2338e2ca9e854da9cec990c4d57/extensions/typescript-language-features/package.json#L147), with a few additional settings excluded for this server.
