@@ -233,19 +233,25 @@ export class TsLspServer implements ITsLspServerHandle {
 
     const ctx = Object.assign(
       {
-        triggerKind: CompletionTriggerKind.Invoked,
+        triggerKind: CompletionTriggerKind.Invoked as CompletionTriggerKind,
         triggerCharacter: "",
       },
       params.context ?? {}
     );
+    const pos = Position.of(params.position);
+    const wordRange = doc.getWordRangeAtPosition(pos);
+    const inWord = wordRange?.contains(new Position(pos.line, pos.character - 1));
+
     const results = await Promise.all(
-      providers.map(async ({ id, provider }) => {
-        const items = await provider.provideCompletionItems(
-          doc,
-          Position.of(params.position),
-          token,
-          ctx
-        );
+      providers.map(async ({ id, provider, args: { triggerCharacters } }) => {
+        const checkTriggerCharacter =
+          ctx.triggerKind === CompletionTriggerKind.TriggerCharacter &&
+          ctx.triggerCharacter &&
+          triggerCharacters.includes(ctx.triggerCharacter);
+        if (!checkTriggerCharacter && !inWord) {
+          return;
+        }
+        const items = await provider.provideCompletionItems(doc, pos, token, ctx);
         return {
           items,
           providerId: id,

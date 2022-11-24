@@ -3,7 +3,7 @@ import * as path from "path";
 import { EditorSettings } from "typescript/lib/tsserverlibrary";
 import * as vscode from "vscode";
 import { Emitter } from "vscode-languageserver";
-import { isTypeScriptDocument } from "@vsc-ts/utils/languageIds";
+import { isTypeScriptDocument } from "../utils/language";
 import { ITsLspServerHandle } from "../server";
 
 function lookUp(tree: any, key: string | undefined) {
@@ -48,15 +48,13 @@ function recursiveUpdate(cur: any, value: any) {
 
 export interface VtslsConfig {
   format?: EditorSettings;
-  wordPattern?: string;
 }
 
 export class ConfigurationShimService {
   private defaultConfig: any = {};
   private workspaceConfig: any = {};
 
-  private _onDidChangeConfiguration =
-    new Emitter<vscode.ConfigurationChangeEvent>();
+  private _onDidChangeConfiguration = new Emitter<vscode.ConfigurationChangeEvent>();
   readonly onDidChangeConfiguration = this._onDidChangeConfiguration.event;
 
   private pkgJsonRead: Promise<any>;
@@ -138,8 +136,6 @@ export class ConfigurationShimService {
 
   $getVtslsDocConfig(doc: vscode.TextDocument, section?: string) {
     const languageId = isTypeScriptDocument(doc) ? "typescript" : "javascript";
-    return this.getConfiguration(
-      `vtsls.${languageId}` + section ? `.${section}` : ""
-    );
+    return this.getConfiguration(`vtsls.${languageId}` + section ? `.${section}` : "");
   }
 }

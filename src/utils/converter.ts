@@ -49,6 +49,7 @@ import { ConfigurationShimService } from "../shims/configuration";
 import * as types from "../shims/types";
 import { WorkspaceShimService } from "../shims/workspace";
 import { deepClone } from "./objects";
+import { getWordPattern } from "./language";
 
 function isStringOrFalsy(val: unknown): val is string | undefined | null {
   return typeof val === "string" || val === undefined || val === null;
@@ -208,13 +209,7 @@ export class LspConverter {
         return types.EndOfLine.LF;
       },
       getWordRangeAtPosition(position) {
-        const wordPatternStr = that.config
-          .$getVtslsDocConfig(this)
-          .get(
-            "wordPattern",
-            "(-?\\d*\\.\\d\\w*)|([^\\`\\~\\@\\!\\%\\^\\&\\*\\(\\)\\-\\=\\+\\[\\{\\]\\}\\\\\\|\\;\\:\\'\\\"\\,\\.\\<\\>/\\?\\s]+)"
-          );
-        const wordPattern = new RegExp(wordPatternStr, "g");
+        const pattern = getWordPattern();
         // from vscode
         const windowSize = 15;
         const maxLen = 1000;
@@ -243,11 +238,11 @@ export class LspConverter {
           if (Date.now() - t1 >= timeBudget) {
             break;
           }
-          wordPattern.lastIndex = Math.max(0, regexWindowStart - windowSize);
+          pattern.lastIndex = Math.max(0, regexWindowStart - windowSize);
           let match;
-          while ((match = wordPattern.exec(line))) {
+          while ((match = pattern.exec(line))) {
             const matchIndex = match.index || 0;
-            if (matchIndex <= colMatch && wordPattern.lastIndex >= colMatch) {
+            if (matchIndex <= colMatch && pattern.lastIndex >= colMatch) {
               candidate = match;
               break;
             } else if (matchIndex > regexWindowStart) {

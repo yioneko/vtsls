@@ -16,7 +16,6 @@ See [available server capabilities](./src/utils/capabilities.ts).
 
 ### Just works
 
-- `typescript.goToProjectConfig`
 - `typescript.openTsServerLog`
 - `typescript.restartTsServer`
 - `typescript.reloadProjects`
@@ -27,22 +26,32 @@ See [available server capabilities](./src/utils/capabilities.ts).
 - Go to source definition
 
 ```typescript
-{ command: "typescript.goToSourceDefinition", arguments: [DocumentUri, Position] }
-
-=> Location[]
+{
+  command: "typescript.goToSourceDefinition",
+  arguments: [DocumentUri, Position]
+} => Location[]
 ```
 
 - File references
 
 ```typescript
-{ command: "typescript.findAllFileReferences", arguments: [DocumentUri] }
+{
+  command: "typescript.findAllFileReferences",
+  arguments: [DocumentUri],
+} => Location[]
+```
 
-=> Location[]
+- Go to project config
+```typescript
+{
+  command: "typescript.findAllFileReferences",
+  arguments: [DocumentUri],
+} => void
 ```
 
 - Update paths on rename
 
-  Should work if client is capable of sending [`workspace/didRenameFiles`](https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#workspace_didRenameFiles) notification. No special handling is needed on client side.
+  Should work if client is capable of sending [`workspace/didRenameFiles`](https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#workspace_didRenameFiles) notification on file rename. No special handling is needed on client side.
 
 ## Configuration
 
@@ -50,24 +59,48 @@ Almost the same as [TypeScript extension of VSCode](https://github.com/microsoft
 
 `* => javascript|typescript`
 
-- `vtsls.*.format.baseIndentSize`
-- `vtsls.*.format.indentSize`
-- `vtsls.*.format.tabSize`
-- `vtsls.*.format.newLineCharacter`
-- `vtsls.*.format.convertTabsToSpaces`
-- `vtsls.*.format.indentStyle`
-- `vtsls.*.format.trimTrailingWhitespace`
-- `vtsls.*.wordPattern`
+```typescript
+"vtsls.*.format.baseIndentSize": number;
+"vtsls.*.format.indentSize": number;
+"vtsls.*.format.tabSize": number;
+"vtsls.*.format.newLineCharacter": string;
+"vtsls.*.format.convertTabsToSpaces": boolean;
+"vtsls.*.format.indentStyle": 0 | 1 | 2; // None = 0 Block = 1 Smart = 2
+"vtsls.*.format.trimTrailingWhitespace": boolean;
+```
 
 ## Code Actions
 
 Same as VSCode. The list below may not be complete.
+
+### Quickfix
 
 - `typescript.organizeImports`
 - `typescript.sortImports`
 - `javascript.sortImports`
 - `typescript.removeUnusedImports`
 - `javascript.removeUnusedImports`
+
+### Source Actions
+
+- `source.organizeImports`
+- `source.sortImports`
+- `source.removeUnusedImports`
+- `source.fixAll.ts`
+- `source.removeUnused.ts`
+- `source.addMissingImports.ts`
+
+### Refactor
+
+- `refactor.extract.function`
+- `refactor.extract.constant`
+- `refactor.extract.type`
+- `refactor.extract.interface`
+- `refactor.move.newFile`
+- `refactor.rewrite.import`
+- `refactor.rewrite.export`
+- `refactor.rewrite.arrow.braces`
+- `refactor.rewrite.property.generateAccessors`
 
 ## TODO
 
