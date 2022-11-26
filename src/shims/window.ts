@@ -56,9 +56,7 @@ export class WindowShimService {
     ...items: (vscode.MessageOptions | string | vscode.MessageItem)[]
   ) {
     return this._showMessagePrompt(
-      this.serverWindowHandle.showInformationMessage.bind(
-        this.serverWindowHandle
-      ),
+      this.serverWindowHandle.showInformationMessage.bind(this.serverWindowHandle),
       message,
       items
     );
@@ -104,7 +102,7 @@ export class WindowShimService {
   }
 
   showTextDocument(document: vscode.TextDocument) {
-    return this._lspServerHandle.openTextDocument(document.uri.toString());
+    return this._lspServerHandle.openTextDocument(document.uri.toString(), true);
   }
 
   async _showMessagePrompt(
@@ -123,9 +121,7 @@ export class WindowShimService {
       }
       return;
     });
-    const transformedItems = allTitles.filter(
-      (i) => !!i
-    ) as MessageActionItem[];
+    const transformedItems = allTitles.filter((i) => !!i) as MessageActionItem[];
     const selected = await method(message, ...transformedItems);
     if (selected && selected.tsId !== undefined && typeof selected.tsId === "number") {
       return items[selected.tsId];

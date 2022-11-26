@@ -85,7 +85,7 @@ export interface ITsLspServerHandle {
   readonly workspaceHandle: Connection["workspace"];
   readonly converter: LspConverter;
 
-  openTextDocument(uri: LspURI): Promise<TextDocument>;
+  openTextDocument(uri: LspURI, focus?: boolean): Promise<TextDocument>;
   openExternal(uri: LspURI): Promise<boolean>;
   applyWorkspaceEdit(edit: WorkspaceEdit): Promise<boolean>;
   requestConfiguration(params: ConfigurationParams, token?: CancellationToken): Promise<any[]>;
@@ -990,8 +990,8 @@ export class TsLspServer implements ITsLspServerHandle {
     return result.applied;
   }
 
-  async openTextDocument(uri: LspURI) {
-    const result = await this.windowHandle.showDocument({ uri, external: true, takeFocus: false });
+  async openTextDocument(uri: LspURI, focus?: boolean) {
+    const result = await this.windowHandle.showDocument({ uri, external: false, takeFocus: focus });
 
     const doc = this.workspace.$getDocumentByLspUri(uri);
     // already opened
@@ -1010,13 +1010,22 @@ export class TsLspServer implements ITsLspServerHandle {
       setTimeout(() => {
         handler.dispose();
         pending.open();
-      }, 5000);
+      }, 2000);
       await pending.wait();
       const doc = this.workspace.$getDocumentByLspUri(uri);
       if (doc) {
         return doc;
+      } else {
+        // HACK: returns a pesudo doc here: the open is success, but client didn't trigger a didOpen notification
+        return {
+          uri: URI.parse(uri),
+          version: 0,
+          languageId: "unknown",
+          lineCount: 0,
+        } as unknown as TextDocument;
       }
     }
+
     throw new Error(`Cannot open doc ${uri}`);
   }
 
