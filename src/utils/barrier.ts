@@ -5,7 +5,7 @@ export class Barrier {
 
   constructor() {
     this._isOpen = false;
-    this._promise = new Promise<boolean>((c, e) => {
+    this._promise = new Promise<boolean>((c, _e) => {
       this._completePromise = c;
     });
   }

@@ -1,7 +1,6 @@
 import * as vscode from "vscode";
 import { TextDocument } from "vscode-languageserver-textdocument";
 import {
-  ApplyWorkspaceEditRequest,
   CallHierarchyIncomingCallsParams,
   CallHierarchyOutgoingCallsParams,
   CallHierarchyPrepareParams,
@@ -52,7 +51,6 @@ import {
   SelectionRangeParams,
   SemanticTokensParams,
   SemanticTokensRangeParams,
-  ShowDocumentRequest,
   SignatureHelp,
   SignatureHelpContext,
   SignatureHelpParams,
@@ -358,10 +356,9 @@ export class TsLspServer implements ITsLspServerHandle {
     const ctx: Partial<SignatureHelpContext> = deepClone(params.context ?? {});
     ctx.triggerCharacter = ctx.triggerCharacter ?? "";
     if (ctx.activeSignatureHelp?.signatures) {
-      // @ts-ignore
       ctx.activeSignatureHelp.signatures = ctx.activeSignatureHelp.signatures.map(
         this.converter.convertSignatureInfoFromLsp
-      );
+      ) as any;
     }
     const result = await provider.provideSignatureHelp(
       doc,
@@ -989,23 +986,19 @@ export class TsLspServer implements ITsLspServerHandle {
   }
 
   async applyWorkspaceEdit(edit: WorkspaceEdit) {
-    const result = await this.conn.sendRequest(ApplyWorkspaceEditRequest.type, {
-      edit,
-    });
+    const result = await this.workspaceHandle.applyEdit(edit);
     return result.applied;
   }
 
   async openTextDocument(uri: LspURI) {
+    const result = await this.windowHandle.showDocument({ uri, external: true, takeFocus: false });
+
     const doc = this.workspace.$getDocumentByLspUri(uri);
     // already opened
     if (doc) {
       return doc;
     }
-    const result = await this.conn.sendRequest(ShowDocumentRequest.type, {
-      uri: uri,
-      external: false,
-      takeFocus: true,
-    });
+
     if (result.success) {
       const pending = new Barrier();
       const handler = this.onDidOpenTextDocument(({ textDocument }) => {

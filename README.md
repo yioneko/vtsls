@@ -4,13 +4,21 @@
 
 This is an LSP wrapper around [TypeScript extension bundled with VSCode](https://github.com/microsoft/vscode/tree/838b48504cd9a2338e2ca9e854da9cec990c4d57/extensions/typescript-language-features). All features and performance are nearly the same.
 
+This is **not a fork** of that extension unlike other similar projects. It is implemented by filling VSCode APIs and applying **minimal patches** over the extension to make it possible to **keep up with the upstream updates** and drastically reduce the burden of maintenance.
+
 ## Usage
 
-Install by `npm install -g vtsls`, then run `vtsls --stdio`.
+Install by `npm install -g vtsls`, then run `vtsls --stdio`. Requires `node >= 14`.
 
 ## Supported LSP Features
 
 See [available server capabilities](./src/utils/capabilities.ts).
+
+## Clients
+
+All the LSP compliant clients should be able to communiate with it out of box. No special `intializationOptions` requirement in the first `initialize` request and also the server doesn't use it currently. To configure the server, just use the `workspace/didChangeConfiguration` notification. The schema of settings and defaults shoulde be the exactly the same as VSCode's.
+
+For some methods like `completionItem/resolve`, `codeAction/resolve`, `callHierarchy/incomingCalls` which should come after a previous "preparation" request to split the whole function into two round trips, the client should at least support `LSP >= 3.16` with `dataSupport` in client capabilities.
 
 ## Commands
 
@@ -42,9 +50,10 @@ See [available server capabilities](./src/utils/capabilities.ts).
 ```
 
 - Go to project config
+
 ```typescript
 {
-  command: "typescript.findAllFileReferences",
+  command: "typescript.goToProjectConfig",
   arguments: [DocumentUri],
 } => void
 ```
@@ -121,6 +130,26 @@ Same as VSCode. The list below may not be complete.
 ## Not Planned
 
 - Read TypeScript plugin from VSCode extensions
+- All the features not supported in upstream
+
+## Develop
+
+### Overview
+
+```bash
+git submodule update # fetch vscode submodule
+pnpm install
+
+pnpm patch-extension # copy typescript-language-features from vscode repo and apply patches to it
+
+pnpm build:watch # watching build, server output in dist/main.js
+```
+
+### Tips
+
+- By default sourcemap is emitted during build, launching server using `node --enable-source-maps dist/main.js` will give meaningful stack info on error.
+- A git repo will be initialized at the copied extension directory after `pnpm patch-extension` for convenient diffing and patch file generation.
+- Nearly all of the implementations of shims are modified (also simplified to reduce the bundle size) from VSCode source to match the API contract. Make sure the exported shims conforms to the [API document](https://code.visualstudio.com/api/references/vscode-api#languages).
 
 ## Similar Projects
 

@@ -358,22 +358,22 @@ export class LspConverter {
   convertLocation = <T extends vscode.Location | vscode.LocationLink>(
     location: T
   ): T extends vscode.Location ? Location : LocationLink => {
-    // @ts-ignore
-    if (location.targetUri) {
-      // @ts-ignore
-      const l = location as vscode.LocationLink;
+    if ("targetUri" in location) {
       return {
-        originSelectionRange: convertOrFalsy(l.originSelectionRange, LspConverter.convertRange),
-        targetUri: l.targetUri.toString(),
-        targetRange: LspConverter.convertRange(l.targetRange),
-        targetSelectionRange: LspConverter.convertRange(l.targetSelectionRange || l.targetRange),
+        originSelectionRange: convertOrFalsy(
+          location.originSelectionRange,
+          LspConverter.convertRange
+        ),
+        targetUri: location.targetUri.toString(),
+        targetRange: LspConverter.convertRange(location.targetRange),
+        targetSelectionRange: LspConverter.convertRange(
+          location.targetSelectionRange || location.targetRange
+        ),
       } as any;
     } else {
-      // @ts-ignore
-      const l = location as vscode.Location;
       return {
-        uri: l.uri.toString(),
-        range: LspConverter.convertRange(l.range),
+        uri: location.uri.toString(),
+        range: LspConverter.convertRange(location.range),
       } as any;
     }
   };
@@ -533,19 +533,21 @@ export class LspConverter {
   };
 
   convertSignatureInfoFromLsp = (info: SignatureInformation): vscode.SignatureInformation => {
-    const result = deepClone(info);
+    const result = deepClone(info) as vscode.SignatureInformation;
     if (result.documentation) {
-      // @ts-ignore
-      result.documentation = MarkupDocConvert.fromLsp(result.documentation);
+      result.documentation = this.convertMarkupfromLsp(
+        result.documentation as string | MarkupContent
+      );
     }
     for (const param of result.parameters || []) {
       if (param.documentation) {
-        // @ts-ignore
-        param.documentation = MarkupDocConvert.fromLsp(param.documentation);
+        param.documentation = this.convertMarkupfromLsp(
+          param.documentation as string | MarkupContent
+        );
       }
       param.documentation;
     }
-    return result as any;
+    return result;
   };
 
   convertSignatureInfoToLsp = (info: vscode.SignatureInformation): SignatureInformation => {

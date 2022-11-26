@@ -14,10 +14,7 @@ const trimVscodeImportPlugin = {
   setup(build) {
     build.onLoad({ filter: /.*(j|t)s$/ }, async (args) => {
       const file = await fs.promises.readFile(args.path, "utf8");
-      const erased = file.replace(
-        /^import \* as vscode from ('|")vscode('|")(\s|;)*$/m,
-        ""
-      );
+      const erased = file.replace(/^import \* as vscode from ('|")vscode('|")(\s|;)*$/m, "");
       return { contents: erased, loader: "default" };
     });
   },
@@ -27,10 +24,7 @@ const trimVscodeImportPlugin = {
  * @param args {{ watch: boolean }}
  */
 async function build({ watch }) {
-  const pkgJson = await fs.promises.readFile(
-    path.resolve(__dirname, "../package.json"),
-    "utf8"
-  );
+  const pkgJson = await fs.promises.readFile(path.resolve(__dirname, "../package.json"), "utf8");
   const { version } = JSON.parse(pkgJson);
   return esbuild.build({
     entryPoints: [path.resolve(srcDir, "cli.js")],
@@ -58,10 +52,7 @@ async function copyAssets() {
         }
         await Promise.all(
           ["package.json", "package.nls.json"].map((f) => {
-            return fs.promises.copyFile(
-              path.resolve(tsExtPath, f),
-              path.resolve(assetOutDir, f)
-            );
+            return fs.promises.copyFile(path.resolve(tsExtPath, f), path.resolve(assetOutDir, f));
           })
         );
         resolve();
@@ -78,7 +69,7 @@ module.exports = {
 
 if (require.main === module) {
   const args = process.argv.slice(2);
-  build(args[0] === "watch")
+  build({ watch: args[0] === "watch" })
     .then(copyAssets)
     .catch(console.error);
 }

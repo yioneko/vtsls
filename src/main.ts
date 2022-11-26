@@ -33,12 +33,8 @@ function prepareShims() {
   const configurationShim = new ConfigurationShimService(assetsRoot);
   const workspaceShim = new WorkspaceShimService(configurationShim);
   const commandsShim = new CommandsShimService();
-  const diagnosticsShim = new DiagnosticsShimService(
-    onCaseInsensitiveFileSystem()
-  );
-  const languageFeaturesShim = new LanguagesFeaturesShimService(
-    diagnosticsShim
-  );
+  const diagnosticsShim = new DiagnosticsShimService(onCaseInsensitiveFileSystem());
+  const languageFeaturesShim = new LanguagesFeaturesShimService(diagnosticsShim);
   const windowShim = new WindowShimService();
   // TODO: config from cli
   const contextShim = createContextShim(os.tmpdir());
@@ -51,7 +47,6 @@ function prepareShims() {
 
   const vscUri = Object.assign(URI, Utils);
 
-  // @ts-ignore
   global.vscode = {
     workspace: workspaceShim,
     languages: languageFeaturesShim,

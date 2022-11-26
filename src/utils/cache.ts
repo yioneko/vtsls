@@ -5,7 +5,7 @@ export class DisposableCache<V> implements Disposable {
   private _isDisposed = false;
 
   private idGen = 1;
-  private lastMinId = 1;
+  private lastMinId = 0;
 
   constructor(private readonly maxItems: number) {}
 
@@ -51,12 +51,13 @@ export class DisposableCache<V> implements Disposable {
       return;
     }
     this.timer = setTimeout(() => {
-      while (!this._store.has(this.lastMinId) && this.lastMinId < this.idGen) {
+      while (this._store.size > this.maxItems && this.lastMinId < this.idGen) {
         this.lastMinId += 1;
+        if (this._store.has(this.lastMinId)) {
+          this.delete(this.lastMinId);
+        }
       }
-      if (this._store.has(this.lastMinId)) {
-        this.delete(this.lastMinId);
-      }
+
       this.timer = undefined;
     }, 100);
   }

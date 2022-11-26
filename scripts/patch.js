@@ -22,7 +22,6 @@ async function getPatchFiles(patchesPath) {
  * @param targetDir {string | undefined}
  * @return {Promise<string>}
  */
-
 async function checkTsExtDir(targetDir) {
   const cpTarget =
     targetDir || path.resolve(__dirname, "../typescript-language-features");
@@ -46,10 +45,7 @@ async function checkTsExtDir(targetDir) {
  * @param targetDir {string}
  */
 async function copyTsExtTo(targetDir) {
-  const tsExtDir = path.resolve(
-    __dirname,
-    "../vscode/extensions/typescript-language-features"
-  );
+  const tsExtDir = path.resolve(__dirname, "../vscode/extensions/typescript-language-features");
   for (const entry of await fs.readdir(tsExtDir)) {
     if (entry.match(/(src)|(package.*\.json)/)) {
       const entryPath = path.resolve(tsExtDir, entry);
