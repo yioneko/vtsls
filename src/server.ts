@@ -1018,11 +1018,11 @@ export class TsLspServer implements ITsLspServerHandle {
       } else {
         // HACK: returns a pesudo doc here: the open is success, but client didn't trigger a didOpen notification
         return {
-          uri: URI.parse(uri),
+          uri,
           version: 0,
           languageId: "unknown",
           lineCount: 0,
-        } as unknown as TextDocument;
+        } as TextDocument;
       }
     }
 
