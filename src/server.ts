@@ -472,7 +472,8 @@ export class TsLspServer implements ITsLspServerHandle {
         lastPrefix = i;
       }
 
-      const vscKind = new CodeActionKind(kind);
+      // empty kind "" should be assigned as undefined
+      const vscKind = kind ? new CodeActionKind(kind) : undefined;
       const vscCtx = {
         only: vscKind,
         ...baseVscCtx,
@@ -480,7 +481,7 @@ export class TsLspServer implements ITsLspServerHandle {
 
       for (const { id, provider, args } of providers) {
         if (
-          kind &&
+          vscKind &&
           args.metadata &&
           args.metadata.providedCodeActionKinds?.every((k) => !k.contains(vscKind))
         ) {
