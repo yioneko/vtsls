@@ -51,7 +51,7 @@ export class CommandsShimService {
     try {
       return await callback.apply(thisArg, args);
     } catch (e) {
-      throw new Error(`Execute command ${id} failed`);
+      throw new Error(`Execute command ${id} failed: ${e}`);
     }
   }
 }

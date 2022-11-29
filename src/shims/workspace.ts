@@ -4,8 +4,8 @@ import * as vscode from "vscode";
 import { Emitter, MessageType, Range, URI as LspURI } from "vscode-languageserver";
 import { TextDocument } from "vscode-languageserver-textdocument";
 import { URI, Utils as uriUtils } from "vscode-uri";
-import { ResourceMap } from "../utils/resourceMap";
 import type { ITsLspServerHandle } from "../server";
+import { ResourceMap } from "../utils/resourceMap";
 import { ConfigurationShimService } from "./configuration";
 
 export class WorkspaceShimService {
@@ -199,7 +199,7 @@ export class WorkspaceShimService {
         fUri.scheme === uri.scheme &&
         fUri.authority === uri.authority &&
         uri.path > fPathWithSlash &&
-        uri.path.endsWith(fPathWithSlash)
+        uri.path.startsWith(fPathWithSlash)
       ) {
         return folder;
       }
