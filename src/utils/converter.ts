@@ -42,14 +42,14 @@ import {
 } from "vscode-languageserver";
 import { TextDocument } from "vscode-languageserver-textdocument";
 import { URI } from "vscode-uri";
-import { onCaseInsensitiveFileSystem } from "../utils/fs";
 import { ResourceMap } from "../../src/utils/resourceMap";
 import { ITsLspServerHandle } from "../server";
 import { ConfigurationShimService } from "../shims/configuration";
 import * as types from "../shims/types";
 import { WorkspaceShimService } from "../shims/workspace";
-import { deepClone } from "./objects";
+import { onCaseInsensitiveFileSystem } from "../utils/fs";
 import { getWordPattern } from "./language";
+import { deepClone } from "./objects";
 
 function isStringOrFalsy(val: unknown): val is string | undefined | null {
   return typeof val === "string" || val === undefined || val === null;
@@ -205,8 +205,9 @@ export class LspConverter {
         return new types.Position(pos.line, pos.character);
       },
       get eol() {
-        // TODO
-        return types.EndOfLine.LF;
+        return that.config.$getVtslsDocConfig(this).get("newLineCharacter") === "\r\n"
+          ? types.EndOfLine.LF
+          : types.EndOfLine.CRLF;
       },
       getWordRangeAtPosition(position) {
         const pattern = getWordPattern();
@@ -496,7 +497,12 @@ export class LspConverter {
         tags: symbol.tags,
         // @ts-ignore
         deprecated: symbol.deprecated,
-        children: symbol.children ? symbol.children.map(this.convertSymbol) : undefined,
+        children:
+          symbol.children &&
+          this.server.clientCapabilities.textDocument?.documentSymbol
+            ?.hierarchicalDocumentSymbolSupport
+            ? symbol.children.map(this.convertSymbol)
+            : undefined,
       } as any;
     } else {
       return {
@@ -521,14 +527,19 @@ export class LspConverter {
     return new types.MarkdownString(doc.value);
   };
 
-  convertMarkupToLsp = (doc: string | vscode.MarkdownString): string | MarkupContent => {
+  convertMarkupToLsp = (
+    doc: string | vscode.MarkdownString
+  ): string | MarkupContent | undefined => {
+    // empty content should be undefined
     if (typeof doc === "string") {
-      return doc;
+      return doc || undefined;
     } else {
-      return {
-        kind: MarkupKind.Markdown,
-        value: doc.value,
-      };
+      return doc.value
+        ? {
+            kind: MarkupKind.Markdown,
+            value: doc.value,
+          }
+        : undefined;
     }
   };
 
