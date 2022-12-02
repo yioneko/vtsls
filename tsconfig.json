@@ -2,13 +2,13 @@
   "extends": "./tsconfig.base.json",
   "compilerOptions": {
     "paths": {
-      "@vsc-ts/*": ["typescript-language-features/src/*"],
-      "vscode": ["vscode/src/vscode-dts/vscode.d.ts"]
+      "@vsc-ts/*": ["typescript-language-features/src/*"]
     }
   },
   "include": [
     "src/**/*",
-    "typescript-language-features/src/**/*",
-    "vscode/src/vscode-dts/vscode.d.ts"
+    "vscode/src/vscode-dts/vscode.d.ts",
+    "vscode/src/vscode-dts/vscode.proposed.resolvers.d.ts",
+    "vscode/src/vscode-dts/vscode.proposed.workspaceTrust.d.ts",
   ]
 }

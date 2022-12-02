@@ -212,7 +212,7 @@ export class WorkspaceShimService {
     if (!workspaceFolder) {
       return uri.fsPath;
     }
-    let includeFolder =
+    const includeFolder =
       typeof includeWorkspace === "undefined" ? this._workspaceFolders.size > 1 : includeWorkspace;
 
     const result = path.relative(workspaceFolder.uri.fsPath, uri.fsPath);

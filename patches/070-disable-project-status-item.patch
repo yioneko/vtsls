@@ -1,8 +1,15 @@
 diff --git a/src/utils/largeProjectStatus.ts b/src/utils/largeProjectStatus.ts
-index 8dacf80..0f861dc 100644
+index 8dacf80..742f42f 100644
 --- a/src/utils/largeProjectStatus.ts
 +++ b/src/utils/largeProjectStatus.ts
-@@ -21,9 +21,9 @@ class ExcludeHintItem {
+@@ -15,15 +15,15 @@ interface Hint {
+ 
+ class ExcludeHintItem {
+ 	public configFileName?: string;
+-	private _item: vscode.StatusBarItem;
++	// private _item: vscode.StatusBarItem;
+ 	private _currentHint?: Hint;
+ 
  	constructor(
  		private readonly telemetryReporter: TelemetryReporter
  	) {

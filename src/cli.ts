@@ -2,4 +2,4 @@
 
 import { startServer } from "./main";
 
-startServer();
+startServer().catch((e) => console.error(e));

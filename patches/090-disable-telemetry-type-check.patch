@@ -1,0 +1,12 @@
+diff --git a/src/experimentTelemetryReporter.ts b/src/experimentTelemetryReporter.ts
+index ddd643f..75bd505 100644
+--- a/src/experimentTelemetryReporter.ts
++++ b/src/experimentTelemetryReporter.ts
+@@ -3,6 +3,7 @@
+  *  Licensed under the MIT License. See License.txt in the project root for license information.
+  *--------------------------------------------------------------------------------------------*/
+ 
++// @ts-nocheck
+ import * as vscode from 'vscode';
+ import VsCodeTelemetryReporter from '@vscode/extension-telemetry';
+ import * as tas from 'vscode-tas-client';

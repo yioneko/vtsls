@@ -2,6 +2,7 @@
  *  Copyright (c) Microsoft Corporation. All rights reserved.
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
+/* eslint-disable */
 import { onCaseInsensitiveFileSystem } from "src/utils/fs";
 import * as vscode from "vscode";
 import { URI } from "vscode-uri";
@@ -84,7 +85,7 @@ export class Position {
 		return false;
 	}
 
-	static of(obj): Position {
+	static of(obj: unknown): Position {
 		if (obj instanceof Position) {
 			return obj;
 		} else if (this.isPosition(obj)) {
@@ -233,7 +234,7 @@ export class Range {
 			&& Position.isPosition((<Range>thing.end));
 	}
 
-	static of(obj): Range {
+	static of(obj: unknown): Range {
 		if (obj instanceof Range) {
 			return obj;
 		}
@@ -2589,7 +2590,7 @@ export class SemanticTokensLegend {
 	}
 }
 
-function isStrArrayOrUndefined(arg: any): arg is string[] | undefined {
+function isStrArrayOrUndefined(arg: unknown[] | undefined): arg is string[] | undefined {
 	return ((typeof arg === 'undefined') || !arg.some(s => s ? typeof s !== 'string' : false));
 }
 

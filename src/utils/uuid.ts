@@ -1,3 +1,5 @@
+import * as crypto from "crypto"
+
 export const generateUuid = (function (): () => string {
   // use `randomUUID` if possible
   if (typeof crypto === "object" && typeof crypto.randomUUID === "function") {
@@ -8,6 +10,7 @@ export const generateUuid = (function (): () => string {
   let getRandomValues: (bucket: Uint8Array) => Uint8Array;
   if (
     typeof crypto === "object" &&
+    "getRandomValues" in crypto &&
     typeof crypto.getRandomValues === "function"
   ) {
     getRandomValues = crypto.getRandomValues.bind(crypto);

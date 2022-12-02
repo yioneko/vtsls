@@ -30,7 +30,7 @@ index b4b431c..935dedc 100644
 -			vscode.window.showErrorMessage(vscode.l10n.t("Go to Source Definition failed. Unsupported file type."));
 -			return;
 -		}
-+		// const resource = activeEditor.document.uri;
++		const resource = document.uri;
 +		// const document = await vscode.workspace.openTextDocument(resource);
 +		// if (!isSupportedLanguageMode(document)) {
 +		// 	vscode.window.showErrorMessage(vscode.l10n.t("Go to Source Definition failed. Unsupported file type."));

@@ -2,7 +2,7 @@ import { Disposable, Emitter } from "vscode-languageserver/node";
 
 export interface ICommand {
   id: string;
-  callback: Function;
+  callback: (...args: any[]) => any;
   thisArg?: any;
   // TODO: not used
   // description?: ICommandHandlerDescription | null;
@@ -14,9 +14,7 @@ export class CommandsShimService {
   private readonly _onDidRegisterCommand = new Emitter<string>();
   readonly onDidRegisterCommand = this._onDidRegisterCommand.event;
 
-  constructor() {}
-
-  async getCommands(filterInternal: boolean = false): Promise<string[]> {
+  async getCommands(filterInternal = false): Promise<string[]> {
     const result = [];
     for (const id of this._commands.keys()) {
       if (filterInternal && id[0] !== "_") {
@@ -51,7 +49,7 @@ export class CommandsShimService {
     try {
       return await callback.apply(thisArg, args);
     } catch (e) {
-      throw new Error(`Execute command ${id} failed: ${e}`);
+      throw new Error(`Execute command ${id} failed: ${String(e)}`);
     }
   }
 }

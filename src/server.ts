@@ -102,7 +102,7 @@ export class TsLspServer implements ITsLspServerHandle {
       for (const uri of e.uris) {
         const diagnostics = this.languageFeatures.getDiagnostics(uri);
         if (Array.isArray(diagnostics)) {
-          this.conn.sendDiagnostics({
+          void this.conn.sendDiagnostics({
             uri: uri.toString(),
             diagnostics: diagnostics.map(this.converter.convertDiagnosticToLsp),
           });
@@ -150,6 +150,7 @@ export class TsLspServer implements ITsLspServerHandle {
     this.conn.languages.semanticTokens.on(this.semanticTokensFull.bind(this));
     this.conn.languages.semanticTokens.onRange(this.semanticTokensRange.bind(this));
 
+    /* eslint-disable @typescript-eslint/no-unsafe-return */
     this.conn.onDidOpenTextDocument((p) => this._onDidOpenTextDocument.fire(p));
     this.conn.onDidChangeTextDocument((p) => this._onDidChangeTextDocument.fire(p));
     this.conn.onDidCloseTextDocument((p) => this._onDidCloseTextDocument.fire(p));
@@ -157,6 +158,7 @@ export class TsLspServer implements ITsLspServerHandle {
       this._onDidChangeWorkspaceFolders.fire(p)
     );
     this.conn.onDidChangeConfiguration((p) => this._onDidChangeConfiguration.fire(p));
+    /* eslint-enable @typescript-eslint/no-unsafe-return */
   }
 
   waitInitialized() {
@@ -304,7 +306,7 @@ export class TsLspServer implements ITsLspServerHandle {
     if (ctx.activeSignatureHelp?.signatures) {
       ctx.activeSignatureHelp.signatures = ctx.activeSignatureHelp.signatures.map(
         this.converter.convertSignatureInfoFromLsp
-      ) as any;
+      ) as lsp.SignatureInformation[];
     }
     const result = await provider.provideSignatureHelp(
       doc,
@@ -410,7 +412,7 @@ export class TsLspServer implements ITsLspServerHandle {
     // if no kinds passed, assume requesting all
     const kinds = ctx.only?.sort() || [""];
 
-    let lastPrefix: number = -1;
+    let lastPrefix = -1;
     for (let i = 0; i < kinds.length; ++i) {
       const kind = kinds[i];
       // filter out kinds with same prefix
@@ -477,10 +479,12 @@ export class TsLspServer implements ITsLspServerHandle {
   }
 
   async codeActionResolve(item: lsp.CodeAction, token: lsp.CancellationToken) {
-    const { providerId, index, cacheId } = item.data || {};
-    if ([providerId, index, cacheId].some((i) => isNil(i))) {
+    const idData = TsIdData.resolve(item.data);
+    if (!idData) {
       return item;
     }
+
+    const { providerId, cacheId, index } = idData;
 
     const cachedItem = this.codeActionCache.get(cacheId)?.[index];
     if (!cachedItem) {
@@ -533,6 +537,7 @@ export class TsLspServer implements ITsLspServerHandle {
               return this.commands.executeCommand(command.command, ...(command.arguments || []));
             }
           }
+          return;
         }
         case CODE_LENS_DATA_TAG: {
           const cachedItem = this.codeLensCache.get(cacheId)?.[index];
@@ -547,7 +552,7 @@ export class TsLspServer implements ITsLspServerHandle {
     } else {
       switch (params.command) {
         case "typescript.goToSourceDefinition": {
-          const uri = args[0];
+          const uri = args[0] as string;
           const doc = this.workspace.$getDocumentByLspUri(uri);
           if (!doc) {
             throw new lsp.ResponseError(
@@ -555,7 +560,7 @@ export class TsLspServer implements ITsLspServerHandle {
               `Cannot find document for ${uri}`
             );
           }
-          const locations =
+          const locations: vscode.Location[] =
             (await this.commands.executeCommand(
               params.command,
               this.converter.convertTextDocuemntFromLsp(doc),
@@ -565,7 +570,7 @@ export class TsLspServer implements ITsLspServerHandle {
         }
         case "typescript.findAllFileReferences": {
           const uri = args[0];
-          const locations =
+          const locations: vscode.Location[] =
             (await this.commands.executeCommand(params.command, URI.parse(uri))) || [];
           return locations.map(this.converter.convertLocation);
         }
@@ -1043,7 +1048,7 @@ export class TsLspServer implements ITsLspServerHandle {
   }
 
   logMessage(type: lsp.MessageType, message: string): void {
-    this.conn.sendNotification(lsp.LogMessageNotification.type, { type, message });
+    void this.conn.sendNotification(lsp.LogMessageNotification.type, { type, message });
   }
 
   logTrace(message: string, verbose?: string): void {

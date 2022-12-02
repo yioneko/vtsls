@@ -3,8 +3,8 @@ import * as path from "path";
 import { EditorSettings } from "typescript/lib/tsserverlibrary";
 import * as vscode from "vscode";
 import { Emitter } from "vscode-languageserver";
-import { isTypeScriptDocument } from "../utils/language";
 import { ITsLspServerHandle } from "../server";
+import { isTypeScriptDocument } from "../utils/language";
 
 function lookUp(tree: any, key: string | undefined) {
   if (key) {
@@ -136,6 +136,6 @@ export class ConfigurationShimService {
 
   $getVtslsDocConfig(doc: vscode.TextDocument, section?: string) {
     const languageId = isTypeScriptDocument(doc) ? "typescript" : "javascript";
-    return this.getConfiguration(`vtsls.${languageId}` + section ? `.${section}` : "");
+    return this.getConfiguration(`vtsls.${languageId}${section ? `.${section}` : ""}`);
   }
 }

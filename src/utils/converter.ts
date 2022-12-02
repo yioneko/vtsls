@@ -106,6 +106,7 @@ export class LspConverter {
       onCaseInsensitiveFileSystem: onCaseInsensitiveFileSystem(),
     });
 
+    /* eslint-disable @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call */
     // @ts-ignore private api
     for (const entry of edit._allEntries()) {
       if (entry._type === types.FileEditType.File) {
@@ -157,9 +158,10 @@ export class LspConverter {
           ]);
         }
       } else {
-        throw new Error(`Not supported type of edit entry: ${entry._type}`);
+        throw new Error(`Not supported type of edit entry: ${entry._type as string}`);
       }
     }
+    /* eslint-enable @typescript-eslint/no-unsafe-member-access */
 
     if (hasResourceOp || supportVersion) {
       return {
@@ -276,7 +278,7 @@ export class LspConverter {
         throw new Error("Function not implemented.");
       },
       lineAt(lineOrPosition: number | vscode.Position): vscode.TextLine {
-        let line: number = 0;
+        let line = 0;
         if (lineOrPosition instanceof vscode.Position) {
           line = lineOrPosition.line;
         } else if (typeof lineOrPosition === "number") {
@@ -630,8 +632,10 @@ export class LspConverter {
         break;
       case types.FoldingRangeKind.Region:
         kind = FoldingRangeKind.Region;
+        break;
       case types.FoldingRangeKind.Imports:
         kind = FoldingRangeKind.Imports;
+        break;
       default:
         break;
     }

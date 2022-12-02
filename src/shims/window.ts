@@ -95,8 +95,8 @@ export class WindowShimService {
       reporter.done();
       return result;
     } catch (e) {
-      this.showErrorMessage(String(e));
       reporter.done();
+      void this.showErrorMessage(String(e));
       throw e;
     }
   }

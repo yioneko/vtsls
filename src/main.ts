@@ -20,7 +20,7 @@ import { WindowShimService } from "./shims/window";
 import { WorkspaceShimService } from "./shims/workspace";
 import { onCaseInsensitiveFileSystem } from "./utils/fs";
 
-let tsExtension: { activate: any; deactivate?: () => void };
+let tsExtension: { activate: (context: vscode.ExtensionContext) => void; deactivate?: () => void };
 
 async function startVsTsExtension(context: vscode.ExtensionContext) {
   tsExtension = await import("@vsc-ts/extension");

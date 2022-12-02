@@ -15,4 +15,8 @@ export class Memento implements vscode.Memento {
     this._storage[key] = value;
     return Promise.resolve();
   }
+
+  setKeysForSync(_: string[]) {
+    throw new Error("not implmented");
+  }
 }

@@ -1,0 +1,24 @@
+name: lint
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: "true"
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 16
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 7
+      - run: pnpm install
+      - run: pnpm patch-extension
+      - run: pnpm lint
