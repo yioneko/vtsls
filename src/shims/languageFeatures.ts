@@ -4,13 +4,13 @@ import { URI } from "vscode-uri";
 import { DiagnosticsShimService } from "./diagnostics";
 import { score } from "./selector";
 
-export type ProviderRegistration<T, Args = unknown> = {
+export type ProviderRegistry<T, Args = unknown> = {
   provider: T;
   selector: vscode.DocumentSelector;
 } & Args;
 
 export type ProviderRegistrations<T, Args = unknown> = {
-  [id: number]: ProviderRegistration<T, Args>;
+  [id: number]: ProviderRegistry<T, Args>;
 };
 
 export class LanguagesFeaturesShimService {
@@ -78,7 +78,7 @@ export class LanguagesFeaturesShimService {
 
   private _register<T, A>(
     collections: ProviderRegistrations<T, A>,
-    registration: ProviderRegistration<T, A>
+    registration: ProviderRegistry<T, A>
   ) {
     const id = this._idGen++;
     collections[id] = registration;

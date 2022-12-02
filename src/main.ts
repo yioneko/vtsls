@@ -1,5 +1,5 @@
-import * as path from "path";
 import * as os from "os";
+import * as path from "path";
 import * as vscode from "vscode";
 import {
   CancellationTokenSource,
@@ -169,6 +169,7 @@ export async function startServer() {
 
   conn.onShutdown(() => {
     tsExtension?.deactivate?.();
+    contextShim.subscriptions.forEach((sub) => sub.dispose());
   });
 
   process.on("exit", () => {
