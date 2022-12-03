@@ -1,8 +1,8 @@
-import { CodeActionKind, ServerCapabilities, TextDocumentSyncKind } from "vscode-languageserver";
 import { TypeScriptCompletionItemProvider } from "@vsc-ts/languageFeatures/completions";
 import { allKnownCodeActionKinds } from "@vsc-ts/languageFeatures/refactor";
 import { tokenModifiers, tokenTypes } from "@vsc-ts/languageFeatures/semanticTokens";
 import { TypeScriptSignatureHelpProvider } from "@vsc-ts/languageFeatures/signatureHelp";
+import { CodeActionKind, ServerCapabilities, TextDocumentSyncKind } from "vscode-languageserver";
 
 export function getTsLspDefaultCapabilities(): ServerCapabilities {
   return {
@@ -46,7 +46,7 @@ export function getTsLspDefaultCapabilities(): ServerCapabilities {
       ],
       resolveProvider: true,
     },
-    codeLensProvider: { resolveProvider: false },
+    codeLensProvider: { resolveProvider: true },
     documentLinkProvider: undefined,
     colorProvider: false,
     workspaceSymbolProvider: { resolveProvider: false },

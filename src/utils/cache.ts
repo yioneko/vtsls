@@ -1,6 +1,6 @@
 import { Disposable } from "vscode-languageserver";
 
-export class DisposableCache<V> implements Disposable {
+export class RestrictedCache<V> implements Disposable {
   private readonly _store = new Map<number, V>();
   private _isDisposed = false;
 
@@ -29,7 +29,7 @@ export class DisposableCache<V> implements Disposable {
     if (this._isDisposed) {
       console.warn(
         new Error(
-          "Trying to add a disposable to a DisposableMap that has already been disposed of. The added object will be leaked!"
+          "Trying to add a disposable to cache that has already been disposed of. The added object will be leaked!"
         ).stack
       );
     }

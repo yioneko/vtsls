@@ -14,7 +14,7 @@ import { score } from "./shims/selector";
 import * as types from "./shims/types";
 import { WorkspaceShimService } from "./shims/workspace";
 import { Barrier } from "./utils/barrier";
-import { DisposableCache } from "./utils/cache";
+import { RestrictedCache } from "./utils/cache";
 import { getTsLspDefaultCapabilities } from "./utils/capabilities";
 import { LspConverter } from "./utils/converter";
 import { deepClone } from "./utils/objects";
@@ -143,6 +143,7 @@ export class TsLspServer implements ITsLspServerHandle {
     this.conn.onFoldingRanges(this.foldingRanges.bind(this));
     this.conn.onSelectionRanges(this.selectionRanges.bind(this));
     this.conn.onCodeLens(this.codeLens.bind(this));
+    this.conn.onCodeLensResolve(this.codeLensResolve.bind(this));
     this.conn.languages.inlayHint.on(this.inlayHint.bind(this));
     this.conn.languages.callHierarchy.onPrepare(this.prepareCallHierachy.bind(this));
     this.conn.languages.callHierarchy.onIncomingCalls(this.incomingCalls.bind(this));
@@ -150,15 +151,13 @@ export class TsLspServer implements ITsLspServerHandle {
     this.conn.languages.semanticTokens.on(this.semanticTokensFull.bind(this));
     this.conn.languages.semanticTokens.onRange(this.semanticTokensRange.bind(this));
 
-    /* eslint-disable @typescript-eslint/no-unsafe-return */
-    this.conn.onDidOpenTextDocument((p) => this._onDidOpenTextDocument.fire(p));
-    this.conn.onDidChangeTextDocument((p) => this._onDidChangeTextDocument.fire(p));
-    this.conn.onDidCloseTextDocument((p) => this._onDidCloseTextDocument.fire(p));
-    this.conn.workspace.onDidChangeWorkspaceFolders((p) =>
-      this._onDidChangeWorkspaceFolders.fire(p)
+    this.conn.onDidOpenTextDocument((p) => void this._onDidOpenTextDocument.fire(p));
+    this.conn.onDidChangeTextDocument((p) => void this._onDidChangeTextDocument.fire(p));
+    this.conn.onDidCloseTextDocument((p) => void this._onDidCloseTextDocument.fire(p));
+    this.conn.workspace.onDidChangeWorkspaceFolders(
+      (p) => void this._onDidChangeWorkspaceFolders.fire(p)
     );
-    this.conn.onDidChangeConfiguration((p) => this._onDidChangeConfiguration.fire(p));
-    /* eslint-enable @typescript-eslint/no-unsafe-return */
+    this.conn.onDidChangeConfiguration((p) => void this._onDidChangeConfiguration.fire(p));
   }
 
   waitInitialized() {
@@ -169,7 +168,7 @@ export class TsLspServer implements ITsLspServerHandle {
     return this.intialized.isOpen();
   }
 
-  private readonly completionItemCache = new DisposableCache<vscode.CompletionItem[]>(5);
+  private readonly completionItemCache = new RestrictedCache<vscode.CompletionItem[]>(5);
 
   async completion(params: lsp.CompletionParams, token: lsp.CancellationToken) {
     const { doc, providers } = this.prepareProviderHandle(
@@ -264,9 +263,7 @@ export class TsLspServer implements ITsLspServerHandle {
     const result = await provider.resolveCompletionItem(cachedItem, token);
     if (result) {
       const converted = this.converter.convertCompletionItem(result, idData);
-      if (converted.command) {
-        converted.command = this.replaceCommandWithIdData(converted.command, idData);
-      }
+      this.replaceCommandWithIdData(converted, idData);
       return converted;
     } else {
       return item;
@@ -390,7 +387,7 @@ export class TsLspServer implements ITsLspServerHandle {
     }
   }
 
-  private readonly codeActionCache = new DisposableCache<(vscode.Command | vscode.CodeAction)[]>(2);
+  private readonly codeActionCache = new RestrictedCache<(vscode.Command | vscode.CodeAction)[]>(2);
 
   async codeAction(params: lsp.CodeActionParams, token: lsp.CancellationToken) {
     const { doc, providers } = this.prepareProviderHandle(
@@ -456,13 +453,13 @@ export class TsLspServer implements ITsLspServerHandle {
           actions.map((action, index) => {
             const idData = TsIdData.create(CODE_ACTION_DATA_TAG, id, index + indexOffset, cacheId);
             let converted = this.converter.convertCodeAction(action, idData);
-            if (typeof converted.command !== "string") {
-              // is codeAction
-              if (converted.command) {
-                converted.command = this.replaceCommandWithIdData(converted.command, idData);
-              }
+            if (typeof converted.command === "string") {
+              converted = this.replaceCommandWithIdData(
+                { command: converted as lsp.Command },
+                idData
+              ).command;
             } else {
-              converted = this.replaceCommandWithIdData(converted as lsp.Command, idData);
+              this.replaceCommandWithIdData(converted as lsp.CodeAction, idData);
             }
             return converted;
           })
@@ -505,9 +502,7 @@ export class TsLspServer implements ITsLspServerHandle {
       // preserve idData
       const idData = item.data;
       const converted = this.converter.convertCodeAction(result, idData) as lsp.CodeAction;
-      if (converted.command) {
-        converted.command = this.replaceCommandWithIdData(converted.command, idData);
-      }
+      this.replaceCommandWithIdData(converted, idData);
       return converted;
     } else {
       return item;
@@ -733,7 +728,7 @@ export class TsLspServer implements ITsLspServerHandle {
     }
   }
 
-  private readonly callHierarchyItemCache = new DisposableCache<vscode.CallHierarchyItem[]>(2);
+  private readonly callHierarchyItemCache = new RestrictedCache<vscode.CallHierarchyItem[]>(2);
 
   async prepareCallHierachy(params: lsp.CallHierarchyPrepareParams, token: lsp.CancellationToken) {
     const { doc, id, provider } = this.prepareHighestProviderHandle(
@@ -825,7 +820,7 @@ export class TsLspServer implements ITsLspServerHandle {
   }
 
   // TODO: index by textdocument
-  private readonly codeLensCache = new DisposableCache<vscode.CodeLens[]>(6);
+  private readonly codeLensCache = new RestrictedCache<vscode.CodeLens[]>(300);
 
   async codeLens(params: lsp.CodeLensParams, token: lsp.CancellationToken) {
     const { doc, providers } = this.prepareProviderHandle(
@@ -857,6 +852,36 @@ export class TsLspServer implements ITsLspServerHandle {
 
     if (merged.length > 0) {
       return merged;
+    }
+  }
+
+  async codeLensResolve(item: lsp.CodeLens, token: lsp.CancellationToken) {
+    const idData = TsIdData.resolve(item.data);
+    if (!idData) {
+      return item;
+    }
+    const { cacheId, index, providerId } = idData;
+
+    const cachedItem = this.codeLensCache.get(cacheId)?.[index];
+    if (!cachedItem) {
+      return item;
+    }
+    const { provider } = this.prepareProviderById(
+      providerId,
+      this.languageFeatures.$providers.codeLens
+    );
+
+    if (!provider.resolveCodeLens) {
+      return item;
+    }
+
+    const result = await provider.resolveCodeLens(cachedItem, token);
+    if (result) {
+      const converted = this.converter.convertCodeLens(result, idData);
+      this.replaceCommandWithIdData(converted, idData);
+      return converted;
+    } else {
+      return item;
     }
   }
 
@@ -971,12 +996,19 @@ export class TsLspServer implements ITsLspServerHandle {
     );
   }
 
-  private replaceCommandWithIdData(command: lsp.Command, idData: TsIdData.IData) {
-    return {
-      command: command.command,
-      title: command.title,
-      arguments: [idData],
-    };
+  private replaceCommandWithIdData<T extends { command?: lsp.Command }>(
+    item: T,
+    idData: TsIdData.IData
+  ) {
+    if (item.command) {
+      const c = item.command;
+      item.command = {
+        command: c.command,
+        title: c.title,
+        arguments: [idData],
+      };
+    }
+    return item;
   }
 
   get clientCapabilities() {
