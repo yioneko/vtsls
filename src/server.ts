@@ -50,6 +50,7 @@ export interface ITsLspServerHandle {
 const COMPLETE_DATA_TAG = "_ts_complete";
 const CODE_ACTION_DATA_TAG = "_ts_code_action";
 const CODE_LENS_DATA_TAG = "_ts_code_lens";
+const CALL_HIERARCHY_DATA_TAG = "_ts_call_hierarchy";
 
 export class TsLspServer implements ITsLspServerHandle {
   private initHanlders = new Set<(params: lsp.InitializeParams) => Promise<void>>();
@@ -745,11 +746,10 @@ export class TsLspServer implements ITsLspServerHandle {
       const itemsArr = Array.isArray(result) ? result : [result];
       const cacheId = this.callHierarchyItemCache.store(itemsArr);
       return itemsArr.map((item, index) =>
-        this.converter.convertCallHierarcgyItem(item, {
-          providerId: id,
-          index,
-          cacheId,
-        })
+        this.converter.convertCallHierarcgyItem(
+          item,
+          TsIdData.create(CALL_HIERARCHY_DATA_TAG, id, index, cacheId)
+        )
       );
     }
     return null;
@@ -866,6 +866,10 @@ export class TsLspServer implements ITsLspServerHandle {
     if (!cachedItem) {
       return item;
     }
+    if (cachedItem.isResolved) {
+      return cachedItem;
+    }
+
     const { provider } = this.prepareProviderById(
       providerId,
       this.languageFeatures.$providers.codeLens
