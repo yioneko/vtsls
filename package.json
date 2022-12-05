@@ -1,7 +1,7 @@
 {
   "name": "vtsls",
   "description": "LSP wrapper for typescript extension of vscode",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "license": "MIT",
   "engines": {
     "node": ">=14",
