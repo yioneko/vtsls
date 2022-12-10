@@ -8,7 +8,7 @@ updates:
     schedule:
       interval: weekly
 
-  - directory: /
+  - directory: /packages/service
     package-ecosystem: npm
     ignore:
       - dependency-name: "jsonc-parser"
@@ -16,5 +16,22 @@ updates:
       - dependency-name: typescript
       - dependency-name: "@types/*"
     open-pull-requests-limit: 5
+    schedule:
+      interval: weekly
+
+  - directory: /packages/server
+    package-ecosystem: npm
+    ignore:
+      - dependency-name: "@vtsls/typescript-lanuguage-service"
+    schedule:
+      interval: weekly
+
+  - directory: /
+    package-ecosystem: npm
+    schedule:
+      interval: weekly
+
+  - directory: /
+    package-ecosystem: github-actions
     schedule:
       interval: weekly

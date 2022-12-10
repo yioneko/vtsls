@@ -4,11 +4,10 @@
   "version": "0.0.5",
   "license": "MIT",
   "engines": {
-    "node": ">=14",
-    "vscode": "^1.30.0"
+    "node": ">=14"
   },
   "bin": {
-    "vtsls": "dist/main.js"
+    "vtsls": "bin/vtsls.js"
   },
   "keywords": [
     "language-server-protocol"
@@ -24,7 +23,8 @@
   },
   "scripts": {
     "build": "node build.js",
-    "build:watch": "node build.js watch"
+    "build:watch": "node build.js watch",
+    "type-check": "tsc --noEmit"
   },
   "main": "./dist/main.js",
   "repository": {

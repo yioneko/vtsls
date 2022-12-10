@@ -26,6 +26,7 @@ export type EventHandlersMapping = {
     params: lsp.ApplyWorkspaceEditParams
   ) => Promise<lsp.ApplyWorkspaceEditResult>;
   workDoneProgress: () => Promise<WorkDoneProgressReporter>;
+  diagnostics: (params: lsp.PublishDiagnosticsParams) => Promise<void>;
 };
 
 export type EventName = keyof EventHandlersMapping;
@@ -36,4 +37,5 @@ export interface TSLanguageServiceEvents {
   onShowMessage(handler: EventHandlersMapping["showMessage"]): lsp.Disposable;
   onApplyWorkspaceEdit(handler: EventHandlersMapping["applyWorkspaceEdit"]): lsp.Disposable;
   onWorkDoneProgress(handler: EventHandlersMapping["workDoneProgress"]): lsp.Disposable;
+  onDiagnostics(handler: EventHandlersMapping['diagnostics']): lsp.Disposable;
 }

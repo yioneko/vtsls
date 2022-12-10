@@ -47,6 +47,7 @@ function createTSLanguageServiceEvents() {
     onShowMessage: onHandler("showMessage"),
     onApplyWorkspaceEdit: onHandler("applyWorkspaceEdit"),
     onWorkDoneProgress: onHandler("workDoneProgress"),
+    onDiagnostics: onHandler("diagnostics"),
   };
 
   return [events, getHandler] as const;
@@ -118,6 +119,20 @@ export function createTSLanguageService(initOptions: TSLanguageServiceOptions) {
 
   const shims = initializeShimServices(initOptions, delegate);
   const l = shims.languageFeaturesService;
+  l.onDidChangeDiagnostics((e) => {
+    const handler = getHandler("diagnostics");
+    if (handler) {
+      for (const uri of e.uris) {
+        const diagnostics = l.getDiagnostics(uri);
+        if (Array.isArray(diagnostics)) {
+          void handler({
+            uri: uri.toString(),
+            diagnostics: diagnostics.map(delegate.converter.convertDiagnosticToLsp),
+          });
+        }
+      }
+    }
+  });
 
   const initialized = new Barrier();
 
@@ -129,16 +144,21 @@ export function createTSLanguageService(initOptions: TSLanguageServiceOptions) {
     }) as unknown as (...args: P) => R extends Thenable<any> ? R : Thenable<R>;
   }
 
-  return {
+  const tsLanguageService = {
     ...events,
-    async initialize(config: TSLanguageServiceConfig) {
+    initialized,
+    // wait initial config
+    async initialize(config: TSLanguageServiceConfig | undefined) {
+      if (initialized.isOpen()) {
+        return;
+      }
+
       try {
-        // wait initial config
         shims.configurationService.$changeConfiguration(config);
         await startVsTsExtension(shims.context);
         initialized.open();
       } catch (e) {
-        this.dispose();
+        tsLanguageService.dispose();
         throw e;
       }
     },
@@ -147,7 +167,12 @@ export function createTSLanguageService(initOptions: TSLanguageServiceOptions) {
       shims.context.subscriptions.forEach((d) => d.dispose());
     },
     changeConfiguration(params: lsp.DidChangeConfigurationParams) {
-      shims.configurationService.$changeConfiguration(params.settings);
+      // set initialized after didChangeConfiguration
+      if (!initialized.isOpen()) {
+        void tsLanguageService.initialize(params.settings);
+      } else {
+        shims.configurationService.$changeConfiguration(params.settings);
+      }
     },
     openTextDocument(params: lsp.DidOpenTextDocumentParams) {
       shims.workspaceService.$openTextDocument(params);
@@ -194,4 +219,6 @@ export function createTSLanguageService(initOptions: TSLanguageServiceOptions) {
     semanticTokensFull: waitInit(l.semanticTokensFull.bind(l)),
     semanticTokensRange: waitInit(l.semanticTokensRange.bind(l)),
   };
+
+  return tsLanguageService;
 }

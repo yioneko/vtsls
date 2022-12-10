@@ -15,5 +15,6 @@
     "strictNullChecks": true,
     "strict": true,
     "types": ["node"]
-  }
+  },
+  "include": []
 }

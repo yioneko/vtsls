@@ -17,6 +17,7 @@ function lookUp(tree: any, key: string | undefined) {
   return tree;
 }
 
+// TODO: ugly
 function update<T = any>(tree: any, key: string, val: T) {
   const parts = key.split(".");
   let node = tree;
@@ -31,6 +32,7 @@ function update<T = any>(tree: any, key: string, val: T) {
   }
 }
 
+// TODO: ugly
 function recursiveUpdate(cur: any, value: any) {
   if (Array.isArray(value) || typeof value !== "object" || value === null) {
     return value;

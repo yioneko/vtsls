@@ -27,10 +27,8 @@ function onServerInitialize(conn: Connection, params: InitializeParams) {
 
   const root =
     params.rootUri ?? (params.rootPath ? URI.file(params.rootPath).toString() : undefined);
-  const folders = params.workspaceFolders ?? (root && [{ name: root, uri: root }]);
-  if (!folders) {
-    return Promise.reject("Cannot initialize with no workspace folders");
-  }
+  const folders =
+    params.workspaceFolders ?? (typeof root == "string" ? [{ name: root, uri: root }] : undefined);
 
   const service = createTSLanguageService({
     locale: params.locale,
@@ -39,9 +37,14 @@ function onServerInitialize(conn: Connection, params: InitializeParams) {
   });
 
   async function initializeService() {
+    void conn.sendRequest(ConfigurationRequest.type, { items: [{}] }).then((config) => {
+      if (Array.isArray(config)) {
+        void service.initialize(config[0]);
+      }
+    });
+
     try {
-      const config = await conn.sendRequest(ConfigurationRequest.type, { items: [{}] });
-      await service.initialize(config);
+      await service.initialized.wait();
     } catch (e) {
       conn.dispose();
     }
@@ -69,6 +72,7 @@ function bindServiceHandlers(conn: Connection, service: TSLanguageService) {
   );
   service.onWorkDoneProgress(() => conn.window.createWorkDoneProgress());
   service.onApplyWorkspaceEdit((params) => conn.workspace.applyEdit(params));
+  service.onDiagnostics((params) => conn.sendDiagnostics(params));
 
   conn.onExit(() => service.dispose());
   conn.onShutdown(() => service.dispose());

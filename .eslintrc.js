@@ -12,8 +12,11 @@ module.exports = {
   },
   plugins: ["@typescript-eslint"],
   ignorePatterns: [
-    "packages/service/typescript-language-features/**/*",
-    "packages/service/vscode/**/*",
+    "packages/service/typescript-language-features",
+    "packages/service/vscode",
+    // TODO: specific rules for scripts file
+    "packages/**/*.js",
+    "**/dist",
     ".eslintrc.*",
   ],
   rules: {

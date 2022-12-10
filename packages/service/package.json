@@ -27,18 +27,13 @@
     "vscode-languageserver-types": "^3.17.2"
   },
   "scripts": {
-    "build": "node scripts/build.js",
-    "build:watch": "node scripts/build.js watch",
-    "build:types": "tsc",
+    "build": "node scripts/build.js && tsc",
+    "build:watch": "node scripts/build.js watch && tsc --watch",
+    "type-check": "tsc",
     "patch-extension": "node scripts/patch.js"
   },
   "repository": {
     "type": "git",
     "url": "https://github.com/yioneko/vtsls.git"
-  },
-  "pnpm": {
-    "patchedDependencies": {
-      "jsonc-parser@3.2.0": "patches/packages/jsonc-parser@3.2.0.patch"
-    }
   }
 }

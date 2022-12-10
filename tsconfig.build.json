@@ -1,9 +1,0 @@
-{
-  "extends": "./tsconfig.base.json",
-  "compilerOptions": {
-    "paths": {
-      "@vsc-ts/*": ["typescript-language-features/src/*"]
-    }
-  },
-  "include": ["src/**/*", "typescript-language-features/src/**/*"]
-}
