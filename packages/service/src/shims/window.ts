@@ -1,17 +1,18 @@
-import { isPrimitive } from "src/utils/types";
+import { TSLanguageServiceDelegate } from "src/languageService";
 import * as vscode from "vscode";
-import { Emitter, MessageActionItem, MessageType } from "vscode-languageserver";
-import { ITsLspServerHandle } from "../server";
+import * as lsp from "vscode-languageserver-protocol";
+import { isPrimitive } from "../utils/types";
 
 export class WindowShimService {
-  private _lspServerHandle: ITsLspServerHandle = null!;
   private outputChannels = new Map<string, vscode.OutputChannel>();
 
-  private _onDidChangeActiveTextEditor = new Emitter<vscode.TextEditor>();
+  private _onDidChangeActiveTextEditor = new lsp.Emitter<vscode.TextEditor>();
   readonly onDidChangeActiveTextEditor = this._onDidChangeActiveTextEditor.event;
 
-  private _onDidChangeVisibleTextEditors = new Emitter<vscode.TextEditor[]>();
+  private _onDidChangeVisibleTextEditors = new lsp.Emitter<vscode.TextEditor[]>();
   readonly onDidChangeVisibleTextEditors = this._onDidChangeVisibleTextEditors.event;
+
+  constructor(private readonly delegate: TSLanguageServiceDelegate) {}
 
   createOutputChannel(name: string) {
     const win = this;
@@ -20,10 +21,10 @@ export class WindowShimService {
         return name;
       },
       append(value) {
-        win._lspServerHandle.logMessage(MessageType.Info, value);
+        win.delegate.logMessage(lsp.MessageType.Info, value);
       },
       appendLine(value) {
-        win._lspServerHandle.logMessage(MessageType.Info, value);
+        win.delegate.logMessage(lsp.MessageType.Info, value);
       },
       clear() {},
       hide() {},
@@ -44,33 +45,21 @@ export class WindowShimService {
     message: string,
     ...items: (vscode.MessageOptions | string | vscode.MessageItem)[]
   ) {
-    return this._showMessagePrompt(
-      this.serverWindowHandle.showErrorMessage.bind(this.serverWindowHandle),
-      message,
-      items
-    );
+    return this._showMessagePrompt(lsp.MessageType.Error, message, items);
   }
 
   async showInformationMessage(
     message: string,
     ...items: (vscode.MessageOptions | string | vscode.MessageItem)[]
   ) {
-    return this._showMessagePrompt(
-      this.serverWindowHandle.showInformationMessage.bind(this.serverWindowHandle),
-      message,
-      items
-    );
+    return this._showMessagePrompt(lsp.MessageType.Info, message, items);
   }
 
   async showWarningMessage(
     message: string,
     ...items: (vscode.MessageOptions | string | vscode.MessageItem)[]
   ) {
-    return this._showMessagePrompt(
-      this.serverWindowHandle.showWarningMessage.bind(this.serverWindowHandle),
-      message,
-      items
-    );
+    return this._showMessagePrompt(lsp.MessageType.Warning, message, items);
   }
 
   async withProgress<R>(
@@ -80,9 +69,12 @@ export class WindowShimService {
       token: vscode.CancellationToken
     ) => Thenable<R>
   ) {
-    const reporter = await this.serverWindowHandle.createWorkDoneProgress();
-    reporter.begin(options.title || "");
+    const reporter = await this.delegate.createWorkDoneProgress();
+    if (!reporter) {
+      return await task({ report() {} }, lsp.CancellationToken.None);
+    }
 
+    reporter.begin(options.title || "");
     try {
       const result = await task(
         {
@@ -96,20 +88,17 @@ export class WindowShimService {
       return result;
     } catch (e) {
       reporter.done();
-      void this.showErrorMessage(String(e));
+      void this.delegate.logMessage(lsp.MessageType.Error, String(e));
       throw e;
     }
   }
 
   showTextDocument(document: vscode.TextDocument) {
-    return this._lspServerHandle.openTextDocument(document.uri.toString(), true);
+    return this.delegate.openTextDocument(document.uri.toString(), true);
   }
 
   async _showMessagePrompt(
-    method: (
-      message: string,
-      ...actions: MessageActionItem[]
-    ) => Promise<MessageActionItem | undefined>,
+    type: lsp.MessageType,
     message: string,
     items: (vscode.MessageOptions | string | vscode.MessageItem)[]
   ) {
@@ -121,23 +110,12 @@ export class WindowShimService {
       }
       return;
     });
-    const transformedItems = allTitles.filter((i) => !!i) as MessageActionItem[];
-    const selected = await method(message, ...transformedItems);
+    const transformedItems = allTitles.filter((i) => !!i) as lsp.MessageActionItem[];
+    const selected = await this.delegate.showMessage(type, message, ...transformedItems);
     if (selected && selected.tsId !== undefined && typeof selected.tsId === "number") {
       return items[selected.tsId];
     } else {
       return selected;
     }
-  }
-
-  $injectServerHandle(server: ITsLspServerHandle) {
-    this._lspServerHandle = server;
-    server.registerInitRequestHandler(async (params) => {
-      server.windowHandle.initialize(params.capabilities);
-    });
-  }
-
-  private get serverWindowHandle() {
-    return this._lspServerHandle.windowHandle;
   }
 }

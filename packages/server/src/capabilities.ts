@@ -1,8 +1,15 @@
-import { TypeScriptCompletionItemProvider } from "@vsc-ts/languageFeatures/completions";
-import { allKnownCodeActionKinds } from "@vsc-ts/languageFeatures/refactor";
-import { tokenModifiers, tokenTypes } from "@vsc-ts/languageFeatures/semanticTokens";
-import { TypeScriptSignatureHelpProvider } from "@vsc-ts/languageFeatures/signatureHelp";
-import { CodeActionKind, ServerCapabilities, TextDocumentSyncKind } from "vscode-languageserver";
+import {
+  codeActionKinds,
+  Commands,
+  completionTriggerCharacters,
+  onTypeFormatFirstTriggerCharacter,
+  onTypeFormatMoreTriggerCharacter,
+  semanticTokenModifiers,
+  semanticTokenTypes,
+  signatureHelpReTriggerCharacters,
+  signatureHelpTriggerCharacters,
+} from "@vtsls/typescript-lanuguage-service";
+import { ServerCapabilities, TextDocumentSyncKind } from "vscode-languageserver/node";
 
 export function getTsLspDefaultCapabilities(): ServerCapabilities {
   return {
@@ -14,8 +21,7 @@ export function getTsLspDefaultCapabilities(): ServerCapabilities {
       save: false,
     },
     completionProvider: {
-      // from jsdoc completion
-      triggerCharacters: [...TypeScriptCompletionItemProvider.triggerCharacters, "*"],
+      triggerCharacters: completionTriggerCharacters,
       resolveProvider: true,
       completionItem: {
         labelDetailsSupport: true,
@@ -23,8 +29,8 @@ export function getTsLspDefaultCapabilities(): ServerCapabilities {
     },
     hoverProvider: true,
     signatureHelpProvider: {
-      triggerCharacters: TypeScriptSignatureHelpProvider.triggerCharacters,
-      retriggerCharacters: TypeScriptSignatureHelpProvider.retriggerCharacters,
+      triggerCharacters: signatureHelpTriggerCharacters,
+      retriggerCharacters: signatureHelpReTriggerCharacters,
     },
     declarationProvider: false,
     definitionProvider: true,
@@ -36,14 +42,7 @@ export function getTsLspDefaultCapabilities(): ServerCapabilities {
       label: "typescript",
     },
     codeActionProvider: {
-      codeActionKinds: [
-        ...(allKnownCodeActionKinds as any),
-        CodeActionKind.Source,
-        CodeActionKind.SourceFixAll,
-        CodeActionKind.SourceOrganizeImports,
-        CodeActionKind.QuickFix,
-        CodeActionKind.Refactor,
-      ],
+      codeActionKinds,
       resolveProvider: true,
     },
     codeLensProvider: { resolveProvider: true },
@@ -53,8 +52,8 @@ export function getTsLspDefaultCapabilities(): ServerCapabilities {
     documentFormattingProvider: true,
     documentRangeFormattingProvider: true,
     documentOnTypeFormattingProvider: {
-      firstTriggerCharacter: ";",
-      moreTriggerCharacter: ["}", "\n"],
+      firstTriggerCharacter: onTypeFormatFirstTriggerCharacter,
+      moreTriggerCharacter: onTypeFormatMoreTriggerCharacter,
     },
     renameProvider: {
       prepareProvider: true,
@@ -62,23 +61,14 @@ export function getTsLspDefaultCapabilities(): ServerCapabilities {
     foldingRangeProvider: true,
     selectionRangeProvider: true,
     executeCommandProvider: {
-      commands: [
-        "javascript.reloadProjects",
-        "typescript.reloadProjects",
-        "typescript.goToProjectConfig",
-        "javascript.goToProjectConfig",
-        "_typescript.learnMoreAboutRefactorings",
-        "typescript.openTsServerLog",
-        "typescript.restartTsServer",
-        "typescript.selectTypeScriptVersion",
-      ],
+      commands: Commands,
     },
     callHierarchyProvider: true,
     linkedEditingRangeProvider: false,
     semanticTokensProvider: {
       legend: {
-        tokenTypes,
-        tokenModifiers,
+        tokenTypes: semanticTokenTypes,
+        tokenModifiers: semanticTokenModifiers,
       },
       full: true,
       range: true,

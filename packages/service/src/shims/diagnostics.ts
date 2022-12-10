@@ -1,23 +1,21 @@
 import * as vscode from "vscode";
-import { Emitter } from "vscode-languageserver/node";
+import { Emitter } from "vscode-languageserver-protocol";
 import { URI } from "vscode-uri";
-import { ResourceMap } from "../../src/utils/resourceMap";
 import { DebounceEmitter } from "../utils/deouncedEmitter";
+import { onCaseInsensitiveFileSystem } from "../utils/fs";
+import { ResourceMap } from "../utils/resourceMap";
 import { generateUuid } from "../utils/uuid";
 
 export class DiagnosticsShimService {
   private diagnosticsCollections = new Map<string, DiagnosticCollection>();
 
-  readonly onDidChangeDiagnostics =
-    new DebounceEmitter<vscode.DiagnosticChangeEvent>();
-
-  constructor(private onCaseInsensitiveFileSystem: boolean) {}
+  readonly onDidChangeDiagnostics = new DebounceEmitter<vscode.DiagnosticChangeEvent>();
 
   createDiagnosticCollection(name?: string) {
     const collectionName = name ?? generateUuid();
     const collection = new DiagnosticCollection(
       collectionName,
-      this.onCaseInsensitiveFileSystem,
+      onCaseInsensitiveFileSystem(),
       this.onDidChangeDiagnostics
     );
     this.diagnosticsCollections.set(collectionName, collection);
@@ -25,9 +23,7 @@ export class DiagnosticsShimService {
   }
 
   getDiagnostics(resource: URI): vscode.Diagnostic[];
-  getDiagnostics(
-    resource?: URI
-  ): (vscode.Diagnostic | [URI, vscode.Diagnostic[]])[];
+  getDiagnostics(resource?: URI): (vscode.Diagnostic | [URI, vscode.Diagnostic[]])[];
   getDiagnostics(resource?: URI) {
     if (resource) {
       let result: vscode.Diagnostic[] = [];
@@ -61,7 +57,7 @@ export class DiagnosticsShimService {
   }
 }
 
-class DiagnosticCollection implements vscode.DiagnosticCollection {
+export class DiagnosticCollection implements vscode.DiagnosticCollection {
   private readonly _onDidChangeDiagnostics: Emitter<vscode.DiagnosticChangeEvent>;
   private readonly _data: ResourceMap<vscode.Diagnostic[]>;
 
@@ -90,13 +86,9 @@ class DiagnosticCollection implements vscode.DiagnosticCollection {
   }
 
   set(uri: vscode.Uri, diagnostics: ReadonlyArray<vscode.Diagnostic>): void;
+  set(entries: ReadonlyArray<[vscode.Uri, ReadonlyArray<vscode.Diagnostic>]>): void;
   set(
-    entries: ReadonlyArray<[vscode.Uri, ReadonlyArray<vscode.Diagnostic>]>
-  ): void;
-  set(
-    first:
-      | vscode.Uri
-      | ReadonlyArray<[vscode.Uri, ReadonlyArray<vscode.Diagnostic>]>,
+    first: vscode.Uri | ReadonlyArray<[vscode.Uri, ReadonlyArray<vscode.Diagnostic>]>,
     diagnostics?: ReadonlyArray<vscode.Diagnostic>
   ) {
     if (!first) {

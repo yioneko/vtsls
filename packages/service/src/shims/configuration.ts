@@ -1,9 +1,8 @@
-import * as fs from "fs/promises";
-import * as path from "path";
+import { contributes as pkgContributes } from "typescript-language-features/package.json";
 import { EditorSettings } from "typescript/lib/tsserverlibrary";
 import * as vscode from "vscode";
-import { Emitter } from "vscode-languageserver";
-import { ITsLspServerHandle } from "../server";
+import { Emitter } from "vscode-languageserver-protocol";
+import { TSLanguageServiceConfig } from "../types";
 import { isTypeScriptDocument } from "../utils/language";
 
 function lookUp(tree: any, key: string | undefined) {
@@ -57,12 +56,19 @@ export class ConfigurationShimService {
   private _onDidChangeConfiguration = new Emitter<vscode.ConfigurationChangeEvent>();
   readonly onDidChangeConfiguration = this._onDidChangeConfiguration.event;
 
-  private pkgJsonRead: Promise<any>;
-
-  constructor(assetsRoot: string) {
-    this.pkgJsonRead = fs
-      .readFile(path.resolve(assetsRoot, "package.json"), "utf8")
-      .then(JSON.parse);
+  constructor() {
+    const contributed = pkgContributes.configuration.properties || {};
+    for (const [key, val] of Object.entries<any>(contributed)) {
+      let defaultVal = val.default;
+      if (!defaultVal) {
+        if (val.type === "string") {
+          defaultVal = "";
+        } else if (val.type === "array") {
+          defaultVal = [];
+        }
+      }
+      update(this.defaultConfig, key, defaultVal);
+    }
   }
 
   getConfiguration(section?: string) {
@@ -112,26 +118,8 @@ export class ConfigurationShimService {
     return vscConfig;
   }
 
-  $injectServerHandle(server: ITsLspServerHandle) {
-    server.registerInitRequestHandler(async () => {
-      const pkgJson = await this.pkgJsonRead;
-      const contributed = pkgJson?.contributes?.configuration?.properties || {};
-      for (const [key, val] of Object.entries<any>(contributed)) {
-        let defaultVal = val.default;
-        if (!defaultVal) {
-          if (val.type === "string") {
-            defaultVal = "";
-          } else if (val.type === "array") {
-            defaultVal = [];
-          }
-        }
-        update(this.defaultConfig, key, defaultVal);
-      }
-    });
-
-    server.onDidChangeConfiguration(({ settings }) => {
-      recursiveUpdate(this.workspaceConfig, settings);
-    });
+  $changeConfiguration(config: TSLanguageServiceConfig) {
+    recursiveUpdate(this.workspaceConfig, config);
   }
 
   $getVtslsDocConfig(doc: vscode.TextDocument, section?: string) {

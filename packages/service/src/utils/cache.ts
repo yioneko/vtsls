@@ -1,4 +1,4 @@
-import { Disposable } from "vscode-languageserver";
+import { Disposable } from "vscode-languageserver-protocol";
 
 export class RestrictedCache<V> implements Disposable {
   private readonly _store = new Map<number, V>();

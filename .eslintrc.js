@@ -8,10 +8,14 @@ module.exports = {
   parser: "@typescript-eslint/parser",
   parserOptions: {
     tsconfigRootDir: __dirname,
-    project: ["./tsconfig.json"],
+    project: ["./packages/*/tsconfig.json"],
   },
   plugins: ["@typescript-eslint"],
-  ignorePatterns: ["typescript-language-features/**/*", "vscode/**/*", ".eslintrc.*"],
+  ignorePatterns: [
+    "packages/service/typescript-language-features/**/*",
+    "packages/service/vscode/**/*",
+    ".eslintrc.*",
+  ],
   rules: {
     "@typescript-eslint/ban-ts-comment": "warn",
     "@typescript-eslint/no-empty-function": "warn",

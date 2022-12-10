@@ -1,4 +1,4 @@
-import { Emitter } from "vscode-languageserver";
+import { Emitter } from "vscode-languageserver-protocol";
 
 export class DebounceEmitter<T> extends Emitter<T> {
   private readonly _delay: number;

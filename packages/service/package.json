@@ -1,0 +1,44 @@
+{
+  "name": "@vtsls/typescript-lanuguage-service",
+  "description": "LSP wrapper for typescript extension of vscode",
+  "version": "0.0.5",
+  "license": "MIT",
+  "engines": {
+    "node": ">=14"
+  },
+  "types": "./dist/src/index.d.ts",
+  "main": "./dist/index.js",
+  "files": [
+    "./dist/index.js",
+    "./dist/**/*.d.ts"
+  ],
+  "dependencies": {
+    "@vscode/l10n": "^0.0.10",
+    "jsonc-parser": "^3.2.0",
+    "semver": "5.5.1",
+    "typescript": "^4.9.3",
+    "vscode-languageserver-textdocument": "^1.0.7",
+    "vscode-uri": "^3.0.3"
+  },
+  "devDependencies": {
+    "@types/semver": "^5.5.0",
+    "esbuild": "^0.15.14",
+    "vscode-languageserver-protocol": "^3.17.2",
+    "vscode-languageserver-types": "^3.17.2"
+  },
+  "scripts": {
+    "build": "node scripts/build.js",
+    "build:watch": "node scripts/build.js watch",
+    "build:types": "tsc",
+    "patch-extension": "node scripts/patch.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yioneko/vtsls.git"
+  },
+  "pnpm": {
+    "patchedDependencies": {
+      "jsonc-parser@3.2.0": "patches/packages/jsonc-parser@3.2.0.patch"
+    }
+  }
+}

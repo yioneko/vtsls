@@ -1,4 +1,4 @@
-import { Disposable, Emitter } from "vscode-languageserver/node";
+import { Disposable, Emitter } from "vscode-languageserver-protocol";
 
 export interface ICommand {
   id: string;

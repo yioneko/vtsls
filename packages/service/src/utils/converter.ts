@@ -1,53 +1,10 @@
 import * as vscode from "vscode";
-import {
-  CallHierarchyIncomingCall,
-  CallHierarchyItem,
-  CallHierarchyOutgoingCall,
-  CodeAction,
-  CodeActionKind,
-  CodeLens,
-  Command,
-  CompletionItem,
-  CompletionItemKind,
-  CompletionItemTag,
-  CreateFile,
-  DeleteFile,
-  Diagnostic,
-  DiagnosticSeverity,
-  DiagnosticTag,
-  DocumentSymbol,
-  FoldingRange,
-  FoldingRangeKind,
-  Hover,
-  InlayHint,
-  InlayHintKind,
-  InsertReplaceEdit,
-  InsertTextFormat,
-  Location,
-  LocationLink,
-  MarkedString,
-  MarkupContent,
-  MarkupKind,
-  Position,
-  Range,
-  RenameFile,
-  ResourceOperationKind,
-  SelectionRange,
-  SemanticTokens,
-  SignatureInformation,
-  SymbolInformation,
-  SymbolKind,
-  TextEdit,
-  WorkspaceEdit,
-} from "vscode-languageserver";
+import * as lsp from "vscode-languageserver-protocol";
 import { TextDocument } from "vscode-languageserver-textdocument";
 import { URI } from "vscode-uri";
-import { ResourceMap } from "../../src/utils/resourceMap";
-import { ITsLspServerHandle } from "../server";
-import { ConfigurationShimService } from "../shims/configuration";
 import * as types from "../shims/types";
-import { WorkspaceShimService } from "../shims/workspace";
 import { onCaseInsensitiveFileSystem } from "../utils/fs";
+import { ResourceMap } from "../utils/resourceMap";
 import { getWordPattern } from "./language";
 import { deepClone } from "./objects";
 
@@ -66,43 +23,39 @@ function convertOrFalsy<T, R>(val: T | undefined | null, cvtFn: (v: T) => R): R 
   return val !== undefined && val !== null ? cvtFn(val) : undefined;
 }
 
-export class LspConverter {
-  constructor(
-    private readonly server: ITsLspServerHandle,
-    private readonly workspace: WorkspaceShimService,
-    private readonly config: ConfigurationShimService
-  ) {}
+export class TSLspConverter {
+  constructor(private readonly clientCapabilities: lsp.ClientCapabilities) {}
 
-  static convertTextEdit(edit: vscode.TextEdit): TextEdit {
+  static convertTextEdit(edit: vscode.TextEdit): lsp.TextEdit {
     return {
-      range: LspConverter.convertRange(edit.range),
+      range: TSLspConverter.convertRange(edit.range),
       newText: edit.newText,
     };
   }
 
-  static convertPosition(pos: vscode.Position): Position {
+  static convertPosition(pos: vscode.Position): lsp.Position {
     return {
       line: pos.line,
       character: pos.character,
     };
   }
 
-  static convertRange(range: vscode.Range): Range {
+  static convertRange(range: vscode.Range): lsp.Range {
     return {
       start: range.start,
       end: range.end,
     };
   }
 
-  convertWorkspaceEdit = (edit: vscode.WorkspaceEdit): WorkspaceEdit => {
+  convertWorkspaceEdit = (edit: vscode.WorkspaceEdit): lsp.WorkspaceEdit => {
     const resouceOpKinds =
-      this.server.clientCapabilities.workspace?.workspaceEdit?.resourceOperations || [];
-    const supportVersion = this.server.clientCapabilities.workspace?.workspaceEdit?.documentChanges;
+      this.clientCapabilities.workspace?.workspaceEdit?.resourceOperations || [];
+    const supportVersion = this.clientCapabilities.workspace?.workspaceEdit?.documentChanges;
 
-    const docChanges: (CreateFile | RenameFile | DeleteFile | URI)[] = [];
+    const docChanges: (lsp.CreateFile | lsp.RenameFile | lsp.DeleteFile | URI)[] = [];
     let hasResourceOp = false;
 
-    const textEditsByUri = new ResourceMap<[number | null, TextEdit[]]>(undefined, {
+    const textEditsByUri = new ResourceMap<[number | null, lsp.TextEdit[]]>(undefined, {
       onCaseInsensitiveFileSystem: onCaseInsensitiveFileSystem(),
     });
 
@@ -114,7 +67,7 @@ export class LspConverter {
         // file operation
         // create
         if (!entry.from) {
-          if (!resouceOpKinds.includes(ResourceOperationKind.Create)) {
+          if (!resouceOpKinds.includes(lsp.ResourceOperationKind.Create)) {
             throw new Error("client doesn't support create operation");
           }
           docChanges.push({
@@ -124,7 +77,7 @@ export class LspConverter {
           });
         } else if (entry.to) {
           // Rename
-          if (!resouceOpKinds.includes(ResourceOperationKind.Rename)) {
+          if (!resouceOpKinds.includes(lsp.ResourceOperationKind.Rename)) {
             throw new Error("client doesn't support rename operation");
           }
           docChanges.push({
@@ -135,7 +88,7 @@ export class LspConverter {
           });
         } else {
           // delete
-          if (!resouceOpKinds.includes(ResourceOperationKind.Delete)) {
+          if (!resouceOpKinds.includes(lsp.ResourceOperationKind.Delete)) {
             throw new Error("client doesn't support delete operation");
           }
           docChanges.push({
@@ -146,16 +99,12 @@ export class LspConverter {
         }
       } else if (entry._type === types.FileEditType.Text) {
         // text edits
-        const doc = this.workspace.$getDocumentByLspUri(entry.uri.toString());
         if (textEditsByUri.has(entry.uri)) {
-          textEditsByUri.get(entry.uri)![1].push(LspConverter.convertTextEdit(entry.edit));
+          textEditsByUri.get(entry.uri)![1].push(TSLspConverter.convertTextEdit(entry.edit));
         } else {
           // mark for future use
           docChanges.push(entry.uri);
-          textEditsByUri.set(entry.uri, [
-            doc?.version ?? null,
-            [LspConverter.convertTextEdit(entry.edit)],
-          ]);
+          textEditsByUri.set(entry.uri, [null, [TSLspConverter.convertTextEdit(entry.edit)]]);
         }
       } else {
         throw new Error(`Not supported type of edit entry: ${entry._type as string}`);
@@ -175,7 +124,7 @@ export class LspConverter {
         }),
       };
     } else {
-      const changes: WorkspaceEdit["changes"] = {};
+      const changes: lsp.WorkspaceEdit["changes"] = {};
       for (const {
         resource: uri,
         value: [_, edits],
@@ -207,9 +156,10 @@ export class LspConverter {
         return new types.Position(pos.line, pos.character);
       },
       get eol() {
-        return that.config.$getVtslsDocConfig(this).get("newLineCharacter") === "\r\n"
-          ? types.EndOfLine.LF
-          : types.EndOfLine.CRLF;
+        return types.EndOfLine.LF;
+        // return that.config.$getVtslsDocConfig(this).get("newLineCharacter") === "\r\n"
+        //   ? types.EndOfLine.LF
+        //   : types.EndOfLine.CRLF;
       },
       getWordRangeAtPosition(position) {
         const pattern = getWordPattern();
@@ -270,7 +220,8 @@ export class LspConverter {
       },
       // not synced if removed from documents
       get isClosed() {
-        return that.workspace.$getDocumentByLspUri(textDocument.uri) !== undefined;
+        // return that.workspace.$getDocumentByLspUri(textDocument.uri) !== undefined;
+        return false;
       },
       // assume always dirty
       isDirty: true,
@@ -288,7 +239,10 @@ export class LspConverter {
         }
 
         const lineText = textDocument.getText(
-          Range.create(Position.create(line, 0), Position.create(line, Number.MAX_VALUE))
+          lsp.Range.create(
+            lsp.Position.create(line, 0),
+            lsp.Position.create(line, Number.MAX_VALUE)
+          )
         );
 
         // TODO: fill api
@@ -311,7 +265,7 @@ export class LspConverter {
     return doc;
   };
 
-  convertCompletionItem = (item: vscode.CompletionItem, data?: any): CompletionItem => {
+  convertCompletionItem = (item: vscode.CompletionItem, data?: any): lsp.CompletionItem => {
     const { label, ...details } = isStringOrFalsy(item.label) ? { label: item.label } : item.label;
 
     const isSnippet = !isStringOrFalsy(item.insertText);
@@ -319,39 +273,39 @@ export class LspConverter {
       ? (item.insertText as vscode.SnippetString).value
       : (item.insertText as string | undefined);
 
-    let textEdit: TextEdit | InsertReplaceEdit | undefined = undefined;
+    let textEdit: lsp.TextEdit | lsp.InsertReplaceEdit | undefined = undefined;
     // prefer range to textEdit if provided
     if (item.range) {
-      if (Range.is(item.range)) {
+      if (lsp.Range.is(item.range)) {
         textEdit = {
-          range: LspConverter.convertRange(item.range),
+          range: TSLspConverter.convertRange(item.range),
           newText: insertText ?? label,
         };
       } else {
         textEdit = {
-          insert: LspConverter.convertRange(item.range.inserting),
-          replace: LspConverter.convertRange(item.range.replacing),
+          insert: TSLspConverter.convertRange(item.range.inserting),
+          replace: TSLspConverter.convertRange(item.range.replacing),
           newText: insertText ?? label,
         };
       }
     } else if (item.textEdit) {
-      textEdit = LspConverter.convertTextEdit(item.textEdit);
+      textEdit = TSLspConverter.convertTextEdit(item.textEdit);
     }
 
     return {
       label,
       labelDetails: details,
-      kind: item.kind ? ((item.kind + 1) as CompletionItemKind) : undefined,
-      tags: item.tags as CompletionItemTag[],
+      kind: item.kind ? ((item.kind + 1) as lsp.CompletionItemKind) : undefined,
+      tags: item.tags as lsp.CompletionItemTag[],
       detail: item.detail,
       documentation: convertOrFalsy(item.documentation, this.convertMarkupToLsp),
       preselect: item.preselect,
       sortText: item.sortText,
       filterText: item.filterText,
-      insertTextFormat: isSnippet ? InsertTextFormat.Snippet : InsertTextFormat.PlainText,
+      insertTextFormat: isSnippet ? lsp.InsertTextFormat.Snippet : lsp.InsertTextFormat.PlainText,
       insertText,
       textEdit,
-      additionalTextEdits: mapOrFalsy(item.additionalTextEdits, LspConverter.convertTextEdit),
+      additionalTextEdits: mapOrFalsy(item.additionalTextEdits, TSLspConverter.convertTextEdit),
       commitCharacters: item.commitCharacters,
       command: item.command,
       data,
@@ -360,23 +314,23 @@ export class LspConverter {
 
   convertLocation = <T extends vscode.Location | vscode.LocationLink>(
     location: T
-  ): T extends vscode.Location ? Location : LocationLink => {
+  ): T extends vscode.Location ? lsp.Location : lsp.LocationLink => {
     if ("targetUri" in location) {
       return {
         originSelectionRange: convertOrFalsy(
           location.originSelectionRange,
-          LspConverter.convertRange
+          TSLspConverter.convertRange
         ),
         targetUri: location.targetUri.toString(),
-        targetRange: LspConverter.convertRange(location.targetRange),
-        targetSelectionRange: LspConverter.convertRange(
+        targetRange: TSLspConverter.convertRange(location.targetRange),
+        targetSelectionRange: TSLspConverter.convertRange(
           location.targetSelectionRange || location.targetRange
         ),
       } as any;
     } else {
       return {
         uri: location.uri.toString(),
-        range: LspConverter.convertRange(location.range),
+        range: TSLspConverter.convertRange(location.range),
       } as any;
     }
   };
@@ -384,11 +338,11 @@ export class LspConverter {
   convertLocations = <T extends vscode.Location | vscode.Location[] | vscode.LocationLink[]>(
     location: T
   ): T extends vscode.Location
-    ? Location
+    ? lsp.Location
     : T extends vscode.Location[]
-    ? Location[]
+    ? lsp.Location[]
     : T extends vscode.LocationLink
-    ? LocationLink[]
+    ? lsp.LocationLink[]
     : never => {
     if (Array.isArray(location)) {
       return location.map(this.convertLocation) as any;
@@ -396,7 +350,7 @@ export class LspConverter {
       return this.convertLocation(location) as any;
     }
   };
-  convertDiagnosticFromLsp = (diagnostic: Diagnostic): vscode.Diagnostic => {
+  convertDiagnosticFromLsp = (diagnostic: lsp.Diagnostic): vscode.Diagnostic => {
     const d = new types.Diagnostic(
       types.Range.of(diagnostic.range),
       diagnostic.message,
@@ -418,14 +372,14 @@ export class LspConverter {
     return d;
   };
 
-  convertDiagnosticToLsp = (diagnostic: vscode.Diagnostic): Diagnostic => {
+  convertDiagnosticToLsp = (diagnostic: vscode.Diagnostic): lsp.Diagnostic => {
     const { value: code, target } =
       isStringOrFalsy(diagnostic.code) || typeof diagnostic.code === "number"
         ? { value: diagnostic.code, target: undefined }
         : diagnostic.code;
 
     return {
-      range: LspConverter.convertRange(diagnostic.range),
+      range: TSLspConverter.convertRange(diagnostic.range),
       message: diagnostic.message,
       code,
       codeDescription: target
@@ -434,28 +388,28 @@ export class LspConverter {
           }
         : undefined,
       source: diagnostic.source,
-      severity: (diagnostic.severity + 1) as DiagnosticSeverity,
+      severity: (diagnostic.severity + 1) as lsp.DiagnosticSeverity,
       relatedInformation: diagnostic.relatedInformation
         ? diagnostic.relatedInformation.map((d) => ({
             message: d.message,
             location: this.convertLocation(d.location),
           }))
         : undefined,
-      tags: diagnostic.tags ? diagnostic.tags.map((t) => t as DiagnosticTag) : undefined,
+      tags: diagnostic.tags ? diagnostic.tags.map((t) => t as lsp.DiagnosticTag) : undefined,
     };
   };
 
   convertCodeAction = (
     action: vscode.Command | vscode.CodeAction,
     data?: any
-  ): Command | CodeAction => {
+  ): lsp.Command | lsp.CodeAction => {
     if (action instanceof types.CodeAction) {
       const ac = action as vscode.CodeAction;
-      const result: CodeAction = {
+      const result: lsp.CodeAction = {
         title: ac.title,
         command: ac.command,
         diagnostics: mapOrFalsy(ac.diagnostics, this.convertDiagnosticToLsp),
-        kind: ac.kind?.value as CodeActionKind,
+        kind: ac.kind?.value as lsp.CodeActionKind,
         edit: convertOrFalsy(ac.edit, this.convertWorkspaceEdit),
         isPreferred: action.isPreferred,
         data,
@@ -467,10 +421,10 @@ export class LspConverter {
     }
   };
 
-  convertHover = (hover: vscode.Hover): Hover => {
+  convertHover = (hover: vscode.Hover): lsp.Hover => {
     const mergedString = new types.MarkdownString();
     for (const content of hover.contents) {
-      if (MarkedString.is(content)) {
+      if (lsp.MarkedString.is(content)) {
         if (typeof content === "string") {
           mergedString.appendText(content);
         } else {
@@ -482,34 +436,33 @@ export class LspConverter {
     }
     return {
       contents: mergedString.value,
-      range: hover.range ? LspConverter.convertRange(hover.range) : undefined,
+      range: hover.range ? TSLspConverter.convertRange(hover.range) : undefined,
     };
   };
 
   convertSymbol = <T extends vscode.SymbolInformation | vscode.DocumentSymbol>(
     symbol: T
-  ): T extends vscode.SymbolInformation ? SymbolInformation : DocumentSymbol => {
+  ): T extends vscode.SymbolInformation ? lsp.SymbolInformation : lsp.DocumentSymbol => {
     if ("range" in symbol) {
       return {
         name: symbol.name,
         detail: symbol.detail,
-        kind: (symbol.kind + 1) as SymbolKind,
-        range: LspConverter.convertRange(symbol.range),
-        selectionRange: LspConverter.convertRange(symbol.selectionRange),
+        kind: (symbol.kind + 1) as lsp.SymbolKind,
+        range: TSLspConverter.convertRange(symbol.range),
+        selectionRange: TSLspConverter.convertRange(symbol.selectionRange),
         tags: symbol.tags,
         // @ts-ignore
         deprecated: symbol.deprecated,
         children:
           symbol.children &&
-          this.server.clientCapabilities.textDocument?.documentSymbol
-            ?.hierarchicalDocumentSymbolSupport
+          this.clientCapabilities.textDocument?.documentSymbol?.hierarchicalDocumentSymbolSupport
             ? symbol.children.map(this.convertSymbol)
             : undefined,
       } as any;
     } else {
       return {
         name: symbol.name,
-        kind: (symbol.kind + 1) as SymbolKind,
+        kind: (symbol.kind + 1) as lsp.SymbolKind,
         tags: symbol.tags,
         // @ts-ignore
         deprecated: symbol.deprecated,
@@ -519,7 +472,7 @@ export class LspConverter {
     }
   };
 
-  convertMarkupfromLsp = (doc: string | MarkupContent): string | vscode.MarkdownString => {
+  convertMarkupfromLsp = (doc: string | lsp.MarkupContent): string | vscode.MarkdownString => {
     if (typeof doc === "string") {
       return doc;
     }
@@ -531,31 +484,31 @@ export class LspConverter {
 
   convertMarkupToLsp = (
     doc: string | vscode.MarkdownString
-  ): string | MarkupContent | undefined => {
+  ): string | lsp.MarkupContent | undefined => {
     // empty content should be undefined
     if (typeof doc === "string") {
       return doc || undefined;
     } else {
       return doc.value
         ? {
-            kind: MarkupKind.Markdown,
+            kind: lsp.MarkupKind.Markdown,
             value: doc.value,
           }
         : undefined;
     }
   };
 
-  convertSignatureInfoFromLsp = (info: SignatureInformation): vscode.SignatureInformation => {
+  convertSignatureInfoFromLsp = (info: lsp.SignatureInformation): vscode.SignatureInformation => {
     const result = deepClone(info) as vscode.SignatureInformation;
     if (result.documentation) {
       result.documentation = this.convertMarkupfromLsp(
-        result.documentation as string | MarkupContent
+        result.documentation as string | lsp.MarkupContent
       );
     }
     for (const param of result.parameters || []) {
       if (param.documentation) {
         param.documentation = this.convertMarkupfromLsp(
-          param.documentation as string | MarkupContent
+          param.documentation as string | lsp.MarkupContent
         );
       }
       param.documentation;
@@ -563,7 +516,7 @@ export class LspConverter {
     return result;
   };
 
-  convertSignatureInfoToLsp = (info: vscode.SignatureInformation): SignatureInformation => {
+  convertSignatureInfoToLsp = (info: vscode.SignatureInformation): lsp.SignatureInformation => {
     return {
       label: info.label,
       activeParameter: info.activeParameter,
@@ -577,22 +530,25 @@ export class LspConverter {
     };
   };
 
-  convertCallHierarcgyItem = (item: vscode.CallHierarchyItem, data?: any): CallHierarchyItem => {
+  convertCallHierarcgyItem = (
+    item: vscode.CallHierarchyItem,
+    data?: any
+  ): lsp.CallHierarchyItem => {
     return {
       uri: item.uri.toString(),
-      kind: (item.kind + 1) as SymbolKind,
+      kind: (item.kind + 1) as lsp.SymbolKind,
       name: item.name,
-      range: LspConverter.convertRange(item.range),
-      selectionRange: LspConverter.convertRange(item.selectionRange),
+      range: TSLspConverter.convertRange(item.range),
+      selectionRange: TSLspConverter.convertRange(item.selectionRange),
       detail: item.detail,
       tags: item.tags as any,
       data,
     };
   };
 
-  convertInlayHint = (hint: vscode.InlayHint): InlayHint => {
+  convertInlayHint = (hint: vscode.InlayHint): lsp.InlayHint => {
     return {
-      position: LspConverter.convertPosition(hint.position),
+      position: TSLspConverter.convertPosition(hint.position),
       label:
         typeof hint.label === "string"
           ? hint.label
@@ -602,39 +558,39 @@ export class LspConverter {
               location: convertOrFalsy(l.location, this.convertLocation),
               command: l.command ? { ...l.command } : undefined,
             })),
-      kind: hint.kind as InlayHintKind,
+      kind: hint.kind as lsp.InlayHintKind,
       tooltip: convertOrFalsy(hint.tooltip, this.convertMarkupToLsp),
       paddingLeft: hint.paddingLeft,
       paddingRight: hint.paddingRight,
-      textEdits: mapOrFalsy(hint.textEdits, LspConverter.convertTextEdit),
+      textEdits: mapOrFalsy(hint.textEdits, TSLspConverter.convertTextEdit),
     };
   };
 
-  convertIncomingCall = (item: vscode.CallHierarchyIncomingCall): CallHierarchyIncomingCall => {
+  convertIncomingCall = (item: vscode.CallHierarchyIncomingCall): lsp.CallHierarchyIncomingCall => {
     return {
       from: this.convertCallHierarcgyItem(item.from),
-      fromRanges: item.fromRanges.map(LspConverter.convertRange),
+      fromRanges: item.fromRanges.map(TSLspConverter.convertRange),
     };
   };
 
-  convertOutgoingCall = (item: vscode.CallHierarchyOutgoingCall): CallHierarchyOutgoingCall => {
+  convertOutgoingCall = (item: vscode.CallHierarchyOutgoingCall): lsp.CallHierarchyOutgoingCall => {
     return {
       to: this.convertCallHierarcgyItem(item.to),
-      fromRanges: item.fromRanges.map(LspConverter.convertRange),
+      fromRanges: item.fromRanges.map(TSLspConverter.convertRange),
     };
   };
 
-  convertFoldingRange = (range: vscode.FoldingRange): FoldingRange => {
-    let kind: FoldingRangeKind | undefined;
+  convertFoldingRange = (range: vscode.FoldingRange): lsp.FoldingRange => {
+    let kind: lsp.FoldingRangeKind | undefined;
     switch (range.kind) {
       case types.FoldingRangeKind.Comment:
-        kind = FoldingRangeKind.Comment;
+        kind = lsp.FoldingRangeKind.Comment;
         break;
       case types.FoldingRangeKind.Region:
-        kind = FoldingRangeKind.Region;
+        kind = lsp.FoldingRangeKind.Region;
         break;
       case types.FoldingRangeKind.Imports:
-        kind = FoldingRangeKind.Imports;
+        kind = lsp.FoldingRangeKind.Imports;
         break;
       default:
         break;
@@ -646,17 +602,17 @@ export class LspConverter {
     };
   };
 
-  convertSelectionRange = (range: vscode.SelectionRange): SelectionRange => {
+  convertSelectionRange = (range: vscode.SelectionRange): lsp.SelectionRange => {
     return {
-      range: LspConverter.convertRange(range.range),
+      range: TSLspConverter.convertRange(range.range),
       parent: convertOrFalsy(range.parent, this.convertSelectionRange),
     };
   };
 
-  convertCodeLens = (lens: vscode.CodeLens, data?: any): CodeLens => {
+  convertCodeLens = (lens: vscode.CodeLens, data?: any): lsp.CodeLens => {
     // TODO: arguments may not be able to be serialized
     return {
-      range: LspConverter.convertRange(lens.range),
+      range: TSLspConverter.convertRange(lens.range),
       command: convertOrFalsy(lens.command, (c) => ({
         command: c.command,
         title: c.title,
@@ -666,7 +622,7 @@ export class LspConverter {
     };
   };
 
-  convertSemanticTokens = (tokens: vscode.SemanticTokens): SemanticTokens => {
+  convertSemanticTokens = (tokens: vscode.SemanticTokens): lsp.SemanticTokens => {
     return { data: Array.from(tokens.data), resultId: tokens.resultId };
   };
 }

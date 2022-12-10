@@ -1,4 +1,4 @@
-import { Emitter } from "vscode-languageserver";
+import { Emitter } from "vscode-languageserver-protocol";
 
 export function createExtensionsShim() {
   return {
