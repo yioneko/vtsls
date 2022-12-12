@@ -16,6 +16,7 @@ async function build({ watch }) {
     bundle: true,
     outfile: path.resolve(outDir, "main.js"),
     format: "cjs",
+    external: ["./node_modules/*"],
     target: "node14",
     platform: "node",
     sourcemap: "external",

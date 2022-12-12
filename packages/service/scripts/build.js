@@ -10,22 +10,31 @@ const srcDir = path.resolve(__dirname, "../src");
  * @param args {{ watch: boolean }}
  */
 async function build({ watch }) {
-  return esbuild.build({
+  const esmOpts = {
     entryPoints: [srcDir],
     tsconfig: path.resolve(__dirname, "../tsconfig.build.json"),
-    outfile: path.resolve(outDir, "index.js"),
+    outfile: path.resolve(outDir, "index.mjs"),
     bundle: true,
-    format: "cjs",
+    format: "esm",
     target: "node14",
     platform: "node",
+    external: ["./node_modules/*"],
     watch,
+  };
+  await esbuild.build(esmOpts);
+  await esbuild.build({
+    ...esmOpts,
+    outfile: path.resolve(outDir, "index.js"),
+    format: "cjs",
+    define: { "import.meta.url": "importMetaUrl" },
+    inject: [path.resolve(__dirname, "cjs_shims.js")],
   });
 }
 
 if (require.main === module) {
   const args = process.argv.slice(2);
 
-  const extPath = path.resolve(__dirname, "../typescript-language-features");
+  const extPath = path.resolve(__dirname, "../src/typescript-language-features");
   fs.stat(extPath, async (err, stat) => {
     await new Promise((resolve) => {
       if (err || !stat.isDirectory()) {

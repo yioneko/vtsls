@@ -3,13 +3,13 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 /* eslint-disable */
-import { onCaseInsensitiveFileSystem } from "src/utils/fs";
 import * as vscode from "vscode";
 import { URI } from "vscode-uri";
 
 import { equals } from "../utils/objects";
 import { ResourceMap } from "../utils/resourceMap";
 import { generateUuid } from "../utils/uuid";
+import { onCaseInsensitiveFileSystem } from "../utils/fs";
 
 export class Disposable {
 

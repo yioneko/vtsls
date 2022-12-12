@@ -14,7 +14,7 @@ updates:
       - dependency-name: "jsonc-parser"
       - dependency-name: semver
       - dependency-name: typescript
-      - dependency-name: "@types/*"
+      - dependency-name: "@types/semver"
     open-pull-requests-limit: 5
     schedule:
       interval: weekly
@@ -28,6 +28,8 @@ updates:
 
   - directory: /
     package-ecosystem: npm
+    ignore:
+      - dependency-name: "@types/node"
     schedule:
       interval: weekly
 

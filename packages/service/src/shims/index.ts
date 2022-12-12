@@ -1,6 +1,7 @@
 import * as os from "os";
-import { TSLanguageServiceDelegate } from "src/languageService";
+import { Emitter } from "vscode-languageserver-protocol";
 import { URI, Utils } from "vscode-uri";
+import { TSLanguageServiceDelegate } from "../languageService";
 import { TSLanguageServiceOptions } from "../types";
 import { CommandsShimService } from "./commands";
 import { ConfigurationShimService } from "./configuration";
@@ -11,7 +12,6 @@ import { createL10nShim } from "./l10n";
 import { LanguageFeaturesShimService } from "./languageFeatures";
 import { WindowShimService } from "./window";
 import { WorkspaceShimService } from "./workspace";
-import { Emitter } from "vscode-languageserver-protocol";
 
 // in vscode namespace
 export let languages: typeof import("vscode").languages;
@@ -21,10 +21,10 @@ export let extensions: typeof import("vscode").extensions;
 export let window: typeof import("vscode").window;
 export let env: typeof import("vscode").env;
 export let workspace: typeof import("vscode").workspace;
+export { CancellationTokenSource } from "vscode-languageserver-protocol";
 export * from "./types";
 export const EventEmitter = Emitter;
 export const Uri = Object.assign({}, URI, Utils);
-export { CancellationTokenSource } from "vscode-languageserver-protocol";
 
 export function initializeShimServices(
   initOptions: TSLanguageServiceOptions,

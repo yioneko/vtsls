@@ -6,6 +6,7 @@
   "engines": {
     "node": ">=14"
   },
+  "main": "./dist/main.js",
   "bin": {
     "vtsls": "bin/vtsls.js"
   },
@@ -26,9 +27,9 @@
     "build:watch": "node build.js watch",
     "type-check": "tsc --noEmit"
   },
-  "main": "./dist/main.js",
   "repository": {
     "type": "git",
-    "url": "https://github.com/yioneko/vtsls.git"
+    "url": "https://github.com/yioneko/vtsls.git",
+    "directory": "packages/server"
   }
 }

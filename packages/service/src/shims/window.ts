@@ -1,6 +1,6 @@
-import { TSLanguageServiceDelegate } from "src/languageService";
 import * as vscode from "vscode";
 import * as lsp from "vscode-languageserver-protocol";
+import { TSLanguageServiceDelegate } from "../languageService";
 import { isPrimitive } from "../utils/types";
 
 export class WindowShimService {

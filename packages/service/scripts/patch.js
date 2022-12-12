@@ -24,7 +24,7 @@ async function getPatchFiles(patchesPath) {
  */
 async function checkTsExtDir(targetDir) {
   const cpTarget =
-    targetDir || path.resolve(__dirname, "../typescript-language-features");
+    targetDir || path.resolve(__dirname, "../src/typescript-language-features");
   try {
     const stat = await fs.stat(cpTarget);
     if (stat.isDirectory()) {

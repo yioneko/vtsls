@@ -1,6 +1,6 @@
 import {
   codeActionKinds,
-  Commands,
+  commands,
   completionTriggerCharacters,
   onTypeFormatFirstTriggerCharacter,
   onTypeFormatMoreTriggerCharacter,
@@ -61,7 +61,7 @@ export function getTsLspDefaultCapabilities(): ServerCapabilities {
     foldingRangeProvider: true,
     selectionRangeProvider: true,
     executeCommandProvider: {
-      commands: Commands,
+      commands,
     },
     callHierarchyProvider: true,
     linkedEditingRangeProvider: false,

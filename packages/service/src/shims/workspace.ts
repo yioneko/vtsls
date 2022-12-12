@@ -1,5 +1,5 @@
 import * as path from "path";
-import { TSLanguageServiceDelegate } from "src/languageService";
+import { TSLanguageServiceDelegate } from "../languageService";
 import * as vscode from "vscode";
 import * as lsp from "vscode-languageserver-protocol";
 import { TextDocument } from "vscode-languageserver-textdocument";

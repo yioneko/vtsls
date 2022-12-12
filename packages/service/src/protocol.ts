@@ -1,6 +1,6 @@
 import { CodeActionKind } from "vscode-languageserver-protocol";
 
-// from jsdoc completion
+// "*" from jsdoc completion
 export const completionTriggerCharacters = [".", '"', "'", "`", "/", "@", "<", "#", " ", "*"];
 
 export const signatureHelpTriggerCharacters = ["(", ",", "<"];
@@ -41,7 +41,7 @@ export const semanticTokenModifiers = [
   "defaultLibrary",
 ];
 
-export const Commands = [
+export const commands = [
   "javascript.reloadProjects",
   "typescript.reloadProjects",
   "typescript.goToProjectConfig",

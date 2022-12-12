@@ -1,8 +1,17 @@
 diff --git a/src/tsServer/versionProvider.electron.ts b/src/tsServer/versionProvider.electron.ts
-index dca0fb2..00d3c7c 100644
+index dca0fb2..7891dd9 100644
 --- a/src/tsServer/versionProvider.electron.ts
 +++ b/src/tsServer/versionProvider.electron.ts
-@@ -78,14 +78,16 @@ export class DiskTypeScriptVersionProvider implements ITypeScriptVersionProvider
+@@ -10,6 +10,8 @@ import API from '../utils/api';
+ import { TypeScriptServiceConfiguration } from '../utils/configuration';
+ import { RelativeWorkspacePathResolver } from '../utils/relativePathResolver';
+ import { ITypeScriptVersionProvider, TypeScriptVersion, TypeScriptVersionSource } from './versionProvider';
++import { createRequire } from 'module';
++const req = createRequire(import.meta.url);
+ 
+ 
+ export class DiskTypeScriptVersionProvider implements ITypeScriptVersionProvider {
+@@ -78,14 +80,16 @@ export class DiskTypeScriptVersionProvider implements ITypeScriptVersionProvider
  
  	private getContributedVersion(source: TypeScriptVersionSource, extensionId: string, pathToTs: readonly string[]): TypeScriptVersion | undefined {
  		try {
@@ -11,7 +20,7 @@ index dca0fb2..00d3c7c 100644
 -				const serverPath = path.join(extension.extensionPath, ...pathToTs, 'typescript', 'lib', 'tsserver.js');
 +			// const extension = vscode.extensions.getExtension(extensionId);
 +			// if (extension) {
-+				const tsPath = require.resolve("typescript", { paths: [__dirname] })
++				const tsPath = req.resolve("typescript", { paths: [import.meta.url] })
 +				const serverPath = path.join(path.dirname(tsPath), 'tsserver.js');
 +
  				const bundledVersion = new TypeScriptVersion(source, serverPath, DiskTypeScriptVersionProvider.getApiVersion(serverPath), '');

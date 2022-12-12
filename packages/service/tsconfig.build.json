@@ -1,9 +1,10 @@
 {
   "extends": "./tsconfig.base.json",
   "compilerOptions": {
+    "outDir": "./dist",
     "paths": {
       "@vsc-ts/*": ["typescript-language-features/src/*"],
-      "vscode": ["src/shims"]
+      "vscode": ["shims"]
     }
   }
 }

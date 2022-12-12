@@ -1,7 +1,7 @@
-import { TSLanguageServiceDelegate } from "src/languageService";
 import * as vscode from "vscode";
 import * as lsp from "vscode-languageserver-protocol";
 import { URI } from "vscode-uri";
+import { TSLanguageServiceDelegate } from "../languageService";
 import { RestrictedCache } from "../utils/cache";
 import { TSLspConverter } from "../utils/converter";
 import { onCaseInsensitiveFileSystem } from "../utils/fs";
