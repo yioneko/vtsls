@@ -1,5 +1,8 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": ["config:base"],
-  "ignoreDeps": ["jsonc-parser", "semver", "@types/semver", "@types/node"]
+  "ignoreDeps": ["jsonc-parser", "semver", "@types/semver", "@types/node"],
+  "git-submodules": {
+    "enabled": true
+  }
 }
