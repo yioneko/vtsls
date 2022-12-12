@@ -1,4 +1,4 @@
-import { createTSLanguageService, TSLanguageService } from "@vtsls/typescript-lanuguage-service";
+import { createTSLanguageService, TSLanguageService } from "@vtsls/language-service";
 import {
   ConfigurationRequest,
   Connection,

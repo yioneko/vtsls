@@ -8,7 +8,9 @@ Unlike other similar projects, this is implemented by filling VSCode APIs and ap
 
 ## Usage
 
-Install by `npm install -g vtsls`, then run `vtsls --stdio`. Requires `node >= 14`.
+**Notice**: The package has been renamed from `vtsls`.
+
+Install by `npm install -g @vtsls/language-server`, then run `vtsls --stdio`. Requires `node >= 14`.
 
 ## Supported LSP Features
 

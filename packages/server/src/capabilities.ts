@@ -8,7 +8,7 @@ import {
   semanticTokenTypes,
   signatureHelpReTriggerCharacters,
   signatureHelpTriggerCharacters,
-} from "@vtsls/typescript-lanuguage-service";
+} from "@vtsls/language-service";
 import { ServerCapabilities, TextDocumentSyncKind } from "vscode-languageserver/node";
 
 export function getTsLspDefaultCapabilities(): ServerCapabilities {
