@@ -4,7 +4,7 @@
 
 This is an LSP wrapper around [TypeScript extension bundled with VSCode](https://github.com/microsoft/vscode/tree/838b48504cd9a2338e2ca9e854da9cec990c4d57/extensions/typescript-language-features). All features and performance are nearly the same.
 
-This is **not a fork** of that extension unlike other similar projects. It is implemented by filling VSCode APIs and applying **minimal patches** over the extension to make it possible to **keep up with the upstream updates** and drastically reduce the burden of maintenance.
+Unlike other similar projects, this is implemented by filling VSCode APIs and applying **minimal patches** onto the extension to make it possible to **keep up with the upstream updates** and drastically reduce the burden of maintenance.
 
 ## Usage
 
@@ -131,25 +131,6 @@ Same as VSCode. The list below may not be complete.
 
 - Read TypeScript plugin from VSCode extensions
 - All the features not supported in upstream
-
-## Develop
-
-### Overview
-
-```bash
-git submodule update # fetch vscode submodule
-pnpm install
-
-pnpm patch-extension # copy typescript-language-features from vscode repo and apply patches to it
-
-pnpm build:watch # watching build, server output in dist/main.js
-```
-
-### Tips
-
-- By default sourcemap is emitted during build, launching server using `node --enable-source-maps dist/main.js` will give meaningful stack info on error.
-- A git repo will be initialized at the copied extension directory after `pnpm patch-extension` for convenient diffing and patch file generation.
-- Nearly all of the implementations of shims are modified (also simplified to reduce the bundle size) from VSCode source to match the API contract. Make sure the exported shims conforms to the [API document](https://code.visualstudio.com/api/references/vscode-api#languages).
 
 ## Similar Projects
 

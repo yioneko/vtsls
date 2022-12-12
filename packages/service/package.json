@@ -1,7 +1,7 @@
 {
-  "name": "@vtsls/typescript-lanuguage-service",
+  "name": "@vtsls/lanuguage-service",
   "description": "LSP wrapper for typescript extension of vscode",
-  "version": "0.0.5",
+  "version": "0.1.0",
   "license": "MIT",
   "engines": {
     "node": ">=14"
