@@ -16,7 +16,7 @@
   "dependencies": {
     "vscode-languageserver": "^8.0.2",
     "vscode-uri": "^3.0.3",
-    "@vtsls/language-service": "workspace:0.1.1"
+    "@vtsls/language-service": "workspace:0.1.2"
   },
   "devDependencies": {
     "esbuild": "^0.16.0"

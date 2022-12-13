@@ -51,10 +51,9 @@ function onServerInitialize(conn: Connection, params: InitializeParams) {
   }
 
   conn.onInitialized(() => {
+    bindServiceHandlers(conn, service);
     void initializeService();
   });
-
-  bindServiceHandlers(conn, service);
 
   return {
     capabilities: getTsLspDefaultCapabilities(),

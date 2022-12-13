@@ -622,13 +622,15 @@ export class LanguageFeaturesShimService extends LanguagesFeaturesRegistryServic
       this.$providers.completionItem
     );
 
-    const ctx = Object.assign(
-      {
-        triggerKind: lsp.CompletionTriggerKind.Invoked as lsp.CompletionTriggerKind,
-        triggerCharacter: "",
-      },
-      params.context ?? {}
-    );
+    const ctx = params.context
+      ? {
+          triggerKind: params.context.triggerKind - 1,
+          triggerCharacter: params.context.triggerCharacter,
+        }
+      : {
+          triggerKind: types.CompletionTriggerKind.Invoke,
+          triggerCharacter: "",
+        };
     const pos = types.Position.of(params.position);
     const wordRange = doc.getWordRangeAtPosition(pos);
     const inWord = wordRange?.contains(new types.Position(pos.line, pos.character - 1));
@@ -636,10 +638,12 @@ export class LanguageFeaturesShimService extends LanguagesFeaturesRegistryServic
     const results = await Promise.all(
       providers.map(async ({ id, provider, args: { triggerCharacters } }) => {
         const checkTriggerCharacter =
-          ctx.triggerKind === lsp.CompletionTriggerKind.TriggerCharacter &&
-          ctx.triggerCharacter &&
-          triggerCharacters.includes(ctx.triggerCharacter);
-        if (!checkTriggerCharacter && !inWord) {
+          ctx.triggerCharacter && triggerCharacters.includes(ctx.triggerCharacter);
+        if (
+          ctx.triggerKind === types.CompletionTriggerKind.TriggerCharacter &&
+          !checkTriggerCharacter &&
+          !inWord // by default, identifier chars should be also considered as trigger char
+        ) {
           return;
         }
         const items = await provider.provideCompletionItems(doc, pos, token, ctx);
@@ -1045,7 +1049,10 @@ export class LanguageFeaturesShimService extends LanguagesFeaturesRegistryServic
       this.$providers.rename
     );
     if (!provider.prepareRename) {
-      return new lsp.ResponseError(lsp.ErrorCodes.MethodNotFound, "cannot find provider");
+      throw new lsp.ResponseError(
+        lsp.ErrorCodes.MethodNotFound,
+        "cannot find provider for prepareRename"
+      );
     }
     const result = await provider.prepareRename(doc, types.Position.of(params.position), token);
     if (result) {
@@ -1123,10 +1130,8 @@ export class LanguageFeaturesShimService extends LanguagesFeaturesRegistryServic
     return null;
   }
 
-  async incomingCalls(
-    { item }: lsp.CallHierarchyIncomingCallsParams,
-    token: lsp.CancellationToken
-  ) {
+  async incomingCalls(params: lsp.CallHierarchyIncomingCallsParams, token: lsp.CancellationToken) {
+    const { item } = params;
     const cached = this.callHierarchyCache.resolve(item);
     if (!cached) {
       return null;
@@ -1144,10 +1149,8 @@ export class LanguageFeaturesShimService extends LanguagesFeaturesRegistryServic
     return null;
   }
 
-  async outgoingCalls(
-    { item }: lsp.CallHierarchyOutgoingCallsParams,
-    token: lsp.CancellationToken
-  ) {
+  async outgoingCalls(params: lsp.CallHierarchyOutgoingCallsParams, token: lsp.CancellationToken) {
+    const { item } = params;
     const cached = this.callHierarchyCache.resolve(item);
     if (!cached) {
       return null;

@@ -3,7 +3,6 @@ import { EditorSettings } from "typescript/lib/tsserverlibrary";
 import * as vscode from "vscode";
 import { Emitter } from "vscode-languageserver-protocol";
 import { TSLanguageServiceConfig } from "../types";
-import { isTypeScriptDocument } from "../utils/language";
 
 function lookUp(tree: any, key: string | undefined) {
   if (key) {
@@ -60,8 +59,8 @@ export class ConfigurationShimService {
 
   constructor() {
     const contributed = pkgContributes.configuration.properties || {};
-    for (const [key, val] of Object.entries<any>(contributed)) {
-      let defaultVal = val.default;
+    for (const [key, val] of Object.entries(contributed)) {
+      let defaultVal = "default" in val ? val.default : undefined;
       if (!defaultVal) {
         if (val.type === "string") {
           defaultVal = "";
@@ -122,10 +121,5 @@ export class ConfigurationShimService {
 
   $changeConfiguration(config: TSLanguageServiceConfig) {
     recursiveUpdate(this.workspaceConfig, config);
-  }
-
-  $getVtslsDocConfig(doc: vscode.TextDocument, section?: string) {
-    const languageId = isTypeScriptDocument(doc) ? "typescript" : "javascript";
-    return this.getConfiguration(`vtsls.${languageId}${section ? `.${section}` : ""}`);
   }
 }

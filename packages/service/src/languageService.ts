@@ -164,7 +164,9 @@ export function createTSLanguageService(initOptions: TSLanguageServiceOptions) {
     },
     dispose() {
       disposeVsTsExtension();
-      shims.context.subscriptions.forEach((d) => d.dispose());
+      shims.context.subscriptions.forEach((d) => {
+        d.dispose();
+      });
     },
     changeConfiguration(params: lsp.DidChangeConfigurationParams) {
       // set initialized after didChangeConfiguration

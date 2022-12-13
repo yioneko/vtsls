@@ -87,7 +87,19 @@ export function getTsLspDefaultCapabilities(): ServerCapabilities {
         supported: true,
         changeNotifications: true,
       },
-      fileOperations: undefined,
+      fileOperations: {
+        didRename: {
+          filters: [
+            {
+              scheme: "file",
+              pattern: {
+                glob: "**/*.{ts,tsx,js,jsx}",
+                matches: "file",
+              },
+            },
+          ],
+        },
+      },
     },
   };
 }
