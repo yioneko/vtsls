@@ -23,11 +23,11 @@ importers:
       vscode-languageserver: ^8.0.2
       vscode-uri: ^3.0.3
     dependencies:
+      '@vtsls/language-service': link:../service
+      vscode-languageserver: 8.0.2
       vscode-uri: 3.0.6
     devDependencies:
-      '@vtsls/language-service': link:../service
       esbuild: 0.16.4
-      vscode-languageserver: 8.0.2
 
   packages/service:
     specifiers:
@@ -39,20 +39,18 @@ importers:
       typescript: ^4.9.4
       vscode-languageserver-protocol: ^3.17.2
       vscode-languageserver-textdocument: ^1.0.7
-      vscode-languageserver-types: ^3.17.2
       vscode-uri: ^3.0.3
     dependencies:
       '@vscode/l10n': 0.0.10
       jsonc-parser: 3.2.0
       semver: 5.5.1
       typescript: 4.9.4
+      vscode-languageserver-protocol: 3.17.2
       vscode-languageserver-textdocument: 1.0.7
       vscode-uri: 3.0.6
     devDependencies:
       '@types/semver': 5.5.0
       esbuild: 0.16.4
-      vscode-languageserver-protocol: 3.17.2
-      vscode-languageserver-types: 3.17.2
 
 packages:
 
@@ -1208,14 +1206,12 @@ packages:
   /vscode-jsonrpc/8.0.2:
     resolution: {integrity: sha512-RY7HwI/ydoC1Wwg4gJ3y6LpU9FJRZAUnTYMXthqhFXXu77ErDd/xkREpGuk4MyYkk4a+XDWAMqe0S3KkelYQEQ==}
     engines: {node: '>=14.0.0'}
-    dev: true
 
   /vscode-languageserver-protocol/3.17.2:
     resolution: {integrity: sha512-8kYisQ3z/SQ2kyjlNeQxbkkTNmVFoQCqkmGrzLH6A9ecPlgTbp3wDTnUNqaUxYr4vlAcloxx8zwy7G5WdguYNg==}
     dependencies:
       vscode-jsonrpc: 8.0.2
       vscode-languageserver-types: 3.17.2
-    dev: true
 
   /vscode-languageserver-textdocument/1.0.7:
     resolution: {integrity: sha512-bFJH7UQxlXT8kKeyiyu41r22jCZXG8kuuVVA33OEJn1diWOZK5n8zBSPZFHVBOu8kXZ6h0LIRhf5UnCo61J4Hg==}
@@ -1223,14 +1219,13 @@ packages:
 
   /vscode-languageserver-types/3.17.2:
     resolution: {integrity: sha512-zHhCWatviizPIq9B7Vh9uvrH6x3sK8itC84HkamnBWoDFJtzBf7SWlpLCZUit72b3os45h6RWQNC9xHRDF8dRA==}
-    dev: true
 
   /vscode-languageserver/8.0.2:
     resolution: {integrity: sha512-bpEt2ggPxKzsAOZlXmCJ50bV7VrxwCS5BI4+egUmure/oI/t4OlFzi/YNtVvY24A2UDOZAgwFGgnZPwqSJubkA==}
     hasBin: true
     dependencies:
       vscode-languageserver-protocol: 3.17.2
-    dev: true
+    dev: false
 
   /vscode-uri/3.0.6:
     resolution: {integrity: sha512-fmL7V1eiDBFRRnu+gfRWTzyPpNIHJTc4mWnFkwBUmO9U3KPgJAmTx7oxi2bl/Rh6HLdU7+4C9wlj0k2E4AdKFQ==}

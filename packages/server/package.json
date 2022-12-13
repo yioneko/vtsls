@@ -14,13 +14,12 @@
     "language-server-protocol"
   ],
   "dependencies": {
-    "vscode-uri": "^3.0.3"
-  },
-  "devDependencies": {
-    "esbuild": "^0.16.0",
     "vscode-languageserver": "^8.0.2",
     "vscode-uri": "^3.0.3",
     "@vtsls/language-service": "workspace:0.1.1"
+  },
+  "devDependencies": {
+    "esbuild": "^0.16.0"
   },
   "scripts": {
     "build": "node build.js",
