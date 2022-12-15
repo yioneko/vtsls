@@ -14,13 +14,13 @@ Install by `npm install -g @vtsls/language-server`, then run `vtsls --stdio`. Re
 
 ## Supported LSP Features
 
-See [available server capabilities](./src/utils/capabilities.ts).
+See [available server capabilities](./packages/server/src/capabilities.ts).
 
-## Clients
+## Configuration
 
-All the LSP compliant clients should be able to communiate with it out of box. No special `intializationOptions` requirement in the first `initialize` request and also the server doesn't use it currently. To configure the server, just use the `workspace/didChangeConfiguration` notification. The schema of settings and defaults shoulde be the exactly the same as VSCode's.
+Almost the same as the original VSCode extension, with a few additional settings excluded for this server.
 
-For some methods like `completionItem/resolve`, `codeAction/resolve`, `callHierarchy/incomingCalls` which should come after a previous "preparation" request to split the whole function into two round trips, the client should at least support `LSP >= 3.16` with `dataSupport` in client capabilities.
+See the configuration schema [here](./packages/service/configuration.schema.json).
 
 ## Commands
 
@@ -73,22 +73,6 @@ For some methods like `completionItem/resolve`, `codeAction/resolve`, `callHiera
   command: "typescript.tsserverRequest",
   arguments: [RequestType, args, config]
 } => Response
-```
-
-## Configuration
-
-Almost the same as [TypeScript extension of VSCode](https://github.com/microsoft/vscode/blob/838b48504cd9a2338e2ca9e854da9cec990c4d57/extensions/typescript-language-features/package.json#L147), with a few additional settings excluded for this server.
-
-`* => javascript|typescript`
-
-```typescript
-"vtsls.*.format.baseIndentSize": number;
-"vtsls.*.format.indentSize": number;
-"vtsls.*.format.tabSize": number;
-"vtsls.*.format.newLineCharacter": string;
-"vtsls.*.format.convertTabsToSpaces": boolean;
-"vtsls.*.format.indentStyle": 0 | 1 | 2; // None = 0 Block = 1 Smart = 2
-"vtsls.*.format.trimTrailingWhitespace": boolean;
 ```
 
 ## Code Actions

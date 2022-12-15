@@ -31,7 +31,8 @@
     "build": "node scripts/build.js && tsc",
     "build:watch": "node scripts/build.js watch & tsc --watch",
     "type-check": "tsc",
-    "patch-extension": "node scripts/patch.js"
+    "patch-extension": "node scripts/patch.js",
+    "gen-schema": "node scripts/genConfigSchema.js"
   },
   "repository": {
     "type": "git",

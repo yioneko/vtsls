@@ -910,10 +910,7 @@ export class LanguageFeaturesShimService extends LanguagesFeaturesRegistryServic
     if (result) {
       // preserve data and command
       // the codeAction instance is mutated in cache
-      const converted = this.delegate.converter.convertCodeAction(
-        result,
-        item.data
-      ) as lsp.CodeAction;
+      const converted = this.delegate.converter.convertCodeAction(result, item.data);
       converted.command = item.command;
       return converted;
     } else {

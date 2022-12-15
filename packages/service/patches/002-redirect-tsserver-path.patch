@@ -20,7 +20,7 @@ index dca0fb2..7891dd9 100644
 -				const serverPath = path.join(extension.extensionPath, ...pathToTs, 'typescript', 'lib', 'tsserver.js');
 +			// const extension = vscode.extensions.getExtension(extensionId);
 +			// if (extension) {
-+				const tsPath = req.resolve("typescript", { paths: [import.meta.url] })
++				const tsPath = req.resolve("typescript", { paths: [new URL(import.meta.url).pathname] })
 +				const serverPath = path.join(path.dirname(tsPath), 'tsserver.js');
 +
  				const bundledVersion = new TypeScriptVersion(source, serverPath, DiskTypeScriptVersionProvider.getApiVersion(serverPath), '');
