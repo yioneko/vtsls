@@ -10,13 +10,14 @@ const srcDir = path.resolve(__dirname, "./src");
  */
 async function build({ watch }) {
   const pkgJson = await fs.promises.readFile(path.resolve(__dirname, "./package.json"), "utf8");
-  const { version } = JSON.parse(pkgJson);
+  const { version, dependencies = [] } = JSON.parse(pkgJson);
   return esbuild.build({
     entryPoints: [srcDir],
     bundle: true,
     outfile: path.resolve(outDir, "main.js"),
     format: "cjs",
-    external: ["./node_modules/*"],
+    // TODO: peerDependencies
+    external: Object.keys(dependencies).flatMap((d) => [d, `${d}/*`]),
     target: "node14",
     platform: "node",
     sourcemap: "external",

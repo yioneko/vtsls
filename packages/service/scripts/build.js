@@ -10,6 +10,9 @@ const srcDir = path.resolve(__dirname, "../src");
  * @param args {{ watch: boolean }}
  */
 async function build({ watch }) {
+  const pkgJson = await fs.promises.readFile(path.resolve(__dirname, "../package.json"), "utf8");
+  const { dependencies = [] } = JSON.parse(pkgJson);
+
   const esmOpts = {
     entryPoints: [srcDir],
     tsconfig: path.resolve(__dirname, "../tsconfig.build.json"),
@@ -18,7 +21,7 @@ async function build({ watch }) {
     format: "esm",
     target: "node14",
     platform: "node",
-    external: ["./node_modules/*"],
+    external: Object.keys(dependencies).flatMap((d) => [d, `${d}/*`]),
     watch,
   };
   await esbuild.build(esmOpts);
