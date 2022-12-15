@@ -50,16 +50,15 @@ export class TSLspConverter {
   convertWorkspaceEdit = (edit: vscode.WorkspaceEdit): lsp.WorkspaceEdit => {
     const resouceOpKinds =
       this.clientCapabilities.workspace?.workspaceEdit?.resourceOperations || [];
-    const supportVersion = this.clientCapabilities.workspace?.workspaceEdit?.documentChanges;
 
     const docChanges: (lsp.CreateFile | lsp.RenameFile | lsp.DeleteFile | URI)[] = [];
     let hasResourceOp = false;
 
-    const textEditsByUri = new ResourceMap<[number | null, lsp.TextEdit[]]>(undefined, {
+    const textEditsByUri = new ResourceMap<lsp.TextEdit[]>(undefined, {
       onCaseInsensitiveFileSystem: onCaseInsensitiveFileSystem(),
     });
 
-    /* eslint-disable @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call */
+    /* eslint-disable @typescript-eslint/no-unsafe-call */
     // @ts-ignore private api
     for (const entry of edit._allEntries()) {
       if (entry._type === types.FileEditType.File) {
@@ -100,35 +99,34 @@ export class TSLspConverter {
       } else if (entry._type === types.FileEditType.Text) {
         // text edits
         if (textEditsByUri.has(entry.uri)) {
-          textEditsByUri.get(entry.uri)![1].push(TSLspConverter.convertTextEdit(entry.edit));
+          textEditsByUri.get(entry.uri)?.push(TSLspConverter.convertTextEdit(entry.edit));
         } else {
           // mark for future use
           docChanges.push(entry.uri);
-          textEditsByUri.set(entry.uri, [null, [TSLspConverter.convertTextEdit(entry.edit)]]);
+          textEditsByUri.set(entry.uri, [TSLspConverter.convertTextEdit(entry.edit)]);
         }
       } else {
         throw new Error(`Not supported type of edit entry: ${entry._type as string}`);
       }
     }
-    /* eslint-enable @typescript-eslint/no-unsafe-member-access */
+    /* eslint-enable @typescript-eslint/no-unsafe-call */
 
-    if (hasResourceOp || supportVersion) {
+    if (hasResourceOp) {
       return {
         documentChanges: docChanges.map((d) => {
           if (!URI.isUri(d)) {
             return d;
           } else {
-            const [version, edits] = textEditsByUri.get(d)!;
-            return { textDocument: { uri: d.toString(), version }, edits };
+            return {
+              textDocument: { uri: d.toString(), version: null },
+              edits: textEditsByUri.get(d)!,
+            };
           }
         }),
       };
     } else {
       const changes: lsp.WorkspaceEdit["changes"] = {};
-      for (const {
-        resource: uri,
-        value: [_, edits],
-      } of textEditsByUri.entries) {
+      for (const { resource: uri, value: edits } of textEditsByUri.entries) {
         changes[uri.toString()] = edits;
       }
       return { changes };
@@ -136,7 +134,6 @@ export class TSLspConverter {
   };
 
   convertTextDocuemntFromLsp = (textDocument: TextDocument): vscode.TextDocument => {
-    const that = this;
     const uri = URI.parse(textDocument.uri);
     const doc: vscode.TextDocument = {
       uri,
@@ -399,10 +396,10 @@ export class TSLspConverter {
     };
   };
 
-  convertCodeAction = (
-    action: vscode.Command | vscode.CodeAction,
+  convertCodeAction = <T extends vscode.Command | vscode.CodeAction>(
+    action: T,
     data?: any
-  ): lsp.Command | lsp.CodeAction => {
+  ): T extends vscode.Command ? lsp.Command : lsp.CodeAction => {
     if (action instanceof types.CodeAction) {
       const ac = action as vscode.CodeAction;
       const result: lsp.CodeAction = {
@@ -414,10 +411,9 @@ export class TSLspConverter {
         isPreferred: action.isPreferred,
         data,
       };
-      return result;
+      return result as any;
     } else {
-      const ac = action as vscode.Command;
-      return { ...ac, data };
+      return { ...action, data } as any;
     }
   };
 
@@ -451,8 +447,7 @@ export class TSLspConverter {
         range: TSLspConverter.convertRange(symbol.range),
         selectionRange: TSLspConverter.convertRange(symbol.selectionRange),
         tags: symbol.tags,
-        // @ts-ignore
-        deprecated: symbol.deprecated,
+        deprecated: symbol.tags?.includes(types.SymbolTag.Deprecated) ?? false,
         children:
           symbol.children &&
           this.clientCapabilities.textDocument?.documentSymbol?.hierarchicalDocumentSymbolSupport
@@ -464,8 +459,7 @@ export class TSLspConverter {
         name: symbol.name,
         kind: (symbol.kind + 1) as lsp.SymbolKind,
         tags: symbol.tags,
-        // @ts-ignore
-        deprecated: symbol.deprecated,
+        deprecated: symbol.tags?.includes(types.SymbolTag.Deprecated) ?? false,
         location: this.convertLocation(symbol.location),
         containerName: symbol.containerName,
       } as any;
@@ -610,14 +604,9 @@ export class TSLspConverter {
   };
 
   convertCodeLens = (lens: vscode.CodeLens, data?: any): lsp.CodeLens => {
-    // TODO: arguments may not be able to be serialized
     return {
       range: TSLspConverter.convertRange(lens.range),
-      command: convertOrFalsy(lens.command, (c) => ({
-        command: c.command,
-        title: c.title,
-        arguments: [data],
-      })),
+      command: lens.command,
       data,
     };
   };

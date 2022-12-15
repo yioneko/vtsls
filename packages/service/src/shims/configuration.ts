@@ -1,38 +1,37 @@
 import { contributes as pkgContributes } from "typescript-language-features/package.json";
 import { EditorSettings } from "typescript/lib/tsserverlibrary";
+import { isPrimitive } from "utils/types";
 import * as vscode from "vscode";
 import { Emitter } from "vscode-languageserver-protocol";
 import { TSLanguageServiceConfig } from "../types";
 
-function lookUp(tree: any, key: string | undefined) {
+function lookUp<T>(tree: any, key: string | undefined): T | undefined {
   if (key) {
     const parts = key.split(".");
     let node = tree;
-    for (let i = 0; node && i < parts.length; i++) {
+    for (let i = 0; node && !isPrimitive(node) && i < parts.length; i++) {
       node = node[parts[i]];
     }
-    return node;
+    return node as T | undefined;
   }
-  return tree;
+  return tree as T;
 }
 
-// TODO: ugly
 function update<T = any>(tree: any, key: string, val: T) {
   const parts = key.split(".");
   let node = tree;
-  for (let i = 0; i < parts.length - 1; i++) {
+  for (let i = 0; node && !isPrimitive(node) && i < parts.length - 1; i++) {
     if (!node[parts[i]]) {
       node[parts[i]] = {};
     }
     node = node[parts[i]];
   }
-  if (node && parts.length) {
+  if (node && !isPrimitive(node) && parts.length) {
     node[parts[parts.length - 1]] = val;
   }
 }
 
-// TODO: ugly
-function recursiveUpdate(cur: any, value: any) {
+function recursiveUpdate<T>(cur: any, value: T): T {
   if (Array.isArray(value) || typeof value !== "object" || value === null) {
     return value;
   }
@@ -43,7 +42,7 @@ function recursiveUpdate(cur: any, value: any) {
       cur[k] = recursiveUpdate(cur[k], v);
     }
   }
-  return cur;
+  return cur as T;
 }
 
 export interface VtslsConfig {

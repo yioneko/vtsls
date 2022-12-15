@@ -241,7 +241,7 @@ export class WorkspaceShimService {
     setTimeout(() => {
       handler.dispose();
       pending.open();
-    }, 2000);
+    }, 200);
 
     await pending.wait();
     // HACK: returns a pesudo doc here: the open is success, but client didn't trigger a didOpen notification
