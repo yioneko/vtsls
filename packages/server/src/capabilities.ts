@@ -70,7 +70,7 @@ export function getTsLspDefaultCapabilities(): ServerCapabilities {
         tokenTypes: semanticTokenTypes,
         tokenModifiers: semanticTokenModifiers,
       },
-      full: true,
+      full: false,
       range: true,
     },
     monikerProvider: false,

@@ -110,7 +110,7 @@ function bindServiceHandlers(conn: Connection, service: TSLanguageService) {
   conn.languages.callHierarchy.onIncomingCalls(service.incomingCalls);
   conn.languages.callHierarchy.onOutgoingCalls(service.outgoingCalls);
   conn.languages.inlayHint.on(service.inlayHint);
-  conn.languages.semanticTokens.on(service.semanticTokensFull);
+  // conn.languages.semanticTokens.on(service.semanticTokensFull);
   conn.languages.semanticTokens.onRange(service.semanticTokensRange);
   /* eslint-enable @typescript-eslint/no-misused-promises, @typescript-eslint/unbound-method*/
 }

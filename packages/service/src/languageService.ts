@@ -218,7 +218,8 @@ export function createTSLanguageService(initOptions: TSLanguageServiceOptions) {
     inlayHint: waitInit(l.inlayHint.bind(l)),
     codeLens: waitInit(l.codeLens.bind(l)),
     codeLensResolve: waitInit(l.codeLensResolve.bind(l)),
-    semanticTokensFull: waitInit(l.semanticTokensFull.bind(l)),
+    // TODO: the extension doesn't register document semantic tokens provider
+    // semanticTokensFull: waitInit(l.semanticTokensFull.bind(l)),
     semanticTokensRange: waitInit(l.semanticTokensRange.bind(l)),
   };
 
