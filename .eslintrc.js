@@ -8,7 +8,7 @@ module.exports = {
   parser: "@typescript-eslint/parser",
   parserOptions: {
     tsconfigRootDir: __dirname,
-    project: ["./packages/*/tsconfig.json"],
+    project: ["./packages/server/tsconfig.json", "./packages/service/tsconfig.lint.json"],
   },
   plugins: ["@typescript-eslint"],
   ignorePatterns: [
@@ -16,6 +16,7 @@ module.exports = {
     "packages/service/vscode",
     // TODO: specific rules for scripts file
     "packages/**/*.js",
+    "packages/service/vitest.config.ts",
     "**/dist",
     ".eslintrc.*",
   ],

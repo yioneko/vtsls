@@ -1,4 +1,4 @@
-import path from "node:path";
+import * as path from "node:path";
 import { URI } from "vscode-uri";
 import { createTSLanguageService, TSLanguageService } from "../";
 
@@ -7,7 +7,7 @@ export async function createTestService(workspacePath: string) {
     clientCapabilities: {},
     workspaceFolders: [{ name: "test", uri: URI.file(workspacePath).toString() }],
   });
-  service.initialize({
+  await service.initialize({
     typescript: {
       preferences: {
         includePackageJsonAutoImports: "off",

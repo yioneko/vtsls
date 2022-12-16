@@ -1,4 +1,4 @@
-import path from "node:path";
+import * as path from "node:path";
 import { afterAll, describe, expect, it } from "vitest";
 import * as lsp from "vscode-languageserver-protocol";
 import { CancellationToken } from "vscode-languageserver-protocol";
@@ -59,7 +59,7 @@ function abc(a) {}`
       expect.objectContaining({
         detail: "JSDoc comment",
         insertTextFormat: lsp.InsertTextFormat.Snippet,
-        insertText: '/**\n * $0\n * @param a ${1}\n */',
+        insertText: "/**\n * $0\n * @param a ${1}\n */",
       })
     );
 
