@@ -12,7 +12,8 @@
     "build:watch": "pnpm build && pnpm run -r --parallel build:watch",
     "lint": "pnpm eslint && pnpm type-check",
     "eslint": "eslint .",
-    "type-check": "pnpm run -r type-check"
+    "type-check": "pnpm run -r type-check",
+    "test": "pnpm run -r test"
   },
   "main": "./dist/main.js",
   "repository": {

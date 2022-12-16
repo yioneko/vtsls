@@ -63,7 +63,7 @@ function onServerInitialize(conn: Connection, params: InitializeParams) {
 
 function bindServiceHandlers(conn: Connection, service: TSLanguageService) {
   service.onLogMessage(
-    (params) => void conn.sendNotification(LogMessageNotification.method, params)
+    (params) => void conn.sendNotification(LogMessageNotification.type, params)
   );
   service.onShowMessage((params) => conn.sendRequest(ShowMessageRequest.type, params));
   service.onShowDocument(

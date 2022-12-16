@@ -110,7 +110,6 @@ Same as VSCode. The list below may not be complete.
 
 ## TODO
 
-- E2E test
 - Diagnostics polling
 
 ## Not Planned

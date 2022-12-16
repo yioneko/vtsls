@@ -25,12 +25,15 @@
   },
   "devDependencies": {
     "@types/semver": "^5.5.0",
-    "esbuild": "^0.16.0"
+    "esbuild": "^0.16.0",
+    "vitest": "^0.25.8"
   },
   "scripts": {
     "build": "node scripts/build.js && tsc",
     "build:watch": "node scripts/build.js watch & tsc --watch",
     "type-check": "tsc",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "patch-extension": "node scripts/patch.js",
     "gen-schema": "node scripts/genConfigSchema.js"
   },
