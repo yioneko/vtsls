@@ -1,5 +1,6 @@
 import { createTSLanguageService, TSLanguageService } from "@vtsls/language-service";
 import {
+  ClientCapabilities,
   ConfigurationRequest,
   Connection,
   createConnection,
@@ -37,11 +38,15 @@ function onServerInitialize(conn: Connection, params: InitializeParams) {
   });
 
   async function initializeService() {
-    void conn.sendRequest(ConfigurationRequest.type, { items: [{}] }).then((config) => {
-      if (Array.isArray(config)) {
-        void service.initialize(config[0]);
-      }
-    });
+    if (clientCapabilities.workspace?.configuration) {
+      void conn
+        .sendRequest(ConfigurationRequest.type, { items: [{ section: "" }] })
+        .then((config) => {
+          void service.initialize(Array.isArray(config) ? config[0] : {});
+        });
+    } else {
+      void service.initialize({});
+    }
 
     try {
       await service.initialized.wait();
@@ -51,9 +56,11 @@ function onServerInitialize(conn: Connection, params: InitializeParams) {
   }
 
   conn.onInitialized(() => {
-    bindServiceHandlers(conn, service);
+    bindServiceHandlers(conn, service, clientCapabilities);
     void initializeService();
   });
+
+  process.on("exit", () => service.dispose());
 
   return {
     capabilities: getTsLspDefaultCapabilities(),
@@ -61,17 +68,29 @@ function onServerInitialize(conn: Connection, params: InitializeParams) {
   };
 }
 
-function bindServiceHandlers(conn: Connection, service: TSLanguageService) {
-  service.onLogMessage(
-    (params) => void conn.sendNotification(LogMessageNotification.type, params)
-  );
-  service.onShowMessage((params) => conn.sendRequest(ShowMessageRequest.type, params));
-  service.onShowDocument(
-    async (params) => (await conn.sendRequest(ShowDocumentRequest.type, params)).success
-  );
-  service.onWorkDoneProgress(() => conn.window.createWorkDoneProgress());
-  service.onApplyWorkspaceEdit((params) => conn.workspace.applyEdit(params));
-  service.onDiagnostics((params) => conn.sendDiagnostics(params));
+function bindServiceHandlers(
+  conn: Connection,
+  service: TSLanguageService,
+  clientCapabilities: ClientCapabilities
+) {
+  service.onLogMessage((params) => void conn.sendNotification(LogMessageNotification.type, params));
+  if (clientCapabilities.window?.showMessage) {
+    service.onShowMessage((params) => conn.sendRequest(ShowMessageRequest.type, params));
+  }
+  if (clientCapabilities.window?.showDocument) {
+    service.onShowDocument(
+      async (params) => (await conn.sendRequest(ShowDocumentRequest.type, params)).success
+    );
+  }
+  if (clientCapabilities.window?.workDoneProgress) {
+    service.onWorkDoneProgress(() => conn.window.createWorkDoneProgress());
+  }
+  if (clientCapabilities.workspace?.applyEdit) {
+    service.onApplyWorkspaceEdit((params) => conn.workspace.applyEdit(params));
+  }
+  if (clientCapabilities.textDocument?.publishDiagnostics) {
+    service.onDiagnostics((params) => conn.sendDiagnostics(params));
+  }
 
   conn.onExit(() => service.dispose());
   conn.onShutdown(() => service.dispose());

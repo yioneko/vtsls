@@ -42,12 +42,12 @@ export const semanticTokenModifiers = [
 ];
 
 export const commands = [
-  "javascript.reloadProjects",
-  "typescript.reloadProjects",
-  "typescript.goToProjectConfig",
   "javascript.goToProjectConfig",
+  "javascript.reloadProjects",
+  "typescript.goToProjectConfig",
   "_typescript.learnMoreAboutRefactorings",
   "typescript.openTsServerLog",
+  "typescript.reloadProjects",
   "typescript.restartTsServer",
   "typescript.selectTypeScriptVersion",
 ];

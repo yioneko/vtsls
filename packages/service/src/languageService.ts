@@ -135,6 +135,7 @@ export function createTSLanguageService(initOptions: TSLanguageServiceOptions) {
   });
 
   const initialized = new Barrier();
+  let disposed = false;
 
   function waitInit<P extends any[], R>(handler: (...args: P) => R) {
     return (async (...args: P) => {
@@ -163,10 +164,13 @@ export function createTSLanguageService(initOptions: TSLanguageServiceOptions) {
       }
     },
     dispose() {
-      disposeVsTsExtension();
-      shims.context.subscriptions.forEach((d) => {
-        d.dispose();
-      });
+      if (initialized.isOpen() && !disposed) {
+        disposeVsTsExtension();
+        shims.context.subscriptions.forEach((d) => {
+          d.dispose();
+        });
+        disposed = true;
+      }
     },
     changeConfiguration(params: lsp.DidChangeConfigurationParams) {
       // set initialized after didChangeConfiguration

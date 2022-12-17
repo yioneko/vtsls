@@ -1,18 +1,20 @@
-import { Disposable, Emitter } from "vscode-languageserver-protocol";
+import { TSLanguageServiceDelegate } from "../languageService";
+import * as lsp from "vscode-languageserver-protocol";
 
 export interface ICommand {
   id: string;
   callback: (...args: any[]) => any;
   thisArg?: any;
-  // TODO: not used
   // description?: ICommandHandlerDescription | null;
 }
 
 export class CommandsShimService {
   private readonly _commands = new Map<string, ICommand>();
 
-  private readonly _onDidRegisterCommand = new Emitter<string>();
+  private readonly _onDidRegisterCommand = new lsp.Emitter<string>();
   readonly onDidRegisterCommand = this._onDidRegisterCommand.event;
+
+  constructor(private readonly delegate: TSLanguageServiceDelegate) {}
 
   async getCommands(filterInternal = false): Promise<string[]> {
     const result = [];
@@ -33,7 +35,7 @@ export class CommandsShimService {
     }
     this._commands.set(id, { id, callback, thisArg });
 
-    return Disposable.create(() => {
+    return lsp.Disposable.create(() => {
       this._commands.delete(id);
     });
   }
@@ -41,7 +43,7 @@ export class CommandsShimService {
   async executeCommand(id: string, ...args: any[]) {
     const command = this._commands.get(id);
     if (!command) {
-      // throw new Error(`Command ${id} not found`);
+      this.delegate.logMessage(lsp.MessageType.Error, `Command ${id} not found`);
       return;
     }
 
@@ -49,7 +51,7 @@ export class CommandsShimService {
     try {
       return await callback.apply(thisArg, args);
     } catch (e) {
-      throw new Error(`Execute command ${id} failed: ${String(e)}`);
+      this.delegate.logMessage(lsp.MessageType.Error, `Execute command ${id} failed: ${String(e)}`);
     }
   }
 }
