@@ -18,10 +18,12 @@ export async function createTestService(workspacePath: string) {
     },
     vtsls: {
       typescript: {
-        newLineCharacter: "\n",
-        indentSize: 2,
-        tabSize: 2,
-        convertTabsToSpaces: true,
+        format: {
+          newLineCharacter: "\n", // FIXME: tsserver doesn't respect this
+          indentSize: 2,
+          tabSize: 2,
+          convertTabsToSpaces: true,
+        },
       },
     },
   });

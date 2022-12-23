@@ -51,8 +51,8 @@ function abc(a) {}`
     expect(response.items).toContainEqual(
       expect.objectContaining({
         detail: "JSDoc comment",
+        label: "/** */",
         insertTextFormat: lsp.InsertTextFormat.Snippet,
-        insertText: "/**\n * $0\n * @param a ${1}\n */",
       })
     );
 
