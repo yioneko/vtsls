@@ -20,7 +20,6 @@ async function build({ watch }) {
     external: Object.keys(dependencies).flatMap((d) => [d, `${d}/*`]),
     target: "node14",
     platform: "node",
-    sourcemap: "external",
     define: { VTSLS_VRESION: `"${version}"` },
     watch,
   });

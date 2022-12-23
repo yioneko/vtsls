@@ -616,7 +616,7 @@ export class LanguageFeaturesShimService extends LanguagesFeaturesRegistryServic
   private readonly callHierarchyCache = new CallHierarchyCache(this.$providers.callHierarchy);
   private readonly codeLensCache = new CodeLensCache(this.$providers.codeLens, this.commands);
 
-  async completion(params: lsp.CompletionParams, token: lsp.CancellationToken) {
+  async completion(params: lsp.CompletionParams, token = lsp.CancellationToken.None) {
     const { doc, providers } = this.prepareProviderHandle(
       params.textDocument.uri,
       this.$providers.completionItem
@@ -686,7 +686,7 @@ export class LanguageFeaturesShimService extends LanguagesFeaturesRegistryServic
     return lsp.CompletionList.create(merged, isIncomplete);
   }
 
-  async completionItemResolve(item: lsp.CompletionItem, token: lsp.CancellationToken) {
+  async completionItemResolve(item: lsp.CompletionItem, token = lsp.CancellationToken.None) {
     const cached = this.completionCache.resolve(item);
     if (!cached) {
       return item;
@@ -706,7 +706,7 @@ export class LanguageFeaturesShimService extends LanguagesFeaturesRegistryServic
     }
   }
 
-  async documentHighlight(params: lsp.DocumentHighlightParams, token: lsp.CancellationToken) {
+  async documentHighlight(params: lsp.DocumentHighlightParams, token = lsp.CancellationToken.None) {
     const { doc, provider } = this.prepareHighestProviderHandle(
       params.textDocument.uri,
       this.$providers.documentHighlight
@@ -728,7 +728,7 @@ export class LanguageFeaturesShimService extends LanguagesFeaturesRegistryServic
     }));
   }
 
-  async signatureHelp(params: lsp.SignatureHelpParams, token: lsp.CancellationToken) {
+  async signatureHelp(params: lsp.SignatureHelpParams, token = lsp.CancellationToken.None) {
     const { doc, provider } = this.prepareHighestProviderHandle(
       params.textDocument.uri,
       this.$providers.signatureHelp
@@ -758,7 +758,7 @@ export class LanguageFeaturesShimService extends LanguagesFeaturesRegistryServic
     }
   }
 
-  async definition(params: lsp.DefinitionParams, token: lsp.CancellationToken) {
+  async definition(params: lsp.DefinitionParams, token = lsp.CancellationToken.None) {
     const { doc, provider } = this.prepareHighestProviderHandle(
       params.textDocument.uri,
       this.$providers.definition
@@ -770,7 +770,7 @@ export class LanguageFeaturesShimService extends LanguagesFeaturesRegistryServic
     }
   }
 
-  async references(params: lsp.ReferenceParams, token: lsp.CancellationToken) {
+  async references(params: lsp.ReferenceParams, token = lsp.CancellationToken.None) {
     const { doc, provider } = this.prepareHighestProviderHandle(
       params.textDocument.uri,
       this.$providers.reference
@@ -787,7 +787,7 @@ export class LanguageFeaturesShimService extends LanguagesFeaturesRegistryServic
     }
   }
 
-  async hover(params: lsp.HoverParams, token: lsp.CancellationToken) {
+  async hover(params: lsp.HoverParams, token = lsp.CancellationToken.None) {
     const { doc, provider } = this.prepareHighestProviderHandle(
       params.textDocument.uri,
       this.$providers.hover
@@ -799,7 +799,7 @@ export class LanguageFeaturesShimService extends LanguagesFeaturesRegistryServic
     }
   }
 
-  async documentSymbol(params: lsp.DocumentSymbolParams, token: lsp.CancellationToken) {
+  async documentSymbol(params: lsp.DocumentSymbolParams, token = lsp.CancellationToken.None) {
     const { doc, provider } = this.prepareHighestProviderHandle(
       params.textDocument.uri,
       this.$providers.documentSymbol
@@ -813,7 +813,7 @@ export class LanguageFeaturesShimService extends LanguagesFeaturesRegistryServic
     }
   }
 
-  async workspaceSymbol(params: lsp.WorkspaceSymbolParams, token: lsp.CancellationToken) {
+  async workspaceSymbol(params: lsp.WorkspaceSymbolParams, token = lsp.CancellationToken.None) {
     const { provider } = this.getProviderWithoutSelector(this.$providers.workspaceSymbol);
     const result = await provider.provideWorkspaceSymbols(params.query, token);
     if (result) {
@@ -821,7 +821,7 @@ export class LanguageFeaturesShimService extends LanguagesFeaturesRegistryServic
     }
   }
 
-  async codeAction(params: lsp.CodeActionParams, token: lsp.CancellationToken) {
+  async codeAction(params: lsp.CodeActionParams, token = lsp.CancellationToken.None) {
     const { doc, providers } = this.prepareProviderHandle(
       params.textDocument.uri,
       this.$providers.codeActions
@@ -893,7 +893,7 @@ export class LanguageFeaturesShimService extends LanguagesFeaturesRegistryServic
     }
   }
 
-  async codeActionResolve(item: lsp.CodeAction, token: lsp.CancellationToken) {
+  async codeActionResolve(item: lsp.CodeAction, token = lsp.CancellationToken.None) {
     const cached = this.codeActionCache.resolve(item);
     if (!cached) {
       return item;
@@ -950,7 +950,7 @@ export class LanguageFeaturesShimService extends LanguagesFeaturesRegistryServic
     }
   }
 
-  async implementation(params: lsp.ImplementationParams, token: lsp.CancellationToken) {
+  async implementation(params: lsp.ImplementationParams, token = lsp.CancellationToken.None) {
     const { doc, provider } = this.prepareHighestProviderHandle(
       params.textDocument.uri,
       this.$providers.implementation
@@ -966,7 +966,7 @@ export class LanguageFeaturesShimService extends LanguagesFeaturesRegistryServic
     }
   }
 
-  async typeDefinition(params: lsp.TypeDefinitionParams, token: lsp.CancellationToken) {
+  async typeDefinition(params: lsp.TypeDefinitionParams, token = lsp.CancellationToken.None) {
     const { doc, provider } = this.prepareHighestProviderHandle(
       params.textDocument.uri,
       this.$providers.typeDefinition
@@ -982,7 +982,10 @@ export class LanguageFeaturesShimService extends LanguagesFeaturesRegistryServic
     }
   }
 
-  async documentFormatting(params: lsp.DocumentFormattingParams, token: lsp.CancellationToken) {
+  async documentFormatting(
+    params: lsp.DocumentFormattingParams,
+    token = lsp.CancellationToken.None
+  ) {
     // NOTE: typescript use range format instead
     const { doc, provider } = this.prepareHighestProviderHandle(
       params.textDocument.uri,
@@ -1001,7 +1004,7 @@ export class LanguageFeaturesShimService extends LanguagesFeaturesRegistryServic
 
   async documentRangeFormatting(
     params: lsp.DocumentRangeFormattingParams,
-    token: lsp.CancellationToken
+    token = lsp.CancellationToken.None
   ) {
     const { doc, provider } = this.prepareHighestProviderHandle(
       params.textDocument.uri,
@@ -1021,7 +1024,7 @@ export class LanguageFeaturesShimService extends LanguagesFeaturesRegistryServic
 
   async documentOnTypeFormatting(
     params: lsp.DocumentOnTypeFormattingParams,
-    token: lsp.CancellationToken
+    token = lsp.CancellationToken.None
   ) {
     const { doc, provider } = this.prepareHighestProviderHandle(
       params.textDocument.uri,
@@ -1040,7 +1043,7 @@ export class LanguageFeaturesShimService extends LanguagesFeaturesRegistryServic
     }
   }
 
-  async prepareRename(params: lsp.PrepareRenameParams, token: lsp.CancellationToken) {
+  async prepareRename(params: lsp.PrepareRenameParams, token = lsp.CancellationToken.None) {
     const { doc, provider } = this.prepareHighestProviderHandle(
       params.textDocument.uri,
       this.$providers.rename
@@ -1064,7 +1067,7 @@ export class LanguageFeaturesShimService extends LanguagesFeaturesRegistryServic
     }
   }
 
-  async rename(params: lsp.RenameParams, token: lsp.CancellationToken) {
+  async rename(params: lsp.RenameParams, token = lsp.CancellationToken.None) {
     const { doc, provider } = this.prepareHighestProviderHandle(
       params.textDocument.uri,
       this.$providers.rename
@@ -1080,7 +1083,7 @@ export class LanguageFeaturesShimService extends LanguagesFeaturesRegistryServic
     }
   }
 
-  async foldingRanges(params: lsp.FoldingRangeParams, token: lsp.CancellationToken) {
+  async foldingRanges(params: lsp.FoldingRangeParams, token = lsp.CancellationToken.None) {
     const { doc, provider } = this.prepareHighestProviderHandle(
       params.textDocument.uri,
       this.$providers.foldingRange
@@ -1091,7 +1094,7 @@ export class LanguageFeaturesShimService extends LanguagesFeaturesRegistryServic
     }
   }
 
-  async selectionRanges(params: lsp.SelectionRangeParams, token: lsp.CancellationToken) {
+  async selectionRanges(params: lsp.SelectionRangeParams, token = lsp.CancellationToken.None) {
     const { doc, provider } = this.prepareHighestProviderHandle(
       params.textDocument.uri,
       this.$providers.selectionRange
@@ -1106,7 +1109,10 @@ export class LanguageFeaturesShimService extends LanguagesFeaturesRegistryServic
     }
   }
 
-  async prepareCallHierachy(params: lsp.CallHierarchyPrepareParams, token: lsp.CancellationToken) {
+  async prepareCallHierachy(
+    params: lsp.CallHierarchyPrepareParams,
+    token = lsp.CancellationToken.None
+  ) {
     const { doc, id, provider } = this.prepareHighestProviderHandle(
       params.textDocument.uri,
       this.$providers.callHierarchy
@@ -1127,7 +1133,10 @@ export class LanguageFeaturesShimService extends LanguagesFeaturesRegistryServic
     return null;
   }
 
-  async incomingCalls(params: lsp.CallHierarchyIncomingCallsParams, token: lsp.CancellationToken) {
+  async incomingCalls(
+    params: lsp.CallHierarchyIncomingCallsParams,
+    token = lsp.CancellationToken.None
+  ) {
     const { item } = params;
     const cached = this.callHierarchyCache.resolve(item);
     if (!cached) {
@@ -1146,7 +1155,10 @@ export class LanguageFeaturesShimService extends LanguagesFeaturesRegistryServic
     return null;
   }
 
-  async outgoingCalls(params: lsp.CallHierarchyOutgoingCallsParams, token: lsp.CancellationToken) {
+  async outgoingCalls(
+    params: lsp.CallHierarchyOutgoingCallsParams,
+    token = lsp.CancellationToken.None
+  ) {
     const { item } = params;
     const cached = this.callHierarchyCache.resolve(item);
     if (!cached) {
@@ -1165,7 +1177,7 @@ export class LanguageFeaturesShimService extends LanguagesFeaturesRegistryServic
     return null;
   }
 
-  async inlayHint(params: lsp.InlayHintParams, token: lsp.CancellationToken) {
+  async inlayHint(params: lsp.InlayHintParams, token = lsp.CancellationToken.None) {
     const { doc, provider } = this.prepareHighestProviderHandle(
       params.textDocument.uri,
       this.$providers.inlayHints
@@ -1177,7 +1189,7 @@ export class LanguageFeaturesShimService extends LanguagesFeaturesRegistryServic
     return null;
   }
 
-  async codeLens(params: lsp.CodeLensParams, token: lsp.CancellationToken) {
+  async codeLens(params: lsp.CodeLensParams, token = lsp.CancellationToken.None) {
     const { doc, providers } = this.prepareProviderHandle(
       params.textDocument.uri,
       this.$providers.codeLens
@@ -1207,7 +1219,7 @@ export class LanguageFeaturesShimService extends LanguagesFeaturesRegistryServic
     }
   }
 
-  async codeLensResolve(item: lsp.CodeLens, token: lsp.CancellationToken) {
+  async codeLensResolve(item: lsp.CodeLens, token = lsp.CancellationToken.None) {
     const cached = this.codeLensCache.resolve(item);
     if (!cached) {
       return item;
@@ -1230,7 +1242,7 @@ export class LanguageFeaturesShimService extends LanguagesFeaturesRegistryServic
     }
   }
 
-  async semanticTokensFull(params: lsp.SemanticTokensParams, token: lsp.CancellationToken) {
+  async semanticTokensFull(params: lsp.SemanticTokensParams, token = lsp.CancellationToken.None) {
     const { doc, provider } = this.prepareHighestProviderHandle(
       params.textDocument.uri,
       this.$providers.documentSemanticTokens
@@ -1242,7 +1254,10 @@ export class LanguageFeaturesShimService extends LanguagesFeaturesRegistryServic
     return { data: [] };
   }
 
-  async semanticTokensRange(params: lsp.SemanticTokensRangeParams, token: lsp.CancellationToken) {
+  async semanticTokensRange(
+    params: lsp.SemanticTokensRangeParams,
+    token = lsp.CancellationToken.None
+  ) {
     const { doc, provider } = this.prepareHighestProviderHandle(
       params.textDocument.uri,
       this.$providers.documentRangeSemanticTokens
