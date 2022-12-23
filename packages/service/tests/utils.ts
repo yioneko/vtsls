@@ -16,6 +16,14 @@ export async function createTestService(workspacePath: string) {
         useSyntaxServer: "never",
       },
     },
+    vtsls: {
+      typescript: {
+        newLineCharacter: "\n",
+        indentSize: 2,
+        tabSize: 2,
+        convertTabsToSpaces: true,
+      },
+    },
   });
   service.onLogMessage((p) => console.log(p.message));
 
