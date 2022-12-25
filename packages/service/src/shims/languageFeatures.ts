@@ -371,12 +371,12 @@ abstract class DataCache<P extends ProviderCollection<any>> {
   }
 }
 
-class CodeActionCache extends DataCache<CodeActionProviderCollection> {
-  readonly id = "vtsls.codeActionCacheCommand";
+export class CodeActionCache extends DataCache<CodeActionProviderCollection> {
+  static readonly id = "_vtsls.codeActionCacheCommand";
 
   constructor(providers: CodeActionProviderCollection, commands: CommandsShimService) {
     super(providers);
-    commands.registerCommand(this.id, (...args) => {
+    commands.registerCommand(CodeActionCache.id, (...args) => {
       const data = this.resolveData(args[0]);
       if (!data) {
         // TODO
@@ -387,7 +387,7 @@ class CodeActionCache extends DataCache<CodeActionProviderCollection> {
       if (cachedItem?.command) {
         const command =
           typeof cachedItem.command === "string" ? (cachedItem as lsp.Command) : cachedItem.command;
-        if (command && command.command !== this.id) {
+        if (command && command.command !== CodeActionCache.id) {
           void commands.executeCommand(command.command, ...(command.arguments || []));
         }
       }
@@ -403,11 +403,11 @@ class CodeActionCache extends DataCache<CodeActionProviderCollection> {
     return (index: number, item: lsp.CodeAction | lsp.Command) => {
       const data = this.createData(providerId, index, cacheId);
       if (typeof item.command === "string") {
-        return { command: this.id, title: "", arguments: [data] };
+        return { command: CodeActionCache.id, title: "", arguments: [data] };
       } else {
         (item as lsp.CodeAction).data = data;
         if (item.command) {
-          item.command = { command: this.id, title: "", arguments: [data] };
+          item.command = { command: CodeActionCache.id, title: "", arguments: [data] };
         }
       }
       return item;
@@ -431,12 +431,12 @@ class CodeActionCache extends DataCache<CodeActionProviderCollection> {
   }
 }
 
-class CompletionCache extends DataCache<CompletionProviderCollection> {
-  readonly id = "vtsls.completionCacheCommand";
+export class CompletionCache extends DataCache<CompletionProviderCollection> {
+  static readonly id = "_vtsls.completionCacheCommand";
 
   constructor(providers: CompletionProviderCollection, commands: CommandsShimService) {
     super(providers);
-    commands.registerCommand(this.id, (...args) => {
+    commands.registerCommand(CompletionCache.id, (...args) => {
       const data = this.resolveData(args[0]);
       if (!data) {
         // TODO
@@ -444,7 +444,7 @@ class CompletionCache extends DataCache<CompletionProviderCollection> {
       }
       const { cacheId, index } = data;
       const cachedItem = this.completionItemCache.get(cacheId)?.[index];
-      if (cachedItem?.command && cachedItem.command.command !== this.id) {
+      if (cachedItem?.command && cachedItem.command.command !== CompletionCache.id) {
         void commands.executeCommand(
           cachedItem.command.command,
           ...(cachedItem.command.arguments || [])
@@ -461,7 +461,7 @@ class CompletionCache extends DataCache<CompletionProviderCollection> {
       const data = this.createData(providerId, index, cacheId);
       item.data = data;
       if (item.command) {
-        item.command = { command: this.id, title: "", arguments: [data] };
+        item.command = { command: CompletionCache.id, title: "", arguments: [data] };
       }
       return item;
     };
@@ -513,8 +513,8 @@ class CallHierarchyCache extends DataCache<ProviderCollection<vscode.CallHierarc
   }
 }
 
-class CodeLensCache extends DataCache<ProviderCollection<vscode.CodeLensProvider>> {
-  readonly id = "vtsls.codeLensCacheCommand";
+export class CodeLensCache extends DataCache<ProviderCollection<vscode.CodeLensProvider>> {
+  static readonly id = "_vtsls.codeLensCacheCommand";
 
   constructor(
     providers: ProviderCollection<vscode.CodeLensProvider>,
@@ -523,7 +523,7 @@ class CodeLensCache extends DataCache<ProviderCollection<vscode.CodeLensProvider
   ) {
     super(providers);
 
-    commands.registerCommand(this.id, (...args) => {
+    commands.registerCommand(CodeLensCache.id, (...args) => {
       const data = this.resolveData(args[0]);
       if (!data) {
         // TODO
@@ -568,7 +568,7 @@ class CodeLensCache extends DataCache<ProviderCollection<vscode.CodeLensProvider
     return (index: number, item: lsp.CodeLens) => {
       const data = this.createDataWithUri(providerId, index, cacheId, uri);
       if (item.command) {
-        item.command = { command: this.id, title: "", arguments: [data] };
+        item.command = { command: CodeLensCache.id, title: "", arguments: [data] };
       }
       return item;
     };
