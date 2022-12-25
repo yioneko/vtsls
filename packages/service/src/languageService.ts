@@ -147,7 +147,12 @@ export function createTSLanguageService(initOptions: TSLanguageServiceOptions) {
 
   const tsLanguageService = {
     ...events,
-    initialized,
+    initialized() {
+      return initialized.isOpen();
+    },
+    async waitInitialized() {
+      await initialized.wait();
+    },
     // wait initial config
     async initialize(config: TSLanguageServiceConfig | undefined) {
       if (initialized.isOpen()) {

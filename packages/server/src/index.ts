@@ -49,7 +49,7 @@ function onServerInitialize(conn: Connection, params: InitializeParams) {
     }
 
     try {
-      await service.initialized.wait();
+      await service.waitInitialized();
     } catch (e) {
       conn.dispose();
     }

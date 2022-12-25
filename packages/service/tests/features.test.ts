@@ -1,5 +1,5 @@
 import * as path from "node:path";
-import { afterAll, describe, expect, it } from "vitest";
+import { afterAll, assert, describe, expect, it } from "vitest";
 import * as lsp from "vscode-languageserver-protocol";
 import { URI } from "vscode-uri";
 import { createTestService, openDoc } from "./utils";
@@ -55,6 +55,23 @@ function abc(a) {}`
         insertTextFormat: lsp.InsertTextFormat.Snippet,
       })
     );
+
+    close();
+  });
+
+  it("selection range", async () => {
+    const uri = URI.file(path.resolve(workspacePath, "index.ts")).toString();
+    const { close } = openDoc(service, uri, `a.b`);
+
+    const response = await service.selectionRanges({
+      positions: [{ line: 0, character: 2 }],
+      textDocument: { uri },
+    });
+    assert(response);
+    expect(response[0]).toMatchObject({
+      range: { start: { line: 0, character: 2 }, end: { line: 0, character: 3 } },
+      parent: { range: { start: { line: 0, character: 0 }, end: { line: 0, character: 3 } } },
+    });
 
     close();
   });

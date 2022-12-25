@@ -1101,7 +1101,7 @@ export class LanguageFeaturesShimService extends LanguagesFeaturesRegistryServic
     );
     const result = await provider.provideSelectionRanges(
       doc,
-      params.positions.map(types.Position.of),
+      params.positions.map((p) => types.Position.of(p)),
       token
     );
     if (result) {

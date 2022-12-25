@@ -29,7 +29,7 @@ export async function createTestService(workspacePath: string) {
   });
   service.onLogMessage((p) => console.log(p.message));
 
-  await service.initialized.wait();
+  await service.waitInitialized();
 
   const uri = URI.file(path.resolve(workspacePath, "index.ts")).toString();
   service.openTextDocument({
