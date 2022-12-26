@@ -1,0 +1,13 @@
+diff --git a/package.json b/package.json
+index 9fdb1ba..16ce616 100644
+--- a/package.json
++++ b/package.json
+@@ -64,7 +64,7 @@
+     "onCommand:typescript.tsserverRequest",
+     "onCommand:_typescript.configurePlugin",
+     "onCommand:_typescript.learnMoreAboutRefactorings",
+-    "onCommand:typescript.fileReferences",
++    "onCommand:typescript.findAllFileReferences",
+     "onCommand:typescript.goToSourceDefinition",
+     "onTaskType:typescript",
+     "onLanguage:jsonc",

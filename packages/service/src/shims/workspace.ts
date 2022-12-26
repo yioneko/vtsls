@@ -181,9 +181,11 @@ export class WorkspaceShimService {
       }
     }
 
-    this._onDidRenameFiles.fire({
-      files: renamedFiles,
-    });
+    if (renamedFiles.length > 0) {
+      this._onDidRenameFiles.fire({
+        files: renamedFiles,
+      });
+    }
   }
 
   getWorkspaceFolder(uri: vscode.Uri): vscode.WorkspaceFolder | undefined {

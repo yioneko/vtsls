@@ -51,6 +51,7 @@ function onServerInitialize(conn: Connection, params: InitializeParams) {
     try {
       await service.waitInitialized();
     } catch (e) {
+      conn.console.error(`Server initialization failed: ${String(e)}`);
       conn.dispose();
     }
   }

@@ -160,6 +160,9 @@ export function createTSLanguageService(initOptions: TSLanguageServiceOptions) {
       }
 
       try {
+        // shim missing command
+        shims.commandsService.registerCommand("setContext", () => {});
+
         shims.configurationService.$changeConfiguration(config);
         await startVsTsExtension(shims.context);
         initialized.open();
