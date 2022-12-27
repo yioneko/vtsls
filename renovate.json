@@ -1,7 +1,8 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": ["config:base"],
-  "schedule": ["after 1pm on Monday"],
+  "automerge": true,
+  "schedule": ["after 7pm on Monday"],
   "ignoreDeps": ["jsonc-parser", "semver", "@types/semver", "@types/node"],
   "git-submodules": {
     "enabled": true
