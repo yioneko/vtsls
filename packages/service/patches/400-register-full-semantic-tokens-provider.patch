@@ -1,0 +1,16 @@
+diff --git a/src/languageFeatures/semanticTokens.ts b/src/languageFeatures/semanticTokens.ts
+index e8c41e3..b6711ee 100644
+--- a/src/languageFeatures/semanticTokens.ts
++++ b/src/languageFeatures/semanticTokens.ts
+@@ -22,7 +22,10 @@ export function register(
+ 		requireSomeCapability(client, ClientCapability.Semantic),
+ 	], () => {
+ 		const provider = new DocumentSemanticTokensProvider(client);
+-		return vscode.languages.registerDocumentRangeSemanticTokensProvider(selector.semantic, provider, provider.getLegend());
++		return vscode.Disposable.from(
++			vscode.languages.registerDocumentRangeSemanticTokensProvider(selector.semantic, provider, provider.getLegend()),
++			vscode.languages.registerDocumentSemanticTokensProvider(selector.semantic, provider, provider.getLegend()),
++		);
+ 	});
+ }
+ 
