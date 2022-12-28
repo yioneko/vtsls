@@ -1,19 +1,62 @@
 diff --git a/src/languageFeatures/updatePathsOnRename.ts b/src/languageFeatures/updatePathsOnRename.ts
-index 9a7bcd7..8209768 100644
+index 3c149ba..e0e8e9f 100644
 --- a/src/languageFeatures/updatePathsOnRename.ts
 +++ b/src/languageFeatures/updatePathsOnRename.ts
-@@ -205,10 +205,10 @@ class UpdateImportsOnFileRenameHandler extends Disposable {
- 			return undefined;
+@@ -16,13 +16,14 @@ import * as fileSchemes from '../utils/fileSchemes';
+ import { doesResourceLookLikeATypeScriptFile } from '../utils/languageDescription';
+ import * as typeConverters from '../utils/typeConverters';
+ import FileConfigurationManager from './fileConfigurationManager';
++import * as fs from 'fs/promises';
+ 
+ 
+ const updateImportsOnFileMoveName = 'updateImportsOnFileMove.enabled';
+ 
+ async function isDirectory(resource: vscode.Uri): Promise<boolean> {
+ 	try {
+-		return (await vscode.workspace.fs.stat(resource)).type === vscode.FileType.Directory;
++		return (await fs.stat(resource.fsPath)).isDirectory()
+ 	} catch {
+ 		return false;
+ 	}
+@@ -99,13 +100,13 @@ class UpdateImportsOnFileRenameHandler extends Disposable {
+ 			const resourcesBeingRenamed: vscode.Uri[] = [];
+ 
+ 			for (const { oldUri, newUri, newFilePath, oldFilePath, jsTsFileThatIsBeingMoved } of group) {
+-				const document = await vscode.workspace.openTextDocument(jsTsFileThatIsBeingMoved);
++				// const document = await vscode.workspace.openTextDocument(jsTsFileThatIsBeingMoved);
+ 
+ 				// Make sure TS knows about file
+ 				this.client.bufferSyncSupport.closeResource(oldUri);
+-				this.client.bufferSyncSupport.openTextDocument(document);
++				// this.client.bufferSyncSupport.openTextDocument(document);
+ 
+-				if (await this.withEditsForFileRename(edits, document, oldFilePath, newFilePath)) {
++				if (await this.withEditsForFileRename(edits, oldFilePath, newFilePath)) {
+ 					resourcesBeingRenamed.push(newUri);
+ 				}
+ 			}
+@@ -205,8 +206,7 @@ class UpdateImportsOnFileRenameHandler extends Disposable {
  		}
  
--		if (await isDirectory(resource)) {
+ 		if (await isDirectory(resource)) {
 -			const files = await vscode.workspace.findFiles(new vscode.RelativePattern(resource, '**/*.{ts,tsx,js,jsx}'), '**/node_modules/**', 1);
 -			return files[0];
--		}
-+		// if (await isDirectory(resource)) {
-+		// 	const files = await vscode.workspace.findFiles(new vscode.RelativePattern(resource, '**/*.{ts,tsx,js,jsx}'), '**/node_modules/**', 1);
-+		// 	return files[0];
-+		// }
++			return resource;
+ 		}
  
  		return (await this._handles(resource)) ? resource : undefined;
- 	}
+@@ -214,12 +214,12 @@ class UpdateImportsOnFileRenameHandler extends Disposable {
+ 
+ 	private async withEditsForFileRename(
+ 		edits: vscode.WorkspaceEdit,
+-		document: vscode.TextDocument,
++		// document: vscode.TextDocument,
+ 		oldFilePath: string,
+ 		newFilePath: string,
+ 	): Promise<boolean> {
+ 		const response = await this.client.interruptGetErr(() => {
+-			this.fileConfigurationManager.setGlobalConfigurationFromDocument(document, nulToken);
++			// this.fileConfigurationManager.setGlobalConfigurationFromDocument(document, nulToken);
+ 			const args: Proto.GetEditsForFileRenameRequestArgs = {
+ 				oldFilePath,
+ 				newFilePath,

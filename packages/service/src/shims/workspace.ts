@@ -161,26 +161,10 @@ export class WorkspaceShimService {
   }
 
   $renameFiles(params: lsp.RenameFilesParams) {
-    const renamedFiles = [];
-    for (const f of params.files) {
-      const oldUri = URI.parse(f.oldUri);
-      const newUri = URI.parse(f.newUri);
-      const oldDoc = this._documents.get(oldUri);
-      if (oldDoc) {
-        const newDoc = TextDocument.create(
-          f.newUri,
-          oldDoc.languageId,
-          oldDoc.version,
-          oldDoc.getText()
-        );
-        this._documents.delete(oldUri);
-        this._documents.set(newUri, newDoc);
-        renamedFiles.push({ oldUri, newUri });
-      } else {
-        this.delegate.logMessage(lsp.MessageType.Error, `File ${f.oldUri} not found for rename`);
-      }
-    }
-
+    const renamedFiles = params.files.map(({ newUri, oldUri }) => ({
+      newUri: URI.parse(newUri),
+      oldUri: URI.parse(oldUri),
+    }));
     if (renamedFiles.length > 0) {
       this._onDidRenameFiles.fire({
         files: renamedFiles,
