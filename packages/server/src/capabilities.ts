@@ -93,8 +93,15 @@ export function getTsLspDefaultCapabilities(): ServerCapabilities {
             {
               scheme: "file",
               pattern: {
-                glob: "**/*.{ts,tsx,js,jsx}",
+                glob: "**/*.{ts,cts,mts,tsx,js,cjs,mjs,jsx}",
                 matches: "file",
+              },
+            },
+            {
+              scheme: "file",
+              pattern: {
+                glob: "**/*",
+                matches: "folder",
               },
             },
           ],
