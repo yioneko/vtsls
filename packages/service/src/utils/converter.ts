@@ -26,26 +26,26 @@ function convertOrFalsy<T, R>(val: T | undefined | null, cvtFn: (v: T) => R): R 
 export class TSLspConverter {
   constructor(private readonly clientCapabilities: lsp.ClientCapabilities) {}
 
-  static convertTextEdit(edit: vscode.TextEdit): lsp.TextEdit {
+  convertTextEdit = (edit: vscode.TextEdit): lsp.TextEdit => {
     return {
-      range: TSLspConverter.convertRange(edit.range),
+      range: this.convertRange(edit.range),
       newText: edit.newText,
     };
-  }
+  };
 
-  static convertPosition(pos: vscode.Position): lsp.Position {
+  convertPosition = (pos: vscode.Position): lsp.Position => {
     return {
       line: pos.line,
       character: pos.character,
     };
-  }
+  };
 
-  static convertRange(range: vscode.Range): lsp.Range {
+  convertRange = (range: vscode.Range): lsp.Range => {
     return {
       start: range.start,
       end: range.end,
     };
-  }
+  };
 
   convertWorkspaceEdit = (edit: vscode.WorkspaceEdit): lsp.WorkspaceEdit => {
     const resouceOpKinds =
@@ -99,11 +99,11 @@ export class TSLspConverter {
       } else if (entry._type === types.FileEditType.Text) {
         // text edits
         if (textEditsByUri.has(entry.uri)) {
-          textEditsByUri.get(entry.uri)?.push(TSLspConverter.convertTextEdit(entry.edit));
+          textEditsByUri.get(entry.uri)?.push(this.convertTextEdit(entry.edit));
         } else {
           // mark for future use
           docChanges.push(entry.uri);
-          textEditsByUri.set(entry.uri, [TSLspConverter.convertTextEdit(entry.edit)]);
+          textEditsByUri.set(entry.uri, [this.convertTextEdit(entry.edit)]);
         }
       } else {
         throw new Error(`Not supported type of edit entry: ${entry._type as string}`);
@@ -146,8 +146,8 @@ export class TSLspConverter {
       get lineCount() {
         return textDocument.lineCount;
       },
-      getText: textDocument.getText,
-      offsetAt: textDocument.offsetAt,
+      getText: textDocument.getText.bind(textDocument),
+      offsetAt: textDocument.offsetAt.bind(textDocument),
       positionAt(offset) {
         const pos = textDocument.positionAt(offset);
         return new types.Position(pos.line, pos.character);
@@ -275,18 +275,18 @@ export class TSLspConverter {
     if (item.range) {
       if (lsp.Range.is(item.range)) {
         textEdit = {
-          range: TSLspConverter.convertRange(item.range),
+          range: this.convertRange(item.range),
           newText: insertText ?? label,
         };
       } else {
         textEdit = {
-          insert: TSLspConverter.convertRange(item.range.inserting),
-          replace: TSLspConverter.convertRange(item.range.replacing),
+          insert: this.convertRange(item.range.inserting),
+          replace: this.convertRange(item.range.replacing),
           newText: insertText ?? label,
         };
       }
     } else if (item.textEdit) {
-      textEdit = TSLspConverter.convertTextEdit(item.textEdit);
+      textEdit = this.convertTextEdit(item.textEdit);
     }
 
     return {
@@ -302,7 +302,7 @@ export class TSLspConverter {
       insertTextFormat: isSnippet ? lsp.InsertTextFormat.Snippet : lsp.InsertTextFormat.PlainText,
       insertText,
       textEdit,
-      additionalTextEdits: mapOrFalsy(item.additionalTextEdits, TSLspConverter.convertTextEdit),
+      additionalTextEdits: mapOrFalsy(item.additionalTextEdits, this.convertTextEdit),
       commitCharacters: item.commitCharacters,
       command: item.command,
       data,
@@ -314,20 +314,17 @@ export class TSLspConverter {
   ): T extends vscode.Location ? lsp.Location : lsp.LocationLink => {
     if ("targetUri" in location) {
       return {
-        originSelectionRange: convertOrFalsy(
-          location.originSelectionRange,
-          TSLspConverter.convertRange
-        ),
+        originSelectionRange: convertOrFalsy(location.originSelectionRange, this.convertRange),
         targetUri: location.targetUri.toString(),
-        targetRange: TSLspConverter.convertRange(location.targetRange),
-        targetSelectionRange: TSLspConverter.convertRange(
+        targetRange: this.convertRange(location.targetRange),
+        targetSelectionRange: this.convertRange(
           location.targetSelectionRange || location.targetRange
         ),
       } as any;
     } else {
       return {
         uri: location.uri.toString(),
-        range: TSLspConverter.convertRange(location.range),
+        range: this.convertRange(location.range),
       } as any;
     }
   };
@@ -347,6 +344,7 @@ export class TSLspConverter {
       return this.convertLocation(location) as any;
     }
   };
+
   convertDiagnosticFromLsp = (diagnostic: lsp.Diagnostic): vscode.Diagnostic => {
     const d = new types.Diagnostic(
       types.Range.of(diagnostic.range),
@@ -376,7 +374,7 @@ export class TSLspConverter {
         : diagnostic.code;
 
     return {
-      range: TSLspConverter.convertRange(diagnostic.range),
+      range: this.convertRange(diagnostic.range),
       message: diagnostic.message,
       code,
       codeDescription: target
@@ -432,7 +430,7 @@ export class TSLspConverter {
     }
     return {
       contents: mergedString.value,
-      range: hover.range ? TSLspConverter.convertRange(hover.range) : undefined,
+      range: hover.range ? this.convertRange(hover.range) : undefined,
     };
   };
 
@@ -444,8 +442,8 @@ export class TSLspConverter {
         name: symbol.name,
         detail: symbol.detail,
         kind: (symbol.kind + 1) as lsp.SymbolKind,
-        range: TSLspConverter.convertRange(symbol.range),
-        selectionRange: TSLspConverter.convertRange(symbol.selectionRange),
+        range: this.convertRange(symbol.range),
+        selectionRange: this.convertRange(symbol.selectionRange),
         tags: symbol.tags,
         deprecated: symbol.tags?.includes(types.SymbolTag.Deprecated) ?? false,
         children:
@@ -532,8 +530,8 @@ export class TSLspConverter {
       uri: item.uri.toString(),
       kind: (item.kind + 1) as lsp.SymbolKind,
       name: item.name,
-      range: TSLspConverter.convertRange(item.range),
-      selectionRange: TSLspConverter.convertRange(item.selectionRange),
+      range: this.convertRange(item.range),
+      selectionRange: this.convertRange(item.selectionRange),
       detail: item.detail,
       tags: item.tags as any,
       data,
@@ -542,7 +540,7 @@ export class TSLspConverter {
 
   convertInlayHint = (hint: vscode.InlayHint): lsp.InlayHint => {
     return {
-      position: TSLspConverter.convertPosition(hint.position),
+      position: this.convertPosition(hint.position),
       label:
         typeof hint.label === "string"
           ? hint.label
@@ -556,21 +554,21 @@ export class TSLspConverter {
       tooltip: convertOrFalsy(hint.tooltip, this.convertMarkupToLsp),
       paddingLeft: hint.paddingLeft,
       paddingRight: hint.paddingRight,
-      textEdits: mapOrFalsy(hint.textEdits, TSLspConverter.convertTextEdit),
+      textEdits: mapOrFalsy(hint.textEdits, this.convertTextEdit),
     };
   };
 
   convertIncomingCall = (item: vscode.CallHierarchyIncomingCall): lsp.CallHierarchyIncomingCall => {
     return {
       from: this.convertCallHierarcgyItem(item.from),
-      fromRanges: item.fromRanges.map(TSLspConverter.convertRange),
+      fromRanges: item.fromRanges.map(this.convertRange),
     };
   };
 
   convertOutgoingCall = (item: vscode.CallHierarchyOutgoingCall): lsp.CallHierarchyOutgoingCall => {
     return {
       to: this.convertCallHierarcgyItem(item.to),
-      fromRanges: item.fromRanges.map(TSLspConverter.convertRange),
+      fromRanges: item.fromRanges.map(this.convertRange),
     };
   };
 
@@ -598,14 +596,14 @@ export class TSLspConverter {
 
   convertSelectionRange = (range: vscode.SelectionRange): lsp.SelectionRange => {
     return {
-      range: TSLspConverter.convertRange(range.range),
+      range: this.convertRange(range.range),
       parent: convertOrFalsy(range.parent, this.convertSelectionRange),
     };
   };
 
   convertCodeLens = (lens: vscode.CodeLens, data?: any): lsp.CodeLens => {
     return {
-      range: TSLspConverter.convertRange(lens.range),
+      range: this.convertRange(lens.range),
       command: lens.command,
       data,
     };

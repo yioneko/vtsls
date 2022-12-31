@@ -40,7 +40,7 @@ export class CommandsShimService {
     });
   }
 
-  async executeCommand(id: string, ...args: any[]) {
+  async executeCommand<T, A extends any[]>(id: string, ...args: A): Promise<T | undefined> {
     const command = this._commands.get(id);
     if (!command) {
       this.delegate.logMessage(lsp.MessageType.Error, `Command ${id} not found`);
@@ -49,7 +49,7 @@ export class CommandsShimService {
 
     const { callback, thisArg } = command;
     try {
-      return await callback.apply(thisArg, args);
+      return (await callback.apply(thisArg, args)) as T;
     } catch (e) {
       this.delegate.logMessage(lsp.MessageType.Error, `Execute command ${id} failed: ${String(e)}`);
     }

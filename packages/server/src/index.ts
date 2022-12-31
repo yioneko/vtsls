@@ -63,8 +63,13 @@ function onServerInitialize(conn: Connection, params: InitializeParams) {
 
   process.on("exit", () => service.dispose());
 
+  const capabilities = getTsLspDefaultCapabilities();
+  if (!clientCapabilities.textDocument?.codeAction?.codeActionLiteralSupport) {
+    capabilities.codeActionProvider = true;
+  }
+
   return {
-    capabilities: getTsLspDefaultCapabilities(),
+    capabilities,
     serverInfo: { name: "vtsls", version: VTSLS_VRESION },
   };
 }

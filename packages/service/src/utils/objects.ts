@@ -1,6 +1,4 @@
-export {
-  equals,
-} from "@vsc-ts/utils/objects"
+export { equals } from "@vsc-ts/utils/objects";
 
 export function deepClone<T>(obj: T): T {
   if (!obj || typeof obj !== "object") {
@@ -13,7 +11,5 @@ export function deepClone<T>(obj: T): T {
   Object.entries(obj).forEach(([key, value]) => {
     result[key] = value && typeof value === "object" ? deepClone(value) : value;
   });
-  return result;
+  return result as T;
 }
-
-

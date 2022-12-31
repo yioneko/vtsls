@@ -3,7 +3,6 @@ import * as lsp from "vscode-languageserver-protocol";
 import { URI } from "vscode-uri";
 import { TSLanguageServiceDelegate } from "../languageService";
 import { RestrictedCache } from "../utils/cache";
-import { TSLspConverter } from "../utils/converter";
 import { onCaseInsensitiveFileSystem } from "../utils/fs";
 import { deepClone } from "../utils/objects";
 import { ResourceMap } from "../utils/resourceMap";
@@ -723,7 +722,7 @@ export class LanguageFeaturesShimService extends LanguagesFeaturesRegistryServic
     }
 
     return result.map((r) => ({
-      range: TSLspConverter.convertRange(r.range),
+      range: this.delegate.converter.convertRange(r.range),
       kind: r.kind as lsp.DocumentHighlightKind,
     }));
   }
@@ -998,7 +997,7 @@ export class LanguageFeaturesShimService extends LanguagesFeaturesRegistryServic
       token
     );
     if (result) {
-      return result.map(TSLspConverter.convertTextEdit);
+      return result.map(this.delegate.converter.convertTextEdit);
     }
   }
 
@@ -1018,7 +1017,7 @@ export class LanguageFeaturesShimService extends LanguagesFeaturesRegistryServic
       token
     );
     if (result) {
-      return result.map(TSLspConverter.convertTextEdit);
+      return result.map(this.delegate.converter.convertTextEdit);
     }
   }
 
@@ -1039,7 +1038,7 @@ export class LanguageFeaturesShimService extends LanguagesFeaturesRegistryServic
       token
     );
     if (result) {
-      return result.map(TSLspConverter.convertTextEdit);
+      return result.map(this.delegate.converter.convertTextEdit);
     }
   }
 
@@ -1057,10 +1056,10 @@ export class LanguageFeaturesShimService extends LanguagesFeaturesRegistryServic
     const result = await provider.prepareRename(doc, types.Position.of(params.position), token);
     if (result) {
       if (types.Range.isRange(result)) {
-        return TSLspConverter.convertRange(result);
+        return this.delegate.converter.convertRange(result);
       } else {
         return {
-          range: TSLspConverter.convertRange(result.range),
+          range: this.delegate.converter.convertRange(result.range),
           placeholder: result.placeholder,
         };
       }
