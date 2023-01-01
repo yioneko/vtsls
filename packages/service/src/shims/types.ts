@@ -1791,6 +1791,12 @@ export enum ColorFormat {
 	HSL = 2
 }
 
+export enum ProgressLocation {
+	SourceControl = 1,
+	Window = 10,
+	Notification = 15
+}
+
 export class DataTransferItem {
 
 	async asString(): Promise<string> {
