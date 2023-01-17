@@ -11,7 +11,7 @@ const srcDir = path.resolve(__dirname, "./src");
 async function build({ watch }) {
   const pkgJson = await fs.promises.readFile(path.resolve(__dirname, "./package.json"), "utf8");
   const { version, dependencies = [] } = JSON.parse(pkgJson);
-  return esbuild.build({
+  const opts = {
     entryPoints: [srcDir],
     bundle: true,
     outfile: path.resolve(outDir, "main.js"),
@@ -21,8 +21,13 @@ async function build({ watch }) {
     target: "node14",
     platform: "node",
     define: { VTSLS_VRESION: `"${version}"` },
-    watch,
-  });
+  };
+  if (!watch) {
+    return esbuild.build(opts);
+  } else {
+    const context = await esbuild.context(opts);
+    context.watch();
+  }
 }
 
 if (require.main === module) {
