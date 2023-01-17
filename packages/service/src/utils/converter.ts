@@ -522,7 +522,7 @@ export class TSLspConverter {
     };
   };
 
-  convertCallHierarcgyItem = (
+  convertCallHierarcgyItemToLsp = (
     item: vscode.CallHierarchyItem,
     data?: any
   ): lsp.CallHierarchyItem => {
@@ -536,6 +536,17 @@ export class TSLspConverter {
       tags: item.tags as any,
       data,
     };
+  };
+
+  convertCallHierarcgyItemFromLsp = (item: lsp.CallHierarchyItem) => {
+    return new types.CallHierarchyItem(
+      item.kind - 1,
+      item.name,
+      item.detail || "",
+      URI.parse(item.uri),
+      types.Range.of(item.range),
+      types.Range.of(item.selectionRange)
+    );
   };
 
   convertInlayHint = (hint: vscode.InlayHint): lsp.InlayHint => {
@@ -560,14 +571,14 @@ export class TSLspConverter {
 
   convertIncomingCall = (item: vscode.CallHierarchyIncomingCall): lsp.CallHierarchyIncomingCall => {
     return {
-      from: this.convertCallHierarcgyItem(item.from),
+      from: this.convertCallHierarcgyItemToLsp(item.from),
       fromRanges: item.fromRanges.map(this.convertRange),
     };
   };
 
   convertOutgoingCall = (item: vscode.CallHierarchyOutgoingCall): lsp.CallHierarchyOutgoingCall => {
     return {
-      to: this.convertCallHierarcgyItem(item.to),
+      to: this.convertCallHierarcgyItemToLsp(item.to),
       fromRanges: item.fromRanges.map(this.convertRange),
     };
   };

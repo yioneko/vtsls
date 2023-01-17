@@ -224,7 +224,7 @@ export function createTSLanguageService(initOptions: TSLanguageServiceOptions) {
     rename: waitInit(l.rename.bind(l)),
     foldingRanges: waitInit(l.foldingRanges.bind(l)),
     selectionRanges: waitInit(l.selectionRanges.bind(l)),
-    prepareCallHierachy: waitInit(l.prepareCallHierachy.bind(l)),
+    prepareCallHierarchy: waitInit(l.prepareCallHierarchy.bind(l)),
     incomingCalls: waitInit(l.incomingCalls.bind(l)),
     outgoingCalls: waitInit(l.outgoingCalls.bind(l)),
     inlayHint: waitInit(l.inlayHint.bind(l)),

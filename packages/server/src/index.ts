@@ -131,7 +131,7 @@ function bindServiceHandlers(
   conn.onSelectionRanges(service.selectionRanges);
   conn.onCodeLens(service.codeLens);
   conn.onCodeLensResolve(service.codeLensResolve);
-  conn.languages.callHierarchy.onPrepare(service.prepareCallHierachy);
+  conn.languages.callHierarchy.onPrepare(service.prepareCallHierarchy);
   conn.languages.callHierarchy.onIncomingCalls(service.incomingCalls);
   conn.languages.callHierarchy.onOutgoingCalls(service.outgoingCalls);
   conn.languages.inlayHint.on(service.inlayHint);

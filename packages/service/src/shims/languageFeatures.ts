@@ -483,35 +483,6 @@ export class CompletionCache extends DataCache<CompletionProviderCollection> {
   }
 }
 
-class CallHierarchyCache extends DataCache<ProviderCollection<vscode.CallHierarchyProvider>> {
-  private readonly callHierarchyItemCache = new RestrictedCache<vscode.CallHierarchyItem[]>(2);
-
-  store(items: vscode.CallHierarchyItem[], providerId: string) {
-    const cacheId = this.callHierarchyItemCache.store(items);
-    return (index: number, item: lsp.CallHierarchyItem) => {
-      const data = this.createData(providerId, index, cacheId);
-      item.data = data;
-      return item;
-    };
-  }
-
-  resolve(item: lsp.CallHierarchyItem) {
-    if (!item.data) {
-      return;
-    }
-    const resolvedData = this.resolveData(item.data);
-    if (!resolvedData) {
-      return;
-    }
-    const { registry, index, cacheId } = resolvedData;
-    const cachedItem = this.callHierarchyItemCache.get(cacheId)?.[index];
-    if (!cachedItem) {
-      return;
-    }
-    return { registry, cachedItem };
-  }
-}
-
 export class CodeLensCache extends DataCache<ProviderCollection<vscode.CodeLensProvider>> {
   static readonly id = "_vtsls.codeLensCacheCommand";
 
@@ -612,7 +583,6 @@ export class LanguageFeaturesShimService extends LanguagesFeaturesRegistryServic
     this.$providers.codeActions,
     this.commands
   );
-  private readonly callHierarchyCache = new CallHierarchyCache(this.$providers.callHierarchy);
   private readonly codeLensCache = new CodeLensCache(this.$providers.codeLens, this.commands);
 
   async completion(params: lsp.CompletionParams, token = lsp.CancellationToken.None) {
@@ -1108,7 +1078,7 @@ export class LanguageFeaturesShimService extends LanguagesFeaturesRegistryServic
     }
   }
 
-  async prepareCallHierachy(
+  async prepareCallHierarchy(
     params: lsp.CallHierarchyPrepareParams,
     token = lsp.CancellationToken.None
   ) {
@@ -1122,14 +1092,15 @@ export class LanguageFeaturesShimService extends LanguagesFeaturesRegistryServic
       token
     );
 
-    if (result) {
-      const itemsArr = Array.isArray(result) ? result : [result];
-      const transform = this.callHierarchyCache.store(itemsArr, id);
-      return itemsArr.map((item, index) =>
-        transform(index, this.delegate.converter.convertCallHierarcgyItem(item))
+    if (Array.isArray(result)) {
+      return result.map((item) =>
+        this.delegate.converter.convertCallHierarcgyItemToLsp(item, { id })
       );
+    } else {
+      return result
+        ? [this.delegate.converter.convertCallHierarcgyItemToLsp(result, { id })]
+        : null;
     }
-    return null;
   }
 
   async incomingCalls(
@@ -1137,16 +1108,18 @@ export class LanguageFeaturesShimService extends LanguagesFeaturesRegistryServic
     token = lsp.CancellationToken.None
   ) {
     const { item } = params;
-    const cached = this.callHierarchyCache.resolve(item);
-    if (!cached) {
+    const providerId = item.data.id;
+    if (!providerId) {
       return null;
     }
-    const { registry, cachedItem } = cached;
-    if (!registry || !registry.provider.provideCallHierarchyIncomingCalls) {
+    const { provider } = this.prepareProviderById(providerId, this.$providers.callHierarchy);
+    if (!provider.provideCallHierarchyIncomingCalls) {
       return null;
     }
-
-    const result = await registry.provider.provideCallHierarchyIncomingCalls(cachedItem, token);
+    const result = await provider.provideCallHierarchyIncomingCalls(
+      this.delegate.converter.convertCallHierarcgyItemFromLsp(item),
+      token
+    );
 
     if (result) {
       return result.map(this.delegate.converter.convertIncomingCall);
@@ -1159,16 +1132,18 @@ export class LanguageFeaturesShimService extends LanguagesFeaturesRegistryServic
     token = lsp.CancellationToken.None
   ) {
     const { item } = params;
-    const cached = this.callHierarchyCache.resolve(item);
-    if (!cached) {
+    const providerId = item.data.id;
+    if (!providerId) {
       return null;
     }
-    const { registry, cachedItem } = cached;
-    if (!registry || !registry.provider.provideCallHierarchyOutgoingCalls) {
+    const { provider } = this.prepareProviderById(providerId, this.$providers.callHierarchy);
+    if (!provider.provideCallHierarchyOutgoingCalls) {
       return null;
     }
-
-    const result = await registry.provider.provideCallHierarchyOutgoingCalls(cachedItem, token);
+    const result = await provider.provideCallHierarchyOutgoingCalls(
+      this.delegate.converter.convertCallHierarcgyItemFromLsp(item),
+      token
+    );
 
     if (result) {
       return result.map(this.delegate.converter.convertOutgoingCall);
@@ -1317,6 +1292,18 @@ export class LanguageFeaturesShimService extends LanguagesFeaturesRegistryServic
     }
 
     return { doc, ...all[0] };
+  }
+
+  private prepareProviderById<Collection extends ProviderCollection<any>>(
+    id: string,
+    providers: Collection
+  ) {
+    for (const [providerId, reg] of Object.entries(providers)) {
+      if (id === providerId) {
+        return reg as Collection[number];
+      }
+    }
+    throw new lsp.ResponseError(lsp.ErrorCodes.InvalidRequest, `Provider with id ${id} not found`);
   }
 
   private getProviderWithoutSelector<T, Args = unknown>(providers: ProviderCollection<T, Args>) {
