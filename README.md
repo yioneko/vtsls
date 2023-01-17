@@ -108,13 +108,10 @@ Same as VSCode. The list below may not be complete.
 - `refactor.rewrite.arrow.braces`
 - `refactor.rewrite.property.generateAccessors`
 
-## TODO
-
-- Diagnostics polling
-
 ## Not Planned
 
 - Read TypeScript plugin from VSCode extensions
+- Web server
 - All the features not supported in upstream
 
 ## Similar Projects

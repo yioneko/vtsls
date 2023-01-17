@@ -10,6 +10,7 @@ import { DiagnosticsShimService } from "./diagnostics";
 import { createExtensionsShim } from "./extensions";
 import { createL10nShim } from "./l10n";
 import { LanguageFeaturesShimService } from "./languageFeatures";
+import { UIKind } from "./types";
 import { WindowShimService } from "./window";
 import { WorkspaceShimService } from "./workspace";
 
@@ -57,6 +58,7 @@ export function initializeShimServices(
   env = {
     language: initOptions.locale ?? "en",
     openExternal: (uri: import("vscode").Uri) => delegate.openExternal(uri.toString(true)),
+    uiKind: UIKind.Desktop,
   } as any;
 
   return {
