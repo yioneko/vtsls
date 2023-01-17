@@ -22,16 +22,21 @@ async function build({ watch }) {
     target: "node14",
     platform: "node",
     external: Object.keys(dependencies).flatMap((d) => [d, `${d}/*`]),
-    watch,
   };
-  await esbuild.build(esmOpts);
-  await esbuild.build({
+  const cjsOpts = {
     ...esmOpts,
     outfile: path.resolve(outDir, "index.js"),
     format: "cjs",
     define: { "import.meta.url": "importMetaUrl" },
     inject: [path.resolve(__dirname, "cjs_shims.js")],
-  });
+  };
+  if (!watch) {
+    await esbuild.build(esmOpts);
+    await esbuild.build(cjsOpts);
+  } else {
+    const contexts = [await esbuild.context(esmOpts), await esbuild.context(cjsOpts)];
+    contexts.map((ctx) => ctx.watch());
+  }
 }
 
 if (require.main === module) {
