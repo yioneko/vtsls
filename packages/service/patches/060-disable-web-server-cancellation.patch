@@ -1,0 +1,30 @@
+diff --git a/src/tsServer/server.ts b/src/tsServer/server.ts
+index 935d473..261c1e2 100644
+--- a/src/tsServer/server.ts
++++ b/src/tsServer/server.ts
+@@ -4,7 +4,7 @@
+  *--------------------------------------------------------------------------------------------*/
+ 
+ import * as vscode from 'vscode';
+-import { Cancellation } from '@vscode/sync-api-common/lib/common/messageCancellation';
++// import { Cancellation } from '@vscode/sync-api-common/lib/common/messageCancellation';
+ import type * as Proto from '../protocol';
+ import { EventName } from '../protocol.const';
+ import { CallbackMap } from '../tsServer/callbackMap';
+@@ -224,12 +224,12 @@ export class ProcessBasedTsServer extends Disposable implements ITypeScriptServe
+ 
+ 				if (executeInfo.token) {
+ 
+-					const cancelViaSAB = isWebAndHasSharedArrayBuffers()
+-						? Cancellation.addData(request)
+-						: undefined;
++					// const cancelViaSAB = isWebAndHasSharedArrayBuffers()
++					// 	? Cancellation.addData(request)
++					// 	: undefined;
+ 
+ 					executeInfo.token.onCancellationRequested(() => {
+-						cancelViaSAB?.();
++						// cancelViaSAB?.();
+ 						this.tryCancelRequest(request, command);
+ 					});
+ 				}

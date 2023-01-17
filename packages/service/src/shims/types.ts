@@ -2455,4 +2455,9 @@ export class CancellationError extends Error {
 		this.name = this.message;
 	}
 }
+
+export enum UIKind {
+	Desktop = 1,
+	Web = 2
+}
 //#endregion
