@@ -15,7 +15,7 @@
     "./dist/**/*.d.ts"
   ],
   "dependencies": {
-    "@vscode/l10n": "^0.0.10",
+    "@vscode/l10n": "^0.0.11",
     "jsonc-parser": "^3.2.0",
     "semver": "5.5.1",
     "typescript": "^4.9.4",
