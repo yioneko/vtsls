@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
 import { Emitter } from "vscode-languageserver-protocol";
 import { URI } from "vscode-uri";
-import { DebounceEmitter } from "../utils/deouncedEmitter";
+import { DebouncedEmitter } from "../utils/debouncedEmitter";
 import { onCaseInsensitiveFileSystem } from "../utils/fs";
 import { ResourceMap } from "../utils/resourceMap";
 import { generateUuid } from "../utils/uuid";
@@ -9,7 +9,7 @@ import { generateUuid } from "../utils/uuid";
 export class DiagnosticsShimService {
   private diagnosticsCollections = new Map<string, DiagnosticCollection>();
 
-  readonly onDidChangeDiagnostics = new DebounceEmitter<vscode.DiagnosticChangeEvent>();
+  readonly onDidChangeDiagnostics = new DebouncedEmitter<vscode.DiagnosticChangeEvent>();
 
   createDiagnosticCollection(name?: string) {
     const collectionName = name ?? generateUuid();

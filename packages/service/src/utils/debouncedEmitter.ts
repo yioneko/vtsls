@@ -1,6 +1,6 @@
 import { Emitter } from "vscode-languageserver-protocol";
 
-export class DebounceEmitter<T> extends Emitter<T> {
+export class DebouncedEmitter<T> extends Emitter<T> {
   private readonly _delay: number;
   private _cancelCount = 0;
   private _eventBuffer: T[] = [];
