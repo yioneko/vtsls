@@ -275,11 +275,6 @@
       "default": true,
       "description": "Enable/disable auto-import-style completions on partially-typed import statements."
     },
-    "typescript.suggest.includeCompletionsWithSnippetText": {
-      "type": "boolean",
-      "default": true,
-      "description": "Enable/disable snippet completions from TS Server."
-    },
     "typescript.reportStyleChecksAsWarnings": {
       "type": "boolean",
       "default": true,
@@ -1004,6 +999,11 @@
       "type": "boolean",
       "default": true,
       "description": "Enable/disable snippet completions for methods in object literals. Requires using TypeScript 4.7+ in the workspace."
+    },
+    "typescript.experimental.tsserver.web.enableProjectWideIntellisense": {
+      "type": "boolean",
+      "default": false,
+      "description": "Enable/disable project-wide IntelliSense on web. Requires that VS Code is running in a trusted context."
     },
     "vtsls.javascript.format.baseIndentSize": {
       "type": "number"
