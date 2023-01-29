@@ -752,7 +752,7 @@ export class LanguageFeaturesShimService extends LanguagesFeaturesRegistryServic
         if (
           vscKind &&
           args.metadata &&
-          args.metadata.providedCodeActionKinds?.every((k) => !k.contains(vscKind))
+          args.metadata.providedCodeActionKinds?.every((k) => !vscKind.contains(k))
         ) {
           continue;
         }
