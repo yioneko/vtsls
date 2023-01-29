@@ -35,7 +35,6 @@ export async function createTestService(workspacePath: string) {
   service.openTextDocument({
     textDocument: { uri, languageId: "typescript", version: 0, text: "" },
   });
-  await new Promise((res) => setTimeout(res, 200));
   service.closeTextDocument({ textDocument: { uri } });
 
   return service;

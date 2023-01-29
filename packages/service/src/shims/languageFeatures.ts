@@ -1,3 +1,4 @@
+import { Barrier } from "utils/barrier";
 import * as vscode from "vscode";
 import * as lsp from "vscode-languageserver-protocol";
 import { URI } from "vscode-uri";
@@ -75,6 +76,13 @@ class LanguagesFeaturesRegistryService {
   readonly onDidChangeDiagnostics = this.diagnostics.onDidChangeDiagnostics.event;
 
   constructor(private readonly diagnostics: DiagnosticsShimService) {}
+
+  // only for capturing registration timing for initialization
+  // ref: patches/020-trigger-features-registered-event.patch
+  $staticFeaturesRegistered = new Barrier();
+  $triggerStaticFeaturesRegistered() {
+    this.$staticFeaturesRegistered.open();
+  }
 
   createDiagnosticCollection(name?: string) {
     return this.diagnostics.createDiagnosticCollection(name);
@@ -586,7 +594,7 @@ export class LanguageFeaturesShimService extends LanguagesFeaturesRegistryServic
   private readonly codeLensCache = new CodeLensCache(this.$providers.codeLens, this.commands);
 
   async completion(params: lsp.CompletionParams, token = lsp.CancellationToken.None) {
-    const { doc, providers } = this.prepareProviderHandle(
+    const { doc, providers } = await this.prepareProviderHandle(
       params.textDocument.uri,
       this.$providers.completionItem
     );
@@ -676,7 +684,7 @@ export class LanguageFeaturesShimService extends LanguagesFeaturesRegistryServic
   }
 
   async documentHighlight(params: lsp.DocumentHighlightParams, token = lsp.CancellationToken.None) {
-    const { doc, provider } = this.prepareHighestProviderHandle(
+    const { doc, provider } = await this.prepareHighestProviderHandle(
       params.textDocument.uri,
       this.$providers.documentHighlight
     );
@@ -698,7 +706,7 @@ export class LanguageFeaturesShimService extends LanguagesFeaturesRegistryServic
   }
 
   async signatureHelp(params: lsp.SignatureHelpParams, token = lsp.CancellationToken.None) {
-    const { doc, provider } = this.prepareHighestProviderHandle(
+    const { doc, provider } = await this.prepareHighestProviderHandle(
       params.textDocument.uri,
       this.$providers.signatureHelp
     );
@@ -728,7 +736,7 @@ export class LanguageFeaturesShimService extends LanguagesFeaturesRegistryServic
   }
 
   async definition(params: lsp.DefinitionParams, token = lsp.CancellationToken.None) {
-    const { doc, provider } = this.prepareHighestProviderHandle(
+    const { doc, provider } = await this.prepareHighestProviderHandle(
       params.textDocument.uri,
       this.$providers.definition
     );
@@ -740,7 +748,7 @@ export class LanguageFeaturesShimService extends LanguagesFeaturesRegistryServic
   }
 
   async references(params: lsp.ReferenceParams, token = lsp.CancellationToken.None) {
-    const { doc, provider } = this.prepareHighestProviderHandle(
+    const { doc, provider } = await this.prepareHighestProviderHandle(
       params.textDocument.uri,
       this.$providers.reference
     );
@@ -757,7 +765,7 @@ export class LanguageFeaturesShimService extends LanguagesFeaturesRegistryServic
   }
 
   async hover(params: lsp.HoverParams, token = lsp.CancellationToken.None) {
-    const { doc, provider } = this.prepareHighestProviderHandle(
+    const { doc, provider } = await this.prepareHighestProviderHandle(
       params.textDocument.uri,
       this.$providers.hover
     );
@@ -769,7 +777,7 @@ export class LanguageFeaturesShimService extends LanguagesFeaturesRegistryServic
   }
 
   async documentSymbol(params: lsp.DocumentSymbolParams, token = lsp.CancellationToken.None) {
-    const { doc, provider } = this.prepareHighestProviderHandle(
+    const { doc, provider } = await this.prepareHighestProviderHandle(
       params.textDocument.uri,
       this.$providers.documentSymbol
     );
@@ -783,7 +791,7 @@ export class LanguageFeaturesShimService extends LanguagesFeaturesRegistryServic
   }
 
   async workspaceSymbol(params: lsp.WorkspaceSymbolParams, token = lsp.CancellationToken.None) {
-    const { provider } = this.getProviderWithoutSelector(this.$providers.workspaceSymbol);
+    const { provider } = await this.getProviderWithoutSelector(this.$providers.workspaceSymbol);
     const result = await provider.provideWorkspaceSymbols(params.query, token);
     if (result) {
       return result.map(this.delegate.converter.convertSymbol);
@@ -791,7 +799,7 @@ export class LanguageFeaturesShimService extends LanguagesFeaturesRegistryServic
   }
 
   async codeAction(params: lsp.CodeActionParams, token = lsp.CancellationToken.None) {
-    const { doc, providers } = this.prepareProviderHandle(
+    const { doc, providers } = await this.prepareProviderHandle(
       params.textDocument.uri,
       this.$providers.codeActions
     );
@@ -920,7 +928,7 @@ export class LanguageFeaturesShimService extends LanguagesFeaturesRegistryServic
   }
 
   async implementation(params: lsp.ImplementationParams, token = lsp.CancellationToken.None) {
-    const { doc, provider } = this.prepareHighestProviderHandle(
+    const { doc, provider } = await this.prepareHighestProviderHandle(
       params.textDocument.uri,
       this.$providers.implementation
     );
@@ -936,7 +944,7 @@ export class LanguageFeaturesShimService extends LanguagesFeaturesRegistryServic
   }
 
   async typeDefinition(params: lsp.TypeDefinitionParams, token = lsp.CancellationToken.None) {
-    const { doc, provider } = this.prepareHighestProviderHandle(
+    const { doc, provider } = await this.prepareHighestProviderHandle(
       params.textDocument.uri,
       this.$providers.typeDefinition
     );
@@ -956,7 +964,7 @@ export class LanguageFeaturesShimService extends LanguagesFeaturesRegistryServic
     token = lsp.CancellationToken.None
   ) {
     // NOTE: typescript use range format instead
-    const { doc, provider } = this.prepareHighestProviderHandle(
+    const { doc, provider } = await this.prepareHighestProviderHandle(
       params.textDocument.uri,
       this.$providers.documentRangeFormattignEdit
     );
@@ -975,7 +983,7 @@ export class LanguageFeaturesShimService extends LanguagesFeaturesRegistryServic
     params: lsp.DocumentRangeFormattingParams,
     token = lsp.CancellationToken.None
   ) {
-    const { doc, provider } = this.prepareHighestProviderHandle(
+    const { doc, provider } = await this.prepareHighestProviderHandle(
       params.textDocument.uri,
       this.$providers.documentRangeFormattignEdit
     );
@@ -995,7 +1003,7 @@ export class LanguageFeaturesShimService extends LanguagesFeaturesRegistryServic
     params: lsp.DocumentOnTypeFormattingParams,
     token = lsp.CancellationToken.None
   ) {
-    const { doc, provider } = this.prepareHighestProviderHandle(
+    const { doc, provider } = await this.prepareHighestProviderHandle(
       params.textDocument.uri,
       this.$providers.onTypeFormatting
     );
@@ -1013,7 +1021,7 @@ export class LanguageFeaturesShimService extends LanguagesFeaturesRegistryServic
   }
 
   async prepareRename(params: lsp.PrepareRenameParams, token = lsp.CancellationToken.None) {
-    const { doc, provider } = this.prepareHighestProviderHandle(
+    const { doc, provider } = await this.prepareHighestProviderHandle(
       params.textDocument.uri,
       this.$providers.rename
     );
@@ -1037,7 +1045,7 @@ export class LanguageFeaturesShimService extends LanguagesFeaturesRegistryServic
   }
 
   async rename(params: lsp.RenameParams, token = lsp.CancellationToken.None) {
-    const { doc, provider } = this.prepareHighestProviderHandle(
+    const { doc, provider } = await this.prepareHighestProviderHandle(
       params.textDocument.uri,
       this.$providers.rename
     );
@@ -1053,7 +1061,7 @@ export class LanguageFeaturesShimService extends LanguagesFeaturesRegistryServic
   }
 
   async foldingRanges(params: lsp.FoldingRangeParams, token = lsp.CancellationToken.None) {
-    const { doc, provider } = this.prepareHighestProviderHandle(
+    const { doc, provider } = await this.prepareHighestProviderHandle(
       params.textDocument.uri,
       this.$providers.foldingRange
     );
@@ -1064,7 +1072,7 @@ export class LanguageFeaturesShimService extends LanguagesFeaturesRegistryServic
   }
 
   async selectionRanges(params: lsp.SelectionRangeParams, token = lsp.CancellationToken.None) {
-    const { doc, provider } = this.prepareHighestProviderHandle(
+    const { doc, provider } = await this.prepareHighestProviderHandle(
       params.textDocument.uri,
       this.$providers.selectionRange
     );
@@ -1082,7 +1090,7 @@ export class LanguageFeaturesShimService extends LanguagesFeaturesRegistryServic
     params: lsp.CallHierarchyPrepareParams,
     token = lsp.CancellationToken.None
   ) {
-    const { doc, id, provider } = this.prepareHighestProviderHandle(
+    const { doc, id, provider } = await this.prepareHighestProviderHandle(
       params.textDocument.uri,
       this.$providers.callHierarchy
     );
@@ -1112,7 +1120,7 @@ export class LanguageFeaturesShimService extends LanguagesFeaturesRegistryServic
     if (!providerId) {
       return null;
     }
-    const { provider } = this.prepareProviderById(providerId, this.$providers.callHierarchy);
+    const { provider } = await this.prepareProviderById(providerId, this.$providers.callHierarchy);
     if (!provider.provideCallHierarchyIncomingCalls) {
       return null;
     }
@@ -1136,7 +1144,7 @@ export class LanguageFeaturesShimService extends LanguagesFeaturesRegistryServic
     if (!providerId) {
       return null;
     }
-    const { provider } = this.prepareProviderById(providerId, this.$providers.callHierarchy);
+    const { provider } = await this.prepareProviderById(providerId, this.$providers.callHierarchy);
     if (!provider.provideCallHierarchyOutgoingCalls) {
       return null;
     }
@@ -1152,7 +1160,7 @@ export class LanguageFeaturesShimService extends LanguagesFeaturesRegistryServic
   }
 
   async inlayHint(params: lsp.InlayHintParams, token = lsp.CancellationToken.None) {
-    const { doc, provider } = this.prepareHighestProviderHandle(
+    const { doc, provider } = await this.prepareHighestProviderHandle(
       params.textDocument.uri,
       this.$providers.inlayHints
     );
@@ -1164,7 +1172,7 @@ export class LanguageFeaturesShimService extends LanguagesFeaturesRegistryServic
   }
 
   async codeLens(params: lsp.CodeLensParams, token = lsp.CancellationToken.None) {
-    const { doc, providers } = this.prepareProviderHandle(
+    const { doc, providers } = await this.prepareProviderHandle(
       params.textDocument.uri,
       this.$providers.codeLens
     );
@@ -1217,7 +1225,7 @@ export class LanguageFeaturesShimService extends LanguagesFeaturesRegistryServic
   }
 
   async semanticTokensFull(params: lsp.SemanticTokensParams, token = lsp.CancellationToken.None) {
-    const { doc, provider } = this.prepareHighestProviderHandle(
+    const { doc, provider } = await this.prepareHighestProviderHandle(
       params.textDocument.uri,
       this.$providers.documentSemanticTokens
     );
@@ -1232,7 +1240,7 @@ export class LanguageFeaturesShimService extends LanguagesFeaturesRegistryServic
     params: lsp.SemanticTokensRangeParams,
     token = lsp.CancellationToken.None
   ) {
-    const { doc, provider } = this.prepareHighestProviderHandle(
+    const { doc, provider } = await this.prepareHighestProviderHandle(
       params.textDocument.uri,
       this.$providers.documentRangeSemanticTokens
     );
@@ -1247,10 +1255,11 @@ export class LanguageFeaturesShimService extends LanguagesFeaturesRegistryServic
     return { data: [] };
   }
 
-  private prepareProviderHandle<T, Args = unknown>(
+  private async prepareProviderHandle<T, Args = unknown>(
     uri: lsp.URI,
     providers: ProviderCollection<T, Args>
   ) {
+    await this.$staticFeaturesRegistered.wait();
     const scoreWithProviders: {
       id: string;
       score: number;
@@ -1279,11 +1288,11 @@ export class LanguageFeaturesShimService extends LanguagesFeaturesRegistryServic
     };
   }
 
-  private prepareHighestProviderHandle<T, Args = unknown>(
+  private async prepareHighestProviderHandle<T, Args = unknown>(
     uri: lsp.URI,
     providers: ProviderCollection<T, Args>
   ) {
-    const { doc, providers: all } = this.prepareProviderHandle(uri, providers);
+    const { doc, providers: all } = await this.prepareProviderHandle(uri, providers);
     if (!Array.isArray(all) || all.length === 0) {
       throw new lsp.ResponseError(
         lsp.ErrorCodes.InternalError,
@@ -1294,10 +1303,11 @@ export class LanguageFeaturesShimService extends LanguagesFeaturesRegistryServic
     return { doc, ...all[0] };
   }
 
-  private prepareProviderById<Collection extends ProviderCollection<any>>(
+  private async prepareProviderById<Collection extends ProviderCollection<any>>(
     id: string,
     providers: Collection
   ) {
+    await this.$staticFeaturesRegistered.wait();
     for (const [providerId, reg] of Object.entries(providers)) {
       if (id === providerId) {
         return reg as Collection[number];
@@ -1306,7 +1316,10 @@ export class LanguageFeaturesShimService extends LanguagesFeaturesRegistryServic
     throw new lsp.ResponseError(lsp.ErrorCodes.InvalidRequest, `Provider with id ${id} not found`);
   }
 
-  private getProviderWithoutSelector<T, Args = unknown>(providers: ProviderCollection<T, Args>) {
+  private async getProviderWithoutSelector<T, Args = unknown>(
+    providers: ProviderCollection<T, Args>
+  ) {
+    await this.$staticFeaturesRegistered.wait();
     for (const [id, reg] of Object.entries(providers)) {
       return { id, ...reg };
     }
