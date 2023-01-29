@@ -122,6 +122,7 @@ Same as VSCode. The list below may not be complete.
 git submodule update --init
 pnpm install
 pnpm build
+pnpm build:watch # or watch changes by
 ```
 
 ## Similar Projects

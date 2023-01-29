@@ -23,8 +23,7 @@ async function getPatchFiles(patchesPath) {
  * @return {Promise<string>}
  */
 async function checkTsExtDir(targetDir) {
-  const cpTarget =
-    targetDir || path.resolve(__dirname, "../src/typescript-language-features");
+  const cpTarget = targetDir || path.resolve(__dirname, "../src/typescript-language-features");
   try {
     const stat = await fs.stat(cpTarget);
     if (stat.isDirectory()) {
@@ -42,6 +41,30 @@ async function checkTsExtDir(targetDir) {
 }
 
 /**
+ * Copy file or directory recursively. Do not consider other entry types here or check nesting.
+ *
+ * @param {string} src
+ * @param {string} dst
+ */
+async function cpOrRecursive(src, dst) {
+  const srcStat = await fs.stat(src);
+  if (srcStat.isFile()) {
+    await fs.copyFile(src, dst);
+    await fs.chmod(dst, srcStat.mode);
+  } else if (srcStat.isDirectory()) {
+    await fs.mkdir(dst);
+    for (const entry of await fs.readdir(src)) {
+      const newSrc = path.join(src, entry);
+      const newDst = path.join(dst, entry);
+      await cpOrRecursive(newSrc, newDst);
+    }
+    await fs.chmod(dst, srcStat.mode);
+  } else {
+    console.warn(`Entry ${entry} is not a file or directory, skipped copy`);
+  }
+}
+
+/**
  * @param targetDir {string}
  */
 async function copyTsExtTo(targetDir) {
@@ -49,7 +72,7 @@ async function copyTsExtTo(targetDir) {
   for (const entry of await fs.readdir(tsExtDir)) {
     if (entry.match(/(src)|(package.*\.json)/)) {
       const entryPath = path.resolve(tsExtDir, entry);
-      await execFile("cp", [entryPath, `${targetDir}/`, "-r"]);
+      await cpOrRecursive(entryPath, path.join(targetDir, entry));
     }
   }
 }
