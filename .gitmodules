@@ -1,3 +1,4 @@
 [submodule "vscode"]
 	path = packages/service/vscode
 	url = https://github.com/microsoft/vscode
+	shallow = true

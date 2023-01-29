@@ -31,7 +31,7 @@
   "scripts": {
     "build": "node scripts/build.js && tsc",
     "build:watch": "node scripts/build.js watch & tsc --watch",
-    "type-check": "tsc",
+    "type-check": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
     "patch-extension": "node scripts/patch.js",

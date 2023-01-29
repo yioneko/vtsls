@@ -8,5 +8,5 @@
     }
   },
   "include": ["src/**/*"],
-  "exclude": ["src/typescript-language-features"],
+  "exclude": ["src/typescript-language-features"]
 }

@@ -114,6 +114,16 @@ Same as VSCode. The list below may not be complete.
 - Web server
 - All the features not supported in upstream
 
+## Develop
+
+### Build
+
+```sh
+git submodule update --init
+pnpm install
+pnpm build
+```
+
 ## Similar Projects
 
 - [typescript-language-server](https://github.com/typescript-language-server/typescript-language-server)
