@@ -1,4 +1,4 @@
-import { CodeActionCache, CodeLensCache, CompletionCache } from "shims/languageFeatures";
+import { CodeActionCache, CompletionCache } from "shims/languageFeatures";
 import {
   activationEvents as pkgJsonEvents,
   contributes as pkgJsonContributes,
@@ -57,7 +57,7 @@ function collectCommands() {
   for (const { command } of pkgJsonContributes.commands) {
     commandSet.add(command);
   }
-  return [...commandSet.values(), CodeActionCache.id, CompletionCache.id, CodeLensCache.id];
+  return [...commandSet.values(), CodeActionCache.id, CompletionCache.id];
 }
 
 export const commands = collectCommands();

@@ -4,9 +4,7 @@ import * as lsp from "vscode-languageserver-protocol";
 import { URI } from "vscode-uri";
 import { TSLanguageServiceDelegate } from "../languageService";
 import { RestrictedCache } from "../utils/cache";
-import { onCaseInsensitiveFileSystem } from "../utils/fs";
 import { deepClone } from "../utils/objects";
-import { ResourceMap } from "../utils/resourceMap";
 import { isNil } from "../utils/types";
 import { CommandsShimService } from "./commands";
 import { DiagnosticsShimService } from "./diagnostics";
@@ -491,87 +489,6 @@ export class CompletionCache extends DataCache<CompletionProviderCollection> {
   }
 }
 
-export class CodeLensCache extends DataCache<ProviderCollection<vscode.CodeLensProvider>> {
-  static readonly id = "_vtsls.codeLensCacheCommand";
-
-  constructor(
-    providers: ProviderCollection<vscode.CodeLensProvider>,
-    commands: CommandsShimService
-    // workspace: WorkspaceShimService
-  ) {
-    super(providers);
-
-    commands.registerCommand(CodeLensCache.id, (...args) => {
-      const data = this.resolveData(args[0]);
-      if (!data) {
-        // TODO
-        return;
-      }
-      const { cacheId, index, uri } = data;
-      if (!uri) {
-        return;
-      }
-      const cachedItem = this.codeLensCache.get(URI.parse(uri))?.get(cacheId)?.[index];
-      if (cachedItem?.command) {
-        void commands.executeCommand(
-          cachedItem.command.command,
-          ...(cachedItem.command.arguments || [])
-        );
-      }
-    });
-  }
-
-  private readonly codeLensCache = new ResourceMap<RestrictedCache<vscode.CodeLens[]>>(undefined, {
-    onCaseInsensitiveFileSystem: onCaseInsensitiveFileSystem(),
-  });
-
-  private getDocCache(uri: lsp.URI) {
-    const vsUri = URI.parse(uri);
-    const cache = this.codeLensCache.get(vsUri);
-    if (cache) {
-      return cache;
-    } else {
-      const newCache = new RestrictedCache<vscode.CodeLens[]>(2);
-      this.codeLensCache.set(vsUri, newCache);
-      return newCache;
-    }
-  }
-
-  private createDataWithUri(providerId: string, index: number, cacheId: number, uri: lsp.URI) {
-    return { ...this.createData(providerId, index, cacheId), uri };
-  }
-
-  store(items: vscode.CodeLens[], providerId: string, uri: lsp.URI) {
-    const cacheId = this.getDocCache(uri).store(items);
-    return (index: number, item: lsp.CodeLens) => {
-      const data = this.createDataWithUri(providerId, index, cacheId, uri);
-      if (item.command) {
-        item.command = { command: CodeLensCache.id, title: "", arguments: [data] };
-      }
-      return item;
-    };
-  }
-
-  resolve(item: lsp.CodeLens) {
-    if (!item.data) {
-      return;
-    }
-    const resolvedData = this.resolveData(item.data);
-    if (!resolvedData) {
-      return;
-    }
-    const { registry, index, cacheId, uri } = resolvedData;
-    if (!uri) {
-      return;
-    }
-    const cachedItem = this.codeLensCache.get(URI.parse(uri))?.get(cacheId)?.[index];
-    if (!cachedItem) {
-      return;
-    }
-    return { registry, cachedItem };
-  }
-}
-
 export class LanguageFeaturesShimService extends LanguagesFeaturesRegistryService {
   constructor(
     private readonly delegate: TSLanguageServiceDelegate,
@@ -591,7 +508,6 @@ export class LanguageFeaturesShimService extends LanguagesFeaturesRegistryServic
     this.$providers.codeActions,
     this.commands
   );
-  private readonly codeLensCache = new CodeLensCache(this.$providers.codeLens, this.commands);
 
   async completion(params: lsp.CompletionParams, token = lsp.CancellationToken.None) {
     const { doc, providers } = await this.prepareProviderHandle(
@@ -1178,11 +1094,17 @@ export class LanguageFeaturesShimService extends LanguagesFeaturesRegistryServic
     );
     const results = await Promise.all(
       providers.map(async ({ provider, id }) => {
-        const items = await provider.provideCodeLenses(doc, token);
+        const items = await (provider.provideCodeLenses(doc, token) as vscode.ProviderResult<
+          import("@vsc-ts/languageFeatures/codeLens/baseCodeLensProvider").ReferencesCodeLens[]
+        >);
         if (items) {
-          const transform = this.codeLensCache.store(items, id, params.textDocument.uri);
-          return items.map((item, index) =>
-            transform(index, this.delegate.converter.convertCodeLens(item))
+          return items.map((item) =>
+            this.delegate.converter.convertCodeLens(item, {
+              document: item.document.toString(),
+              file: item.file,
+              isResolved: false,
+              id,
+            })
           );
         }
       })
@@ -1202,22 +1124,40 @@ export class LanguageFeaturesShimService extends LanguagesFeaturesRegistryServic
   }
 
   async codeLensResolve(item: lsp.CodeLens, token = lsp.CancellationToken.None) {
-    const cached = this.codeLensCache.resolve(item);
-    if (!cached) {
+    const providerId = item.data.id;
+    if (!providerId || item.data.isResolved) {
       return item;
     }
-    const { registry, cachedItem } = cached;
-    if (!registry || !registry.provider.resolveCodeLens) {
+    const { provider } = await this.prepareProviderById(providerId, this.$providers.codeLens);
+    if (!provider.resolveCodeLens) {
       return item;
     }
-    if (cachedItem.isResolved) {
-      return item;
-    }
-    const result = await registry.provider.resolveCodeLens(cachedItem, token);
+    // TODO: we cannot directly import this at toplevel as vscode namespace is not defined yet
+    const { ReferencesCodeLens } = await import(
+      "@vsc-ts/languageFeatures/codeLens/baseCodeLensProvider"
+    );
+    const refLens = new ReferencesCodeLens(
+      URI.parse(item.data.document),
+      item.data.file,
+      types.Range.of(item.range)
+    );
+    const result = await provider.resolveCodeLens(refLens, token);
     if (result) {
-      const converted = this.delegate.converter.convertCodeLens(result);
-      converted.command = item.command;
+      if (result.command) {
+        // NOTE: from getCommand in languageFeatures/codeLens/implementationsCodeLens.ts
+        const [document, codeLensStart, locations] = result.command.arguments as [
+          URI,
+          vscode.Position,
+          vscode.Location[]
+        ];
+        result.command.arguments = [
+          document.toString(),
+          this.delegate.converter.convertPosition(codeLensStart),
+          this.delegate.converter.convertLocations(locations),
+        ];
+      }
 
+      const converted = this.delegate.converter.convertCodeLens(result, { isResolved: true });
       return converted;
     } else {
       return item;
