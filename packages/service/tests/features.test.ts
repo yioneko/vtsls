@@ -2,77 +2,143 @@ import * as path from "node:path";
 import { afterAll, assert, describe, expect, it } from "vitest";
 import * as lsp from "vscode-languageserver-protocol";
 import { URI } from "vscode-uri";
-import { createTestService, openDoc } from "./utils";
+import { applyEditsToText, createTestService, openDoc } from "./utils";
 
 describe("language features", async () => {
-  const workspacePath = path.resolve(__dirname, "./workspace");
+  const workspacePath = path.join(__dirname, "workspace");
   const service = await createTestService(workspacePath);
 
   afterAll(() => {
     service.dispose();
   });
 
-  it("completion", async () => {
-    const uri = URI.file(path.resolve(workspacePath, "index.ts")).toString();
-    const { close } = openDoc(service, uri, "func");
+  describe("selectionRange", async () => {
+    const testDocUri = URI.file(path.resolve(workspacePath, "index.ts")).toString();
+    const { change: setDocContent } = await openDoc(service, testDocUri);
+    const testDocParams = { textDocument: { uri: testDocUri } };
 
-    const response = await service.completion({
-      position: { line: 0, character: 4 },
-      textDocument: { uri },
-      context: {
-        triggerKind: lsp.CompletionTriggerKind.Invoked,
-      },
-    });
-    expect(response).toMatchObject({
-      items: expect.arrayContaining([expect.objectContaining({ label: "function" })]),
-      isIncomplete: expect.any(Boolean),
-    });
+    // TODO: we cannot close doc in `afterAll`
 
-    close();
+    it("provide selection ranges", async () => {
+      setDocContent("a.b");
+      const response = await service.selectionRanges({
+        positions: [{ line: 0, character: 2 }],
+        ...testDocParams,
+      });
+      assert(response);
+      expect(response[0]).toMatchObject({
+        range: { start: { line: 0, character: 2 }, end: { line: 0, character: 3 } },
+        parent: { range: { start: { line: 0, character: 0 }, end: { line: 0, character: 3 } } },
+      });
+    });
   });
 
-  it("jsdoc completion", async () => {
-    const uri = URI.file(path.resolve(workspacePath, "index.ts")).toString();
-    const { close } = openDoc(
-      service,
-      uri,
-      `/***/
+  describe("completion", async () => {
+    const testDocUri = URI.file(path.resolve(workspacePath, "index.ts")).toString();
+    const { change: setDocContent } = await openDoc(service, testDocUri);
+    const testDocParams = { textDocument: { uri: testDocUri } };
+
+    it("provide basic completion", async () => {
+      setDocContent("func");
+      const response = await service.completion({
+        ...testDocParams,
+        position: { line: 0, character: 4 },
+        context: {
+          triggerKind: lsp.CompletionTriggerKind.Invoked,
+        },
+      });
+      expect(response).toMatchObject({
+        items: expect.arrayContaining([expect.objectContaining({ label: "function" })]),
+        isIncomplete: expect.any(Boolean),
+      });
+    });
+
+    it("provide jsdoc compleion", async () => {
+      setDocContent(
+        `/***/
 function abc(a) {}`
-    );
+      );
 
-    const response = await service.completion({
-      position: { line: 0, character: 3 },
-      textDocument: { uri },
-      context: {
-        triggerKind: lsp.CompletionTriggerKind.TriggerCharacter,
-        triggerCharacter: "*",
-      },
+      const response = await service.completion({
+        ...testDocParams,
+        position: { line: 0, character: 3 },
+        context: {
+          triggerKind: lsp.CompletionTriggerKind.TriggerCharacter,
+          triggerCharacter: "*",
+        },
+      });
+      expect(response.items).toContainEqual(
+        expect.objectContaining({
+          detail: "JSDoc comment",
+          label: "/** */",
+          insertTextFormat: lsp.InsertTextFormat.Snippet,
+        })
+      );
     });
-    expect(response.items).toContainEqual(
-      expect.objectContaining({
-        detail: "JSDoc comment",
-        label: "/** */",
-        insertTextFormat: lsp.InsertTextFormat.Snippet,
-      })
-    );
-
-    close();
   });
 
-  it("selection range", async () => {
-    const uri = URI.file(path.resolve(workspacePath, "index.ts")).toString();
-    const { close } = openDoc(service, uri, `a.b`);
+  describe("formatting", async () => {
+    const formatDocUri = URI.file(path.resolve(workspacePath, "unformatted.ts")).toString();
+    const { doc } = await openDoc(service, formatDocUri);
+    const formatDocParams = { textDocument: { uri: formatDocUri } };
 
-    const response = await service.selectionRanges({
-      positions: [{ line: 0, character: 2 }],
-      textDocument: { uri },
-    });
-    assert(response);
-    expect(response[0]).toMatchObject({
-      range: { start: { line: 0, character: 2 }, end: { line: 0, character: 3 } },
-      parent: { range: { start: { line: 0, character: 0 }, end: { line: 0, character: 3 } } },
+    it("provide document formatting", async () => {
+      const edits = await service.documentFormatting({
+        ...formatDocParams,
+        options: { tabSize: 6, insertSpaces: true },
+      });
+      assert(edits);
+      expect(applyEditsToText(doc.getText(), edits)).toMatchInlineSnapshot(`
+        "function foo() {
+              bar({
+                    a,
+                    b
+              })
+              barbar([
+                    b, c]);
+        }
+        "
+      `);
     });
 
-    close();
+    it("provide document range formatting", async () => {
+      const edits = await service.documentRangeFormatting({
+        ...formatDocParams,
+        range: { start: { line: 1, character: 0 }, end: { line: 4, character: 0 } },
+        options: { tabSize: 2, insertSpaces: false },
+      });
+      assert(edits);
+      expect(applyEditsToText(doc.getText(), edits)).toMatchInlineSnapshot(`
+        "function foo() {
+        	bar({
+        		a,
+        		b
+        	})
+              barbar([
+        b,c]);
+        }
+        "
+      `);
+    });
+
+    it("provide document on type formatting", async () => {
+      const edits = await service.documentOnTypeFormatting({
+        ...formatDocParams,
+        position: { line: 5, character: 6 },
+        ch: ";",
+        options: { tabSize: 4, insertSpaces: true },
+      });
+      assert(edits);
+      expect(applyEditsToText(doc.getText(), edits)).toMatchInlineSnapshot(`
+        "function foo() {
+        bar({
+           a,
+        b})
+            barbar([
+                b, c]);
+        }
+        "
+      `);
+    });
   });
 });

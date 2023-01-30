@@ -1,6 +1,9 @@
 import * as path from "node:path";
+import * as fs from "node:fs/promises";
 import { URI } from "vscode-uri";
 import { createTSLanguageService, TSLanguageService } from "../";
+import { TextDocument } from "vscode-languageserver-textdocument";
+import { TextEdit } from "vscode-languageserver-protocol";
 
 export async function createTestService(workspacePath: string) {
   const service = createTSLanguageService({
@@ -13,17 +16,8 @@ export async function createTestService(workspacePath: string) {
         includePackageJsonAutoImports: "off",
       },
       tsserver: {
+        // log: "verbose",
         useSyntaxServer: "never",
-      },
-    },
-    vtsls: {
-      typescript: {
-        format: {
-          newLineCharacter: "\n", // FIXME: tsserver doesn't respect this
-          indentSize: 2,
-          tabSize: 2,
-          convertTabsToSpaces: true,
-        },
       },
     },
   });
@@ -40,22 +34,47 @@ export async function createTestService(workspacePath: string) {
   return service;
 }
 
-export function openDoc(service: TSLanguageService, uri: string, text: string) {
-  let version = 0;
+export async function openDoc(service: TSLanguageService, uri: string, text?: string) {
+  const resolvedText = text ?? (await readFsUriContent(uri));
   service.openTextDocument({
-    textDocument: { uri, languageId: "typescript", version: 0, text: "" },
-  });
-  service.changeTextDocument({
-    textDocument: { uri, version: ++version },
-    contentChanges: [{ text }],
+    textDocument: {
+      uri,
+      languageId: "typescript",
+      version: 0,
+      text: resolvedText,
+    },
   });
 
+  service.changeTextDocument({
+    textDocument: { uri, version: 0 },
+    contentChanges: [{ text: resolvedText }],
+  });
+
+  const doc = TextDocument.create(uri, "", 0, resolvedText);
+
   return {
+    doc,
     close: () => service.closeTextDocument({ textDocument: { uri } }),
-    change: (text: string) =>
+    change: (text: string) => {
       service.changeTextDocument({
-        textDocument: { uri, version: ++version },
+        textDocument: { uri, version: doc.version + 1 },
         contentChanges: [{ text }],
-      }),
+      });
+      TextDocument.update(doc, [{ text }], doc.version + 1);
+    },
   };
+}
+async function readFsUriContent(uri: string) {
+  try {
+    const fsPath = URI.parse(uri).fsPath;
+    const content = await fs.readFile(fsPath, { encoding: "utf-8" });
+    return content;
+  } catch (e) {
+    return "";
+  }
+}
+
+export function applyEditsToText(text: string, edits: TextEdit[]) {
+  const doc = TextDocument.create("", "", 0, text);
+  return TextDocument.applyEdits(doc, edits);
 }

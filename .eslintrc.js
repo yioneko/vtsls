@@ -17,6 +17,7 @@ module.exports = {
     // TODO: specific rules for scripts file
     "packages/**/*.js",
     "packages/service/vitest.config.ts",
+    "packages/service/tests/workspace",
     "**/dist",
     ".eslintrc.*",
   ],

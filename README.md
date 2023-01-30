@@ -16,7 +16,7 @@ See [available server capabilities](./packages/server/src/capabilities.ts).
 
 ### Code Lens
 
-The code lens command `editor.action.showReferences` shoule be executed by client, [relevant LSP issue here](https://github.com/microsoft/language-server-protocol/issues/1148). Command arguments:
+The code lens command `editor.action.showReferences` should be executed by client, [relevant LSP issue here](https://github.com/microsoft/language-server-protocol/issues/1148). Command arguments:
 
 ```typescript
 [uri: DocumentUri, codeLensStart: Position, locations: Location[]]
@@ -87,7 +87,7 @@ See the configuration schema [here](./packages/service/configuration.schema.json
 {
   command: "_typescript.configurePlugin",
   arguments: [pluginName, config]
-} => Response
+} => void
 ```
 
 ## Code Actions
