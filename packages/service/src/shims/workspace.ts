@@ -231,14 +231,7 @@ export class WorkspaceShimService {
 
     await pending.wait();
     // HACK: returns a pesudo doc here: the open is success, but client didn't trigger a didOpen notification
-    const doc =
-      this._documents.get(uri) ??
-      ({
-        uri: uri.toString(),
-        version: 0,
-        languageId: "unknown",
-        lineCount: 0,
-      } as TextDocument);
+    const doc = this._documents.get(uri) ?? TextDocument.create(uri.toString(), "unknown", 0, "");
     return this.delegate.converter.convertTextDocuemntFromLsp(doc);
   }
 
