@@ -8,13 +8,19 @@ Unlike other similar projects, this is implemented by filling VSCode APIs and ap
 
 ## Usage
 
-**Notice**: The package has been renamed from `vtsls`.
-
 Install by `npm install -g @vtsls/language-server`, then run `vtsls --stdio`. Requires `node >= 14`.
 
 ## Supported LSP Features
 
 See [available server capabilities](./packages/server/src/capabilities.ts).
+
+### Code Lens
+
+The code lens command `editor.action.showReferences` shoule be executed by client, [relevant LSP issue here](https://github.com/microsoft/language-server-protocol/issues/1148). Command arguments:
+
+```typescript
+[uri: DocumentUri, codeLensStart: Position, locations: Location[]]
+```
 
 ## Configuration
 
@@ -75,6 +81,15 @@ See the configuration schema [here](./packages/service/configuration.schema.json
 } => Response
 ```
 
+- Configure typescript plugin
+
+```typescript
+{
+  command: "_typescript.configurePlugin",
+  arguments: [pluginName, config]
+} => Response
+```
+
 ## Code Actions
 
 Same as VSCode. The list below may not be complete.
@@ -107,6 +122,10 @@ Same as VSCode. The list below may not be complete.
 - `refactor.rewrite.export`
 - `refactor.rewrite.arrow.braces`
 - `refactor.rewrite.property.generateAccessors`
+
+## Known Issues
+
+See [Known issues](https://github.com/yioneko/vtsls/issues/26)
 
 ## Not Planned
 
