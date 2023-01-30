@@ -3,12 +3,12 @@
   "extends": ["config:base"],
   "automerge": true,
   "schedule": ["after 7pm on Monday"],
-  "ignoreDeps": ["jsonc-parser", "semver", "@types/semver", "@types/node"],
   "git-submodules": {
     "enabled": true
   },
   "npm": {
     "extends": ["group:allNonMajor"],
+    "ignoreDeps": ["jsonc-parser", "semver", "@types/semver", "@types/node", "node"],
     "rangeStrategy": "bump"
   }
 }
