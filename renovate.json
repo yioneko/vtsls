@@ -6,5 +6,9 @@
   "ignoreDeps": ["jsonc-parser", "semver", "@types/semver", "@types/node"],
   "git-submodules": {
     "enabled": true
+  },
+  "npm": {
+    "extends": ["group:allNonMajor"],
+    "rangeStrategy": "bump"
   }
 }
