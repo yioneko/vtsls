@@ -1,6 +1,6 @@
 const esbuild = require("esbuild");
-const path = require("path");
-const fs = require("fs");
+const path = require("node:path");
+const fs = require("node:fs");
 const { apply } = require("./patch");
 
 const outDir = path.resolve(__dirname, "../dist");

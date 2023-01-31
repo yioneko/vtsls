@@ -1,9 +1,20 @@
 const cp = require("child_process");
-const fs = require("fs/promises");
-const path = require("path");
+const fs = require("node:fs/promises");
+const readline = require("node:readline");
+const path = require("node:path");
 const { promisify } = require("util");
 
 const execFile = promisify(cp.execFile);
+
+async function getVscodeCommit() {
+  const { stdout } = await execFile("git", ["submodule", "status", "vscode"], {
+    cwd: path.resolve(__dirname, "../"),
+  });
+  const commit = stdout.match(/^\s*([^\s]+)\s/)[1];
+  return commit;
+}
+
+const patchMarkFile = ".patched-commit";
 
 /**
  * @param patchesPath {string}
@@ -18,6 +29,18 @@ async function getPatchFiles(patchesPath) {
   return patches;
 }
 
+async function promptOverwriteExt() {
+  if (process.env.CI === "true") {
+    return true;
+  }
+
+  const rl = readline.createInterface(stdin, stdout);
+  const ans = await promisify(rl.question)(
+    "The VSCode submodule has updated. Overwrite the extension and re-patch? [y/n]"
+  );
+  return ans === "y";
+}
+
 /**
  * @param targetDir {string | undefined}
  * @return {Promise<string>}
@@ -27,12 +50,18 @@ async function checkTsExtDir(targetDir) {
   try {
     const stat = await fs.stat(cpTarget);
     if (stat.isDirectory()) {
-      return cpTarget;
-    } else {
-      await fs.rm(cpTarget, { recursive: true });
-      await fs.mkdir(cpTarget, { recursive: true });
-      await copyTsExtTo(cpTarget);
+      const curCommit = await getVscodeCommit();
+      try {
+        const patched = await fs.readFile(path.resolve(targetDir, patchMarkFile), "utf-8");
+        if (curCommit === patched || !promptOverwriteExt()) {
+          return cpTarget;
+        }
+      } catch {}
     }
+
+    await fs.rm(cpTarget, { recursive: true });
+    await fs.mkdir(cpTarget, { recursive: true });
+    await copyTsExtTo(cpTarget);
   } catch {
     await fs.mkdir(cpTarget, { recursive: true });
     await copyTsExtTo(cpTarget);
@@ -69,12 +98,14 @@ async function cpOrRecursive(src, dst) {
  */
 async function copyTsExtTo(targetDir) {
   const tsExtDir = path.resolve(__dirname, "../vscode/extensions/typescript-language-features");
+  const commit = await getVscodeCommit();
   for (const entry of await fs.readdir(tsExtDir)) {
     if (entry.match(/(src)|(package.*\.json)/)) {
       const entryPath = path.resolve(tsExtDir, entry);
       await cpOrRecursive(entryPath, path.join(targetDir, entry));
     }
   }
+  await fs.writeFile(path.resolve(targetDir, patchMarkFile), commit);
 }
 
 async function apply() {
