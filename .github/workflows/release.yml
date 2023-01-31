@@ -1,13 +1,15 @@
-name: lint
+name: Release
+
+permissions:
+  contents: write
 
 on:
   push:
-    branches: [main]
-  pull_request:
-    branches: [main]
+    tags:
+      - "v*"
 
 jobs:
-  lint:
+  release:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -21,4 +23,9 @@ jobs:
           version: 7
       - run: pnpm install
       - run: pnpm build
-      - run: pnpm lint
+      - run: pnpm publish -r
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - run: pnpx changelogithub
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
