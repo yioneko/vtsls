@@ -1143,7 +1143,7 @@ export class LanguageFeaturesShimService extends LanguagesFeaturesRegistryServic
     );
     const result = await provider.resolveCodeLens(refLens, token);
     if (result) {
-      if (result.command) {
+      if (result.command && result.command.command === "editor.action.showReferences") {
         // NOTE: from getCommand in languageFeatures/codeLens/implementationsCodeLens.ts
         const [document, codeLensStart, locations] = result.command.arguments as [
           URI,

@@ -141,4 +141,106 @@ function abc(a) {}`
       `);
     });
   });
+
+  describe("codeLens", async () => {
+    const testDocUri = URI.file(path.resolve(workspacePath, "index.ts")).toString();
+    const { change: setDocContent } = await openDoc(service, testDocUri);
+    const testDocParams = { textDocument: { uri: testDocUri } };
+
+    it("provide references code lenses", async () => {
+      setDocContent("export function a() {}\nfunction b() { a() }");
+      const lenses = await service.codeLens(testDocParams);
+      assert(lenses);
+
+      const lens = lenses[0];
+      expect(lens).toMatchObject({
+        range: {
+          end: {
+            character: 17,
+            line: 0,
+          },
+          start: {
+            character: 16,
+            line: 0,
+          },
+        },
+      });
+
+      const resolved = await service.codeLensResolve(lens);
+      expect(resolved.command).toMatchObject({
+        arguments: [
+          testDocUri,
+          {
+            character: 16,
+            line: 0,
+          },
+          [
+            {
+              range: {
+                end: {
+                  character: 16,
+                  line: 1,
+                },
+                start: {
+                  character: 15,
+                  line: 1,
+                },
+              },
+              uri: testDocUri,
+            },
+          ],
+        ],
+        command: "editor.action.showReferences",
+        title: "1 reference",
+      });
+    });
+
+    it("provide implementations code lenses", async () => {
+      setDocContent("export interface A {}\nclass B implements A {}");
+      const lenses = await service.codeLens(testDocParams);
+      assert(lenses);
+
+      const lens = lenses[0];
+      expect(lens).toMatchObject({
+        range: {
+          end: {
+            character: 18,
+            line: 0,
+          },
+          start: {
+            character: 17,
+            line: 0,
+          },
+        },
+      });
+
+      const resolved = await service.codeLensResolve(lens);
+      expect(resolved.command).toMatchObject({
+        arguments: [
+          testDocUri,
+          {
+            character: 17,
+            line: 0,
+          },
+          [
+            {
+              range: {
+                end: {
+                  character: 7,
+                  line: 1,
+                },
+                start: {
+                  character: 6,
+                  line: 1,
+                },
+              },
+              uri: testDocUri,
+            },
+          ],
+        ],
+        command: "editor.action.showReferences",
+        title: "1 implementation",
+      });
+    });
+  });
 });

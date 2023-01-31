@@ -15,6 +15,12 @@ export async function createTestService(workspacePath: string) {
       preferences: {
         includePackageJsonAutoImports: "off",
       },
+      implementationsCodeLens: {
+        enabled: true,
+      },
+      referencesCodeLens: {
+        enabled: true,
+      },
       tsserver: {
         // log: "verbose",
         useSyntaxServer: "never",
