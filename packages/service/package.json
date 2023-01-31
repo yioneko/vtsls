@@ -14,6 +14,13 @@
     "./dist/index.mjs",
     "./dist/**/*.d.ts"
   ],
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js",
+      "types": "./dist/types.d.ts"
+    }
+  },
   "dependencies": {
     "@vscode/l10n": "^0.0.11",
     "jsonc-parser": "^3.2.0",
