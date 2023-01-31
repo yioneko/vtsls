@@ -2,12 +2,13 @@
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": ["config:base"],
   "automerge": true,
-  "schedule": ["after 7pm on Monday"],
   "git-submodules": {
+    "schedule": ["after 7pm on Monday"],
     "enabled": true
   },
   "npm": {
     "extends": ["group:allNonMajor"],
+    "schedule": ["after 6pm on Monday"],
     "ignoreDeps": ["jsonc-parser", "semver", "@types/semver", "@types/node", "node"],
     "rangeStrategy": "bump"
   }
