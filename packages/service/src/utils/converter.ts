@@ -5,8 +5,8 @@ import { URI } from "vscode-uri";
 import * as types from "../shims/types";
 import { onCaseInsensitiveFileSystem } from "../utils/fs";
 import { ResourceMap } from "../utils/resourceMap";
-import { getWordPattern } from "./language";
 import { deepClone } from "./objects";
+import { getWordAtText } from "./word";
 
 function isStringOrFalsy(val: unknown): val is string | undefined | null {
   return typeof val === "string" || val === undefined || val === null;
@@ -159,53 +159,16 @@ export class TSLspConverter {
         //   : types.EndOfLine.CRLF;
       },
       getWordRangeAtPosition(position) {
-        const pattern = getWordPattern();
-        // from vscode
-        const windowSize = 15;
-        const maxLen = 1000;
-        const timeBudget = 150;
-
-        const colOffset = position.character > maxLen / 2 ? position.character - maxLen / 2 : 0;
-        const colMatch = position.character - colOffset;
         const line = this.getText(
-          new types.Range(
-            position.line,
-            Math.max(0, position.character - maxLen / 2),
-            position.line,
-            position.character + maxLen / 2
-          )
+          new types.Range(position.line, 0, position.line, Number.MAX_VALUE)
         );
-
-        const t1 = Date.now();
-        let candidate: RegExpExecArray | null = null;
-
-        for (
-          let regexWindowStart = colMatch;
-          !candidate && regexWindowStart > 0;
-          regexWindowStart -= windowSize
-        ) {
-          // check time budget
-          if (Date.now() - t1 >= timeBudget) {
-            break;
-          }
-          pattern.lastIndex = Math.max(0, regexWindowStart - windowSize);
-          let match;
-          while ((match = pattern.exec(line))) {
-            const matchIndex = match.index || 0;
-            if (matchIndex <= colMatch && pattern.lastIndex >= colMatch) {
-              candidate = match;
-              break;
-            } else if (matchIndex > regexWindowStart) {
-              break;
-            }
-          }
-        }
-        if (candidate) {
+        const wordAtText = getWordAtText(position.character + 1, line);
+        if (wordAtText) {
           return new types.Range(
             position.line,
-            candidate.index + colOffset,
+            wordAtText.startColumn - 1,
             position.line,
-            candidate.index + candidate[0].length + colOffset
+            wordAtText.endColumn - 1
           );
         }
       },
