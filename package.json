@@ -28,5 +28,6 @@
     "*.{js,ts}": [
       "eslint --cache --fix"
     ]
-  }
+  },
+  "version": "1.0.0"
 }
