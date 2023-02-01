@@ -9,7 +9,7 @@
     "lint-staged": "^13.1.0",
     "simple-git-hooks": "^2.8.1",
     "typescript": "^4.9.4",
-    "@vtsls/language-server": "workspace:*"
+    "@vtsls/language-service": "workspace:0.1.10"
   },
   "scripts": {
     "build": "pnpm run -r build",
