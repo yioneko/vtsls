@@ -77,11 +77,6 @@ export function getTsLspDefaultCapabilities(): ServerCapabilities {
     typeHierarchyProvider: false,
     inlineValueProvider: false,
     inlayHintProvider: true,
-    diagnosticProvider: {
-      identifier: "typescript",
-      interFileDependencies: true,
-      workspaceDiagnostics: false,
-    },
     workspace: {
       workspaceFolders: {
         supported: true,
