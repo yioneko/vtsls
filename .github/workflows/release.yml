@@ -17,9 +17,10 @@ jobs:
         id: release
         with:
           release-type: node
-          package-name: vtsls
           bootstrap-sha: 9548aa7ec7413eeb2056c6e371b82b86f499772a
-          prerelease: true
+          bump-minor-pre-major: true
+          bump-patch-for-minor-pre-major: true
+          plugins: node-workspace
       - uses: actions/checkout@v3
         with:
           submodules: "true"

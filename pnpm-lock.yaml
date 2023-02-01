@@ -7,6 +7,7 @@ importers:
       '@types/node': ^14
       '@typescript-eslint/eslint-plugin': ^5.49.0
       '@typescript-eslint/parser': ^5.49.0
+      '@vtsls/language-server': workspace:*
       eslint: ^8.33.0
       lint-staged: ^13.1.0
       simple-git-hooks: ^2.8.1
@@ -15,6 +16,7 @@ importers:
       '@types/node': 14.18.34
       '@typescript-eslint/eslint-plugin': 5.49.0_rsaczafy73x3xqauzesvzbsgzy
       '@typescript-eslint/parser': 5.49.0_zkdaqh7it7uc4cvz2haft7rc6u
+      '@vtsls/language-server': link:packages/server
       eslint: 8.33.0
       lint-staged: 13.1.0
       simple-git-hooks: 2.8.1
@@ -22,7 +24,7 @@ importers:
 
   packages/server:
     specifiers:
-      '@vtsls/language-service': workspace:0.1.10
+      '@vtsls/language-service': workspace:*
       esbuild: ^0.17.5
       vscode-languageserver: ^8.0.2
       vscode-uri: ^3.0.7
