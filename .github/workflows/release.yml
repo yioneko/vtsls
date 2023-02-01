@@ -1,31 +1,42 @@
 name: Release
 
-permissions:
-  contents: write
-
 on:
   push:
-    tags:
-      - "v*"
+    branches:
+      - main
 
 jobs:
   release:
+    permissions:
+      contents: write
+      pull-requests: write
+
     runs-on: ubuntu-latest
     steps:
+      - uses: google-github-actions/release-please-action@v3
+        id: release
+        with:
+          release-type: node
+          package-name: vtsls
+          bootstrap-sha: 9548aa7ec7413eeb2056c6e371b82b86f499772a
+          prerelease: true
       - uses: actions/checkout@v3
         with:
           submodules: "true"
+        if: ${{ steps.release.outputs.release_created }}
       - uses: actions/setup-node@v3
         with:
           node-version: 16
+        if: ${{ steps.release.outputs.release_created }}
       - uses: pnpm/action-setup@v2
         with:
           version: 7
+        if: ${{ steps.release.outputs.release_created }}
       - run: pnpm install
+        if: ${{ steps.release.outputs.release_created }}
       - run: pnpm build
+        if: ${{ steps.release.outputs.release_created }}
       - run: pnpm publish -r
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-      - run: pnpx changelogithub
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        if: ${{ steps.release.outputs.release_created }}
