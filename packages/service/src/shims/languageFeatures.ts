@@ -659,7 +659,7 @@ export class LanguageFeaturesShimService extends LanguagesFeaturesRegistryServic
 
     const result = await provider.provideDefinition(doc, types.Position.of(params.position), token);
     if (result) {
-      return this.delegate.converter.convertLocations(result);
+      return this.delegate.converter.convertDefinition(result);
     }
   }
 
@@ -676,7 +676,7 @@ export class LanguageFeaturesShimService extends LanguagesFeaturesRegistryServic
       token
     );
     if (result) {
-      return this.delegate.converter.convertLocations(result);
+      return result.map(this.delegate.converter.convertLocation);
     }
   }
 
@@ -855,7 +855,7 @@ export class LanguageFeaturesShimService extends LanguagesFeaturesRegistryServic
       token
     );
     if (result) {
-      return this.delegate.converter.convertLocations(result);
+      return this.delegate.converter.convertImplementation(result);
     }
   }
 
@@ -871,7 +871,7 @@ export class LanguageFeaturesShimService extends LanguagesFeaturesRegistryServic
       token
     );
     if (result) {
-      return this.delegate.converter.convertLocations(result);
+      return this.delegate.converter.convertTypeDefinition(result);
     }
   }
 
@@ -1153,7 +1153,7 @@ export class LanguageFeaturesShimService extends LanguagesFeaturesRegistryServic
         result.command.arguments = [
           document.toString(),
           this.delegate.converter.convertPosition(codeLensStart),
-          this.delegate.converter.convertLocations(locations),
+          locations.map(this.delegate.converter.convertLocation),
         ];
       }
 

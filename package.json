@@ -15,7 +15,7 @@
     "build": "pnpm run -r build",
     "build:watch": "pnpm build && pnpm run -r --parallel build:watch",
     "lint": "pnpm eslint && pnpm type-check",
-    "eslint": "eslint .",
+    "eslint": "eslint --cache .",
     "type-check": "pnpm run -r type-check",
     "test": "pnpm run -r test"
   },

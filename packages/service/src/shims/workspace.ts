@@ -1,9 +1,9 @@
 import * as path from "path";
-import { TSLanguageServiceDelegate } from "../languageService";
 import * as vscode from "vscode";
 import * as lsp from "vscode-languageserver-protocol";
 import { TextDocument } from "vscode-languageserver-textdocument";
 import { URI, Utils as uriUtils } from "vscode-uri";
+import { TSLanguageServiceDelegate } from "../languageService";
 import { Barrier } from "../utils/barrier";
 import { onCaseInsensitiveFileSystem } from "../utils/fs";
 import { ResourceMap } from "../utils/resourceMap";
@@ -105,17 +105,21 @@ export class WorkspaceShimService {
     TextDocument.update(doc, changes, version);
     this._onDidChangeTextDocument.fire({
       document: this.delegate.converter.convertTextDocuemntFromLsp(doc),
-      // @ts-ignore rangeOffset and rangeLength are not of no use
       contentChanges: changes.map((c) => {
         if ("range" in c) {
-          return { range: c.range, text: c.text };
+          const rangeOffset = doc.offsetAt(c.range.start);
+          const rangeLength = doc.offsetAt(c.range.end) - rangeOffset;
+          return { rangeOffset, rangeLength, range: types.Range.of(c.range), text: c.text };
         } else {
           return {
+            rangeOffset: 0,
+            rangeLength: c.text.length,
             range: new types.Range(0, 0, doc.lineCount, 0),
             text: c.text,
           };
         }
       }),
+      reason: undefined,
     });
   }
 

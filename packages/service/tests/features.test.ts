@@ -243,4 +243,119 @@ function abc(a) {}`
       });
     });
   });
+
+  describe("documentSymbol", async () => {
+    const testDocUri = URI.file(path.resolve(workspacePath, "index.ts")).toString();
+    const { change: setDocContent } = await openDoc(service, testDocUri);
+    const testDocParams = { textDocument: { uri: testDocUri } };
+
+    it("provide document symbols", async () => {
+      setDocContent("function a() { function b() {} }");
+      const response = await service.documentSymbol(testDocParams);
+      assert(response);
+      expect(response[0]).toMatchObject({
+        detail: "",
+        kind: lsp.SymbolKind.Function,
+        name: "a",
+        range: {
+          end: {
+            character: 32,
+            line: 0,
+          },
+          start: {
+            character: 0,
+            line: 0,
+          },
+        },
+        selectionRange: {
+          end: {
+            character: 10,
+            line: 0,
+          },
+          start: {
+            character: 9,
+            line: 0,
+          },
+        },
+        children: [
+          {
+            children: [],
+            kind: lsp.SymbolKind.Function,
+            name: "b",
+            range: {
+              end: {
+                character: 30,
+                line: 0,
+              },
+              start: {
+                character: 15,
+                line: 0,
+              },
+            },
+            selectionRange: {
+              end: {
+                character: 25,
+                line: 0,
+              },
+              start: {
+                character: 24,
+                line: 0,
+              },
+            },
+          },
+        ],
+      });
+    });
+  });
+
+  describe("definition", async () => {
+    const testDocUri = URI.file(path.resolve(workspacePath, "index.ts")).toString();
+    const { change: setDocContent } = await openDoc(service, testDocUri);
+    const testDocParams = { textDocument: { uri: testDocUri } };
+
+    it("provide defintion", async () => {
+      setDocContent("function a() {} a()");
+      const response = await service.definition({
+        ...testDocParams,
+        position: {
+          line: 0,
+          character: 16,
+        },
+      });
+      assert(response);
+      expect(response[0]).toMatchObject({
+        targetUri: testDocUri,
+        originSelectionRange: {
+          end: {
+            character: 17,
+            line: 0,
+          },
+          start: {
+            character: 16,
+            line: 0,
+          },
+        },
+        targetRange: {
+          end: {
+            character: 15,
+            line: 0,
+          },
+          start: {
+            character: 0,
+            line: 0,
+          },
+        },
+        targetSelectionRange: {
+          end: {
+            character: 10,
+            line: 0,
+          },
+          start: {
+            character: 9,
+            line: 0,
+          },
+        },
+      });
+    });
+  });
 });

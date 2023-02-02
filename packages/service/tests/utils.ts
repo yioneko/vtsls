@@ -7,7 +7,12 @@ import { TextEdit } from "vscode-languageserver-protocol";
 
 export async function createTestService(workspacePath: string) {
   const service = createTSLanguageService({
-    clientCapabilities: {},
+    clientCapabilities: {
+      textDocument: {
+        documentSymbol: { hierarchicalDocumentSymbolSupport: true },
+        definition: { linkSupport: true },
+      },
+    },
     workspaceFolders: [{ name: "test", uri: URI.file(workspacePath).toString() }],
   });
   await service.initialize({

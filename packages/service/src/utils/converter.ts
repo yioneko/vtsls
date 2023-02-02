@@ -231,7 +231,7 @@ export class TSLspConverter {
     const isSnippet = !isStringOrFalsy(item.insertText);
     const insertText = isSnippet
       ? (item.insertText as vscode.SnippetString).value
-      : (item.insertText as string | undefined);
+      : (item.insertText as string | undefined) || item.textEdit?.newText;
 
     let textEdit: lsp.TextEdit | lsp.InsertReplaceEdit | undefined = undefined;
     // prefer range to textEdit if provided
@@ -262,6 +262,9 @@ export class TSLspConverter {
       preselect: item.preselect,
       sortText: item.sortText,
       filterText: item.filterText,
+      insertTextMode: convertOrFalsy(item.keepWhitespace, (v) =>
+        v ? lsp.InsertTextMode.adjustIndentation : lsp.InsertTextMode.asIs
+      ),
       insertTextFormat: isSnippet ? lsp.InsertTextFormat.Snippet : lsp.InsertTextFormat.PlainText,
       insertText,
       textEdit,
@@ -272,40 +275,67 @@ export class TSLspConverter {
     };
   };
 
-  convertLocation = <T extends vscode.Location | vscode.LocationLink>(
-    location: T
-  ): T extends vscode.Location ? lsp.Location : lsp.LocationLink => {
-    if ("targetUri" in location) {
-      return {
-        originSelectionRange: convertOrFalsy(location.originSelectionRange, this.convertRange),
-        targetUri: location.targetUri.toString(),
-        targetRange: this.convertRange(location.targetRange),
-        targetSelectionRange: this.convertRange(
-          location.targetSelectionRange || location.targetRange
-        ),
-      } as any;
-    } else {
-      return {
-        uri: location.uri.toString(),
-        range: this.convertRange(location.range),
-      } as any;
-    }
+  convertLocationLink = (location: vscode.LocationLink): lsp.LocationLink => {
+    return {
+      originSelectionRange: convertOrFalsy(location.originSelectionRange, this.convertRange),
+      targetUri: location.targetUri.toString(),
+      targetRange: this.convertRange(location.targetRange),
+      targetSelectionRange: this.convertRange(
+        location.targetSelectionRange || location.targetRange
+      ),
+    };
   };
 
-  convertLocations = <T extends vscode.Location | vscode.Location[] | vscode.LocationLink[]>(
-    location: T
-  ): T extends vscode.Location
-    ? lsp.Location
-    : T extends vscode.Location[]
-    ? lsp.Location[]
-    : T extends vscode.LocationLink
-    ? lsp.LocationLink[]
-    : never => {
+  convertLocationLinkToLocation = (location: vscode.LocationLink): lsp.Location => {
+    return {
+      uri: location.targetUri.toString(),
+      range: this.convertRange(location.targetRange),
+    };
+  };
+
+  convertLocation = (location: vscode.Location): lsp.Location => {
+    return {
+      uri: location.uri.toString(),
+      range: this.convertRange(location.range),
+    };
+  };
+
+  private convertLocations(
+    location: vscode.Location | vscode.Location[] | vscode.LocationLink[],
+    supportLink: boolean
+  ) {
     if (Array.isArray(location)) {
-      return location.map(this.convertLocation) as any;
+      return location.map((l) => {
+        if ("targetUri" in l) {
+          return supportLink ? this.convertLocationLink(l) : this.convertLocationLinkToLocation(l);
+        } else {
+          return this.convertLocation(l);
+        }
+      }) as lsp.Location[] | lsp.LocationLink[];
     } else {
-      return this.convertLocation(location) as any;
+      return this.convertLocation(location);
     }
+  }
+
+  convertDefinition = (location: vscode.Definition | vscode.LocationLink[]) => {
+    return this.convertLocations(
+      location,
+      this.clientCapabilities.textDocument?.definition?.linkSupport ?? false
+    );
+  };
+
+  convertImplementation = (location: vscode.Definition | vscode.LocationLink[]) => {
+    return this.convertLocations(
+      location,
+      this.clientCapabilities.textDocument?.implementation?.linkSupport ?? false
+    );
+  };
+
+  convertTypeDefinition = (location: vscode.Definition | vscode.LocationLink[]) => {
+    return this.convertLocations(
+      location,
+      this.clientCapabilities.textDocument?.typeDefinition?.linkSupport ?? false
+    );
   };
 
   convertDiagnosticFromLsp = (diagnostic: lsp.Diagnostic): vscode.Diagnostic => {
@@ -401,29 +431,31 @@ export class TSLspConverter {
     symbol: T
   ): T extends vscode.SymbolInformation ? lsp.SymbolInformation : lsp.DocumentSymbol => {
     if ("range" in symbol) {
-      return {
+      const result: lsp.DocumentSymbol = {
         name: symbol.name,
         detail: symbol.detail,
         kind: (symbol.kind + 1) as lsp.SymbolKind,
         range: this.convertRange(symbol.range),
         selectionRange: this.convertRange(symbol.selectionRange),
-        tags: symbol.tags,
-        deprecated: symbol.tags?.includes(types.SymbolTag.Deprecated) ?? false,
+        tags: symbol.tags as lsp.SymbolTag[],
+        // deprecated: symbol.tags?.includes(types.SymbolTag.Deprecated) ?? false,
         children:
           symbol.children &&
           this.clientCapabilities.textDocument?.documentSymbol?.hierarchicalDocumentSymbolSupport
             ? symbol.children.map(this.convertSymbol)
             : undefined,
-      } as any;
+      };
+      return result as any;
     } else {
-      return {
+      const result: lsp.SymbolInformation = {
         name: symbol.name,
         kind: (symbol.kind + 1) as lsp.SymbolKind,
-        tags: symbol.tags,
+        tags: symbol.tags as lsp.SymbolTag[],
         deprecated: symbol.tags?.includes(types.SymbolTag.Deprecated) ?? false,
         location: this.convertLocation(symbol.location),
         containerName: symbol.containerName,
-      } as any;
+      };
+      return result as any;
     }
   };
 
