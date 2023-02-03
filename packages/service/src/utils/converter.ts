@@ -58,7 +58,7 @@ export class TSLspConverter {
       onCaseInsensitiveFileSystem: onCaseInsensitiveFileSystem(),
     });
 
-    /* eslint-disable @typescript-eslint/no-unsafe-call */
+    /* eslint-disable @typescript-eslint/no-unsafe-call, @typescript-eslint/ban-ts-comment */
     // @ts-ignore private api
     for (const entry of edit._allEntries()) {
       if (entry._type === types.FileEditType.File) {
@@ -109,7 +109,7 @@ export class TSLspConverter {
         throw new Error(`Not supported type of edit entry: ${entry._type as string}`);
       }
     }
-    /* eslint-enable @typescript-eslint/no-unsafe-call */
+    /* eslint-enable @typescript-eslint/no-unsafe-call, @typescript-eslint/ban-ts-comment */
 
     if (hasResourceOp) {
       return {

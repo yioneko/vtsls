@@ -393,7 +393,7 @@ export class CodeActionCache extends DataCache<CodeActionProviderCollection> {
         const command =
           typeof cachedItem.command === "string" ? (cachedItem as lsp.Command) : cachedItem.command;
         if (command && command.command !== CodeActionCache.id) {
-          void commands.executeCommand(command.command, ...(command.arguments || []));
+          return commands.executeCommand(command.command, ...(command.arguments || []));
         }
       }
     });
@@ -450,7 +450,7 @@ export class CompletionCache extends DataCache<CompletionProviderCollection> {
       const { cacheId, index } = data;
       const cachedItem = this.completionItemCache.get(cacheId)?.[index];
       if (cachedItem?.command && cachedItem.command.command !== CompletionCache.id) {
-        void commands.executeCommand(
+        return commands.executeCommand(
           cachedItem.command.command,
           ...(cachedItem.command.arguments || [])
         );
