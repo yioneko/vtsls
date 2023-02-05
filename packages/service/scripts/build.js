@@ -42,6 +42,7 @@ async function build({ watch }) {
 if (require.main === module) {
   const args = process.argv.slice(2);
 
+  // TODO: check overwrite
   const extPath = path.resolve(__dirname, "../src/typescript-language-features");
   fs.stat(extPath, async (err, stat) => {
     await new Promise((resolve) => {

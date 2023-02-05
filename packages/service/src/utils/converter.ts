@@ -24,7 +24,10 @@ function convertOrFalsy<T, R>(val: T | undefined | null, cvtFn: (v: T) => R): R 
 }
 
 export class TSLspConverter {
-  constructor(private readonly clientCapabilities: lsp.ClientCapabilities) {}
+  constructor(private readonly clientCapabilities: lsp.ClientCapabilities) {
+    // TODO: method overload doesn't support bind shortcut
+    this.convertCodeAction = this.convertCodeAction.bind(this);
+  }
 
   convertTextEdit = (edit: vscode.TextEdit): lsp.TextEdit => {
     return {
@@ -60,7 +63,7 @@ export class TSLspConverter {
 
     /* eslint-disable @typescript-eslint/no-unsafe-call, @typescript-eslint/ban-ts-comment */
     // @ts-ignore private api
-    for (const entry of edit._allEntries()) {
+    for (const entry of edit._allEntries() as ReadonlyArray<types.WorkspaceEditEntry>) {
       if (entry._type === types.FileEditType.File) {
         hasResourceOp = true;
         // file operation
@@ -69,11 +72,13 @@ export class TSLspConverter {
           if (!resouceOpKinds.includes(lsp.ResourceOperationKind.Create)) {
             throw new Error("client doesn't support create operation");
           }
-          docChanges.push({
-            kind: "create",
-            uri: entry.to.toString(),
-            options: entry.options,
-          });
+          if (entry.to) {
+            docChanges.push({
+              kind: "create",
+              uri: entry.to.toString(),
+              options: entry.options,
+            });
+          }
         } else if (entry.to) {
           // Rename
           if (!resouceOpKinds.includes(lsp.ResourceOperationKind.Rename)) {
@@ -106,7 +111,7 @@ export class TSLspConverter {
           textEditsByUri.set(entry.uri, [this.convertTextEdit(entry.edit)]);
         }
       } else {
-        throw new Error(`Not supported type of edit entry: ${entry._type as string}`);
+        throw new Error(`Not supported type of edit entry: ${entry._type}`);
       }
     }
     /* eslint-enable @typescript-eslint/no-unsafe-call, @typescript-eslint/ban-ts-comment */
@@ -387,11 +392,16 @@ export class TSLspConverter {
     };
   };
 
-  convertCodeAction = <T extends vscode.Command | vscode.CodeAction>(
+  convertCodeAction(action: vscode.CodeAction, data?: any): lsp.CodeAction;
+  convertCodeAction(action: vscode.Command, data?: any): lsp.Command;
+  convertCodeAction<T extends vscode.CodeAction | vscode.Command>(
     action: T,
     data?: any
-  ): T extends vscode.Command ? lsp.Command : lsp.CodeAction => {
-    if (action instanceof types.CodeAction) {
+  ): T extends vscode.CodeAction ? lsp.CodeAction : lsp.Command;
+  convertCodeAction(action: vscode.CodeAction | vscode.Command, data?: any) {
+    if (typeof action.command === "string") {
+      return action;
+    } else {
       const ac = action as vscode.CodeAction;
       const result: lsp.CodeAction = {
         title: ac.title,
@@ -399,14 +409,12 @@ export class TSLspConverter {
         diagnostics: mapOrFalsy(ac.diagnostics, this.convertDiagnosticToLsp),
         kind: ac.kind?.value as lsp.CodeActionKind,
         edit: convertOrFalsy(ac.edit, this.convertWorkspaceEdit),
-        isPreferred: action.isPreferred,
+        isPreferred: ac.isPreferred,
         data,
       };
-      return result as any;
-    } else {
-      return { ...action, data } as any;
+      return result;
     }
-  };
+  }
 
   convertHover = (hover: vscode.Hover): lsp.Hover => {
     const mergedString = new types.MarkdownString();
@@ -427,9 +435,9 @@ export class TSLspConverter {
     };
   };
 
-  convertSymbol = <T extends vscode.SymbolInformation | vscode.DocumentSymbol>(
-    symbol: T
-  ): T extends vscode.SymbolInformation ? lsp.SymbolInformation : lsp.DocumentSymbol => {
+  convertSymbol = (
+    symbol: vscode.SymbolInformation | vscode.DocumentSymbol
+  ): lsp.SymbolInformation | lsp.DocumentSymbol => {
     if ("range" in symbol) {
       const result: lsp.DocumentSymbol = {
         name: symbol.name,
@@ -442,20 +450,20 @@ export class TSLspConverter {
         children:
           symbol.children &&
           this.clientCapabilities.textDocument?.documentSymbol?.hierarchicalDocumentSymbolSupport
-            ? symbol.children.map(this.convertSymbol)
+            ? (symbol.children.map(this.convertSymbol) as lsp.DocumentSymbol[])
             : undefined,
       };
-      return result as any;
+      return result;
     } else {
       const result: lsp.SymbolInformation = {
         name: symbol.name,
         kind: (symbol.kind + 1) as lsp.SymbolKind,
         tags: symbol.tags as lsp.SymbolTag[],
-        deprecated: symbol.tags?.includes(types.SymbolTag.Deprecated) ?? false,
+        // deprecated: symbol.tags?.includes(types.SymbolTag.Deprecated) ?? false,
         location: this.convertLocation(symbol.location),
         containerName: symbol.containerName,
       };
-      return result as any;
+      return result;
     }
   };
 

@@ -212,6 +212,7 @@ export class DiagnosticCollection implements vscode.DiagnosticCollection {
   }
 
   private static _compareIndexedTuplesByUri(
+    this: void,
     a: [vscode.Uri, readonly vscode.Diagnostic[]],
     b: [vscode.Uri, readonly vscode.Diagnostic[]]
   ): number {

@@ -32,5 +32,6 @@ module.exports = {
     "@typescript-eslint/no-unsafe-return": "warn",
     "@typescript-eslint/require-await": "off",
     "@typescript-eslint/unbound-method": "warn",
+    "@typescript-eslint/no-non-null-assertion": "off",
   },
 };

@@ -359,10 +359,9 @@ abstract class DataCache<P extends ProviderCollection<any>> {
         index: number;
         cacheId: number;
         registry: P[number] | undefined;
-        [key: string]: any;
       }
     | undefined {
-    const { providerId, index, cacheId, ...rest } = data || {};
+    const { providerId, index, cacheId } = data || {};
     if ([providerId, index, cacheId].some(isNil)) {
       return;
     }
@@ -372,7 +371,7 @@ abstract class DataCache<P extends ProviderCollection<any>> {
         registry = p;
       }
     }
-    return { providerId, index, cacheId, registry, ...rest };
+    return { providerId, index, cacheId, registry };
   }
 }
 
@@ -384,8 +383,7 @@ export class CodeActionCache extends DataCache<CodeActionProviderCollection> {
     commands.registerCommand(CodeActionCache.id, (...args) => {
       const data = this.resolveData(args[0]);
       if (!data) {
-        // TODO
-        return;
+        throw new lsp.ResponseError(lsp.ErrorCodes.InvalidParams, "code action item data missing");
       }
       const { cacheId, index } = data;
       const cachedItem = this.codeActionCache.get(cacheId)?.[index];
@@ -444,8 +442,7 @@ export class CompletionCache extends DataCache<CompletionProviderCollection> {
     commands.registerCommand(CompletionCache.id, (...args) => {
       const data = this.resolveData(args[0]);
       if (!data) {
-        // TODO
-        return;
+        throw new lsp.ResponseError(lsp.ErrorCodes.InvalidParams, "completion item data missing");
       }
       const { cacheId, index } = data;
       const cachedItem = this.completionItemCache.get(cacheId)?.[index];
@@ -710,7 +707,7 @@ export class LanguageFeaturesShimService extends LanguagesFeaturesRegistryServic
     const { provider } = await this.getProviderWithoutSelector(this.$providers.workspaceSymbol);
     const result = await provider.provideWorkspaceSymbols(params.query, token);
     if (result) {
-      return result.map(this.delegate.converter.convertSymbol);
+      return result.map(this.delegate.converter.convertSymbol) as lsp.SymbolInformation[];
     }
   }
 
