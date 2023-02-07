@@ -37,7 +37,7 @@ index b4b431c..935dedc 100644
 +		// 	return;
 +		// }
  
- 		const openedFiledPath = this.client.toOpenedFilePath(document);
+ 		const openedFiledPath = this.client.toOpenTsFilePath(document);
  		if (!openedFiledPath) {
 @@ -47,18 +47,18 @@ class SourceDefinitionCommand implements Command {
  			return;
