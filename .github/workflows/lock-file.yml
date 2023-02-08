@@ -27,5 +27,7 @@ jobs:
         with:
           commit_message: Update lock file
           file_pattern: pnpm-lock.yaml
+          commit_options: "--no-verify --signoff"
           commit_user_name: release-please[bot]
           commit_user_email: 55107282+release-please[bot]@users.noreply.github.com
+          skip_dirty_check: true
