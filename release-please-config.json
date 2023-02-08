@@ -1,0 +1,28 @@
+{
+  "bootstrap-sha": "9548aa7ec7413eeb2056c6e371b82b86f499772a",
+  "bump-minor-pre-major": true,
+  "bump-patch-for-minor-pre-major": true,
+  "plugins": [
+    {
+      "type": "node-workspace",
+      "merge": false
+    },
+    {
+      "type": "linked-versions",
+      "group-name": "vtsls",
+      "components": ["service", "server"]
+    }
+  ],
+  "packages": {
+    "packages/service": {
+      "package-name": "@vtsls/language-service",
+      "release-type": "node",
+      "component": "service"
+    },
+    "packages/server": {
+      "package-name": "@vtsls/language-server",
+      "release-type": "node",
+      "component": "server"
+    }
+  }
+}

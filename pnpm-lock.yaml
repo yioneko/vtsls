@@ -7,7 +7,6 @@ importers:
       '@types/node': ^14
       '@typescript-eslint/eslint-plugin': ^5.51.0
       '@typescript-eslint/parser': ^5.51.0
-      '@vtsls/language-service': workspace:0.1.10
       eslint: ^8.33.0
       lint-staged: ^13.1.0
       simple-git-hooks: ^2.8.1
@@ -16,7 +15,6 @@ importers:
       '@types/node': 14.18.34
       '@typescript-eslint/eslint-plugin': 5.51.0_b635kmla6dsb4frxfihkw4m47e
       '@typescript-eslint/parser': 5.51.0_4vsywjlpuriuw3tl5oq6zy5a64
-      '@vtsls/language-service': link:packages/service
       eslint: 8.33.0
       lint-staged: 13.1.0
       simple-git-hooks: 2.8.1
