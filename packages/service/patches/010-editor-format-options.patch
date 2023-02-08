@@ -1,5 +1,5 @@
 diff --git a/src/languageFeatures/fileConfigurationManager.ts b/src/languageFeatures/fileConfigurationManager.ts
-index 93a3c65..24350f8 100644
+index 4df07ef..54c69ba 100644
 --- a/src/languageFeatures/fileConfigurationManager.ts
 +++ b/src/languageFeatures/fileConfigurationManager.ts
 @@ -46,26 +46,27 @@ export default class FileConfigurationManager extends Disposable {
@@ -40,7 +40,7 @@ index 93a3c65..24350f8 100644
 +		options: vscode.FormattingOptions | undefined,
  		token: vscode.CancellationToken
  	): Promise<void> {
- 		const file = this.client.toOpenedFilePath(document);
+ 		const file = this.client.toOpenTsFilePath(document);
 @@ -104,14 +105,14 @@ export default class FileConfigurationManager extends Disposable {
  		document: vscode.TextDocument,
  		token: vscode.CancellationToken,
