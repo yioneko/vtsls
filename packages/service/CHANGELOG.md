@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.12](https://github.com/yioneko/vtsls/compare/service-v0.1.11...service-v0.1.12) (2023-02-09)
+
+
+### Bug Fixes
+
+* postinstall triggered in production install (fix [#38](https://github.com/yioneko/vtsls/issues/38)) ([e48430a](https://github.com/yioneko/vtsls/commit/e48430a73dbee2b0301806e7a1ef904cba115fc1))
+
 ## [0.1.11](https://github.com/yioneko/vtsls/compare/service-v0.1.10...service-v0.1.11) (2023-02-08)
 
 
