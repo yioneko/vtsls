@@ -36,7 +36,6 @@
     "vitest": "^0.28.4"
   },
   "scripts": {
-    "postinstall": "pnpm run patch-extension",
     "build": "node scripts/build.js && tsc",
     "build:watch": "node scripts/build.js watch & tsc --watch",
     "type-check": "tsc --noEmit --emitDeclarationOnly false",
