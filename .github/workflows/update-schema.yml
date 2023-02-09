@@ -1,0 +1,31 @@
+name: Update config schema
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - packages/service/vscode
+
+jobs:
+  update-schema:
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: "true"
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 16
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 7
+      - run: pnpm install
+      - run: pnpm --filter ./pacakges/service patch-extension
+      - run: pnpm --filter ./pacakges/service gen-schema
+      - uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: Update config schema
+          file_pattern: packages/service/configuration.schema.json
