@@ -27,4 +27,4 @@ jobs:
       - name: Publish package
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: pnpm publish --filter ./packages/${GITHUB_REF_NAME%-v*}
+        run: pnpm publish --filter ./packages/${GITHUB_REF_NAME%-v*} --no-git-checks
