@@ -18,83 +18,39 @@ See [available server capabilities](./packages/server/src/capabilities.ts).
 
 The code lens command `editor.action.showReferences` should be executed by client, [relevant LSP issue here](https://github.com/microsoft/language-server-protocol/issues/1148). Command arguments:
 
-```typescript
+```
 [uri: DocumentUri, codeLensStart: Position, locations: Location[]]
 ```
 
-## Configuration
+### Commands
 
-Almost the same as the original VSCode extension, with a few additional settings excluded for this server.
+Some other commands are undocumented because either it is private for server or not tested.
 
-See the configuration schema [here](./packages/service/configuration.schema.json).
-
-## Commands
-
-### Just works
+`command`: `(arguments => result)`
 
 - `typescript.openTsServerLog`
 - `typescript.restartTsServer`
 - `typescript.reloadProjects`
 - `typescript.selectTypeScriptVersion`
+- `typescript.goToSourceDefinition`: `[DocumentUri, Position] => Location[]`
+- `typescript.findAllFileReferences`: `[DocumentUri] => Location[]`
+- `typescript.goToProjectConfig`: `[DocumentUri] => null`
+- `_typescript.configurePlugin`: `[pluginName: string, config: any] => any`
+- `typescript.tsserverRequest`: `[RequestType, args: any, config: any] => any`
 
-### Special
+  See [CommandTypes](https://github.com/microsoft/TypeScript/blob/ed15865eb065006da26a233d07c7899103b67c08/src/server/protocol.ts) for available tsserver commands.
 
-- Go to source definition
+- `typescript.organizeImports`: `[filePath: string] => any`
+- `typescript.sortImports`: `[filePath: string] => any`
+- `javascript.sortImports`: `[filePath: string] => any`
+- `typescript.removeUnusedImports`: `[filePath: string] => any`
+- `javascript.removeUnusedImports`: `[filePath: string] => any`
 
-```typescript
-{
-  command: "typescript.goToSourceDefinition",
-  arguments: [DocumentUri, Position]
-} => Location[]
-```
+### Code Actions
 
-- File references
+Same as VSCode. The list below may be outdated.
 
-```typescript
-{
-  command: "typescript.findAllFileReferences",
-  arguments: [DocumentUri],
-} => Location[]
-```
-
-- Go to project config
-
-```typescript
-{
-  command: "typescript.goToProjectConfig",
-  arguments: [DocumentUri],
-} => void
-```
-
-- Update paths on rename
-
-  Should work if client is capable of sending [`workspace/didRenameFiles`](https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#workspace_didRenameFiles) notification on file rename. No special handling is needed on client side.
-
-- Directly invoke tsserver command
-
-  See [CommandTypes](https://github.com/microsoft/TypeScript/blob/f6628a4573cd37c26912f78de3d08cd1dbf687a5/lib/protocol.d.ts) for available commands.
-
-```typescript
-{
-  command: "typescript.tsserverRequest",
-  arguments: [RequestType, args, config]
-} => Response
-```
-
-- Configure typescript plugin
-
-```typescript
-{
-  command: "_typescript.configurePlugin",
-  arguments: [pluginName, config]
-} => void
-```
-
-## Code Actions
-
-Same as VSCode. The list below may not be complete.
-
-### Quickfix
+#### Quickfix
 
 - `typescript.organizeImports`
 - `typescript.sortImports`
@@ -102,7 +58,7 @@ Same as VSCode. The list below may not be complete.
 - `typescript.removeUnusedImports`
 - `javascript.removeUnusedImports`
 
-### Source Actions
+#### Source Actions
 
 - `source.organizeImports`
 - `source.sortImports`
@@ -111,7 +67,7 @@ Same as VSCode. The list below may not be complete.
 - `source.removeUnused.ts`
 - `source.addMissingImports.ts`
 
-### Refactor
+#### Refactor
 
 - `refactor.extract.function`
 - `refactor.extract.constant`
@@ -122,6 +78,16 @@ Same as VSCode. The list below may not be complete.
 - `refactor.rewrite.export`
 - `refactor.rewrite.arrow.braces`
 - `refactor.rewrite.property.generateAccessors`
+
+### Update paths on rename
+
+Require client to send [`workspace/didRenameFiles`](https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#workspace_didRenameFiles) notification on rename of file/folder.
+
+## Configuration
+
+Almost the same as the original VSCode extension, with a few additional settings excluded for this server.
+
+See the configuration schema [here](./packages/service/configuration.schema.json).
 
 ## Known Issues
 
