@@ -23,8 +23,8 @@ jobs:
         with:
           version: 7
       - run: pnpm install
-      - run: pnpm --filter ./pacakges/service patch-extension
-      - run: pnpm --filter ./pacakges/service gen-schema
+      - run: pnpm --filter ./packages/service patch-extension
+      - run: pnpm --filter ./packages/service gen-schema
       - uses: stefanzweifel/git-auto-commit-action@v4
         with:
           commit_message: Update config schema
