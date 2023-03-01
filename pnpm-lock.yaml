@@ -22,7 +22,7 @@ importers:
 
   packages/server:
     specifiers:
-      '@vtsls/language-service': workspace:0.1.12
+      '@vtsls/language-service': workspace:0.1.13
       esbuild: ^0.17.10
       vscode-languageserver: ^8.1.0
       vscode-uri: ^3.0.7
