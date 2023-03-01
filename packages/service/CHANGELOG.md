@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.13](https://github.com/yioneko/vtsls/compare/service-v0.1.12...service-v0.1.13) (2023-03-01)
+
+
+### Bug Fixes
+
+* **deps:** update packages/service/vscode digest to f8119e9 ([#46](https://github.com/yioneko/vtsls/issues/46)) ([e438dd1](https://github.com/yioneko/vtsls/commit/e438dd14d974155752bcba0d19b00758b28eb404))
+
 ## [0.1.12](https://github.com/yioneko/vtsls/compare/service-v0.1.11...service-v0.1.12) (2023-02-09)
 
 
