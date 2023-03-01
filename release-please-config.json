@@ -10,6 +10,7 @@
     {
       "type": "linked-versions",
       "group-name": "vtsls",
+      "groupName": "vtsls",
       "components": ["service", "server"]
     }
   ],
