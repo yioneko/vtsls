@@ -14,10 +14,6 @@ export class DiagnosticsShimService extends Disposable {
     new DebouncedEmitter<vscode.DiagnosticChangeEvent>()
   );
 
-  constructor() {
-    super();
-  }
-
   public override dispose() {
     super.dispose();
     this.diagnosticsCollections.clear();

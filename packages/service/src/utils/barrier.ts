@@ -1,12 +1,12 @@
-export class Barrier {
+export class Barrier<V = void> {
   private _isOpen: boolean;
-  private _promise: Promise<boolean>;
-  private _completePromise!: (v: boolean) => void;
+  private _promise: Promise<V>;
+  private _completePromise!: (v: V) => void;
 
   constructor() {
     this._isOpen = false;
-    this._promise = new Promise<boolean>((c) => {
-      this._completePromise = c;
+    this._promise = new Promise<V>((v) => {
+      this._completePromise = v;
     });
   }
 
@@ -14,12 +14,12 @@ export class Barrier {
     return this._isOpen;
   }
 
-  open(): void {
+  open(value?: V): void {
     this._isOpen = true;
-    this._completePromise(true);
+    this._completePromise(value as V);
   }
 
-  wait(): Promise<boolean> {
+  wait(): Promise<V> {
     return this._promise;
   }
 }

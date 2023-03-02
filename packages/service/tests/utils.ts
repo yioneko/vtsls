@@ -1,9 +1,9 @@
-import * as path from "node:path";
 import * as fs from "node:fs/promises";
+import * as path from "node:path";
+import * as lsp from "vscode-languageserver-protocol";
+import { TextDocument } from "vscode-languageserver-textdocument";
 import { URI } from "vscode-uri";
 import { createTSLanguageService, TSLanguageService } from "../";
-import { TextDocument } from "vscode-languageserver-textdocument";
-import { TextEdit } from "vscode-languageserver-protocol";
 
 export async function createTestService(workspacePath: string) {
   const service = createTSLanguageService({
@@ -85,7 +85,7 @@ async function readFsUriContent(uri: string) {
   }
 }
 
-export function applyEditsToText(text: string, edits: TextEdit[]) {
+export function applyEditsToText(text: string, edits: lsp.TextEdit[]) {
   const doc = TextDocument.create("", "", 0, text);
   return TextDocument.applyEdits(doc, edits);
 }

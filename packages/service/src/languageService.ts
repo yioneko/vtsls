@@ -1,3 +1,4 @@
+import { DisposableStore } from "utils/dispose";
 import type * as vscode from "vscode";
 import * as lsp from "vscode-languageserver-protocol";
 import { initializeShimServices } from "./shims";
@@ -116,14 +117,9 @@ export function createTSLanguageService(initOptions: TSLanguageServiceOptions) {
     },
   };
 
-  // TODO
-  const toDisposeSet = new Set<lsp.Disposable>();
-  const registerToDispose = <T extends lsp.Disposable>(v: T) => {
-    toDisposeSet.add(v);
-    return v;
-  };
+  const toDispose = new DisposableStore();
 
-  const shims = registerToDispose(initializeShimServices(initOptions, delegate));
+  const shims = toDispose.add(initializeShimServices(initOptions, delegate));
   const l = shims.languageFeaturesService;
 
   l.onDidChangeDiagnostics((e) => {
@@ -168,7 +164,7 @@ export function createTSLanguageService(initOptions: TSLanguageServiceOptions) {
 
       try {
         shims.configurationService.$changeConfiguration(config);
-        registerToDispose(await startVsTsExtension(shims.context));
+        toDispose.add(await startVsTsExtension(shims.context));
         initialized.open();
       } catch (e) {
         tsLanguageService.dispose();
@@ -177,7 +173,7 @@ export function createTSLanguageService(initOptions: TSLanguageServiceOptions) {
     },
     dispose() {
       if (initialized.isOpen() && !disposed) {
-        toDisposeSet.forEach((v) => v.dispose());
+        toDispose.dispose();
         disposed = true;
       }
     },

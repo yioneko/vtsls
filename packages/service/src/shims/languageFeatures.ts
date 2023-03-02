@@ -564,45 +564,39 @@ export class LanguageFeaturesShimService extends LanguagesFeaturesRegistryServic
     const wordRange = doc.getWordRangeAtPosition(pos);
     const inWord = wordRange?.contains(new types.Position(pos.line, pos.character - 1));
 
-    const results = await Promise.all(
-      providers.map(async ({ id, provider, args: { triggerCharacters } }) => {
-        const checkTriggerCharacter =
-          ctx.triggerCharacter && triggerCharacters.includes(ctx.triggerCharacter);
-        if (
-          ctx.triggerKind === types.CompletionTriggerKind.TriggerCharacter &&
-          !checkTriggerCharacter &&
-          !inWord // by default, identifier chars should be also considered as trigger char
-        ) {
-          return;
-        }
-        const items = await provider.provideCompletionItems(doc, pos, token, ctx);
-        return {
-          items,
-          providerId: id,
-        };
-      })
-    );
-
     let merged: lsp.CompletionItem[] = [];
     let isIncomplete = false;
 
-    for (const r of results) {
-      if (!r) {
+    for (const {
+      id: providerId,
+      provider,
+      args: { triggerCharacters },
+    } of providers) {
+      const checkTriggerCharacter =
+        ctx.triggerCharacter && triggerCharacters.includes(ctx.triggerCharacter);
+      if (
+        ctx.triggerKind === types.CompletionTriggerKind.TriggerCharacter &&
+        !checkTriggerCharacter &&
+        !inWord // by default, identifier chars should be also considered as trigger char
+      ) {
         continue;
       }
-      const { items, providerId } = r;
+
+      const items = await provider.provideCompletionItems(doc, pos, token, ctx);
       if (!items) {
         continue;
       }
+
       let itemsArr: vscode.CompletionItem[];
       if (Array.isArray(items)) {
-        if (items.length === 0) {
-          continue;
-        }
         itemsArr = items;
       } else {
         isIncomplete = isIncomplete || Boolean(items.isIncomplete);
         itemsArr = items.items;
+      }
+
+      if (itemsArr.length === 0) {
+        continue;
       }
 
       const transform = this.completionCache.store(itemsArr, providerId);
@@ -767,14 +761,14 @@ export class LanguageFeaturesShimService extends LanguagesFeaturesRegistryServic
     // if no kinds passed, assume requesting all
     const kinds = ctx.only?.sort() || [""];
 
-    let lastPrefix = -1;
+    let lastPrefixi = -1;
     for (let i = 0; i < kinds.length; ++i) {
       const kind = kinds[i];
       // filter out kinds with same prefix
-      if (lastPrefix >= 0 && kind.startsWith(kinds[lastPrefix])) {
+      if (lastPrefixi >= 0 && kind.startsWith(kinds[lastPrefixi])) {
         continue;
       } else {
-        lastPrefix = i;
+        lastPrefixi = i;
       }
 
       // empty kind "" should be assigned as undefined
@@ -798,12 +792,12 @@ export class LanguageFeaturesShimService extends LanguagesFeaturesRegistryServic
           vscCtx,
           token
         );
-        if (!actions) {
-          continue;
-        }
         // filter out disabled actions
         if (!this.clientCapabilities.textDocument?.codeAction?.disabledSupport) {
-          actions = actions.filter((item) => !("disabled" in item));
+          actions = actions?.filter((item) => !("disabled" in item && item.disabled));
+        }
+        if (!actions || actions.length === 0) {
+          continue;
         }
 
         const transform = this.codeActionCache.store(actions, id);

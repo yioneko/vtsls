@@ -52,11 +52,7 @@ Same as VSCode. The list below may be outdated.
 
 #### Quickfix
 
-- `typescript.organizeImports`
-- `typescript.sortImports`
-- `javascript.sortImports`
-- `typescript.removeUnusedImports`
-- `javascript.removeUnusedImports`
+Only `quickfix` kind is supported. No sub-kind is defined.
 
 #### Source Actions
 

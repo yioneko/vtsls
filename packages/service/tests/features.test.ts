@@ -2,6 +2,7 @@ import * as path from "node:path";
 import { afterAll, assert, describe, expect, it } from "vitest";
 import * as lsp from "vscode-languageserver-protocol";
 import { URI } from "vscode-uri";
+import { Barrier } from "../src/utils/barrier";
 import { applyEditsToText, createTestService, openDoc } from "./utils";
 
 describe("language features", async () => {
@@ -50,6 +51,52 @@ describe("language features", async () => {
       expect(response).toMatchObject({
         items: expect.arrayContaining([expect.objectContaining({ label: "function" })]),
         isIncomplete: expect.any(Boolean),
+      });
+    });
+
+    it("provide auto-import completion", async () => {
+      // NOTE: the file need to be on disk
+      const newDocUri = URI.file(path.resolve(workspacePath, "foo.ts")).toString();
+      await openDoc(service, newDocUri, "export function foo() {}");
+
+      setDocContent("foo");
+      const { items } = await service.completion({
+        ...testDocParams,
+        position: { line: 0, character: 2 },
+      });
+
+      const item = items.find((v) => v.label === "foo" && v.labelDetails?.description === "./foo");
+      assert(item);
+
+      const resolvedItem = await service.completionItemResolve(item);
+      expect(resolvedItem.detail).toContain('Add import from "./foo"');
+
+      const pendingEdit = new Barrier<lsp.WorkspaceEdit>();
+      const disposeHandler = service.onApplyWorkspaceEdit(async (p) => {
+        pendingEdit.open(p.edit);
+        disposeHandler.dispose();
+        return { applied: true };
+      });
+
+      assert(resolvedItem.command);
+      await service.executeCommand(resolvedItem.command);
+      const edit = await pendingEdit.wait();
+      expect(edit.changes).toMatchObject({
+        [testDocUri]: [
+          {
+            newText: expect.stringContaining('import { foo } from "./foo";'),
+            range: {
+              end: {
+                character: 0,
+                line: 0,
+              },
+              start: {
+                character: 0,
+                line: 0,
+              },
+            },
+          },
+        ],
       });
     });
 
@@ -355,6 +402,59 @@ function abc(a) {}`
             line: 0,
           },
         },
+      });
+    });
+  });
+
+  describe("codeAction", async () => {
+    // TODO: diagnostics conflict with same file
+    const testDocUri = URI.file(path.resolve(workspacePath, "codeAction.ts")).toString();
+    const { change: setDocContent } = await openDoc(service, testDocUri);
+    const testDocParams = { textDocument: { uri: testDocUri } };
+
+    it("provide quickfix", async () => {
+      setDocContent("let abc;");
+      const pendingDiagnostics = new Barrier<lsp.Diagnostic[]>();
+      const disposeDiagHandler = service.onDiagnostics(async (p) => {
+        if (p.diagnostics.length > 0) {
+          pendingDiagnostics.open(p.diagnostics);
+          disposeDiagHandler.dispose();
+        }
+      });
+      const diagnostics = await pendingDiagnostics.wait();
+      expect(diagnostics[0]).toMatchObject({
+        code: 7043,
+        message:
+          "Variable 'abc' implicitly has an 'any' type, but a better type may be inferred from usage.",
+      });
+
+      const codeActions = await service.codeAction({
+        context: { diagnostics, only: [lsp.CodeActionKind.QuickFix] },
+        range: { start: { line: 0, character: 4 }, end: { line: 0, character: 5 } },
+        ...testDocParams,
+      });
+      assert(codeActions);
+      expect(codeActions[0]).toMatchObject({
+        edit: {
+          changes: {
+            [testDocUri]: [
+              {
+                newText: ": any",
+                range: {
+                  end: {
+                    character: 7,
+                    line: 0,
+                  },
+                  start: {
+                    character: 7,
+                    line: 0,
+                  },
+                },
+              },
+            ],
+          },
+        },
+        title: "Infer type of 'abc' from usage",
       });
     });
   });
