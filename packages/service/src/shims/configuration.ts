@@ -1,5 +1,6 @@
 import { contributes as pkgContributes } from "typescript-language-features/package.json";
 import { EditorSettings } from "typescript/lib/tsserverlibrary";
+import { Disposable } from "utils/dispose";
 import { isPrimitive } from "utils/types";
 import * as vscode from "vscode";
 import { Emitter } from "vscode-languageserver-protocol";
@@ -49,14 +50,18 @@ export interface VtslsConfig {
   format?: EditorSettings;
 }
 
-export class ConfigurationShimService {
+export class ConfigurationShimService extends Disposable {
   private defaultConfig: any = {};
   private workspaceConfig: any = {};
 
-  private _onDidChangeConfiguration = new Emitter<vscode.ConfigurationChangeEvent>();
+  private _onDidChangeConfiguration = this._register(
+    new Emitter<vscode.ConfigurationChangeEvent>()
+  );
   readonly onDidChangeConfiguration = this._onDidChangeConfiguration.event;
 
   constructor() {
+    super();
+
     const contributed = pkgContributes.configuration.properties || {};
     for (const [key, val] of Object.entries(contributed)) {
       let defaultVal = "default" in val ? val.default : undefined;

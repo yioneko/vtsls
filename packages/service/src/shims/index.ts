@@ -15,10 +15,10 @@ import { WindowShimService } from "./window";
 import { WorkspaceShimService } from "./workspace";
 
 // in vscode namespace
+export const l10n: typeof import("vscode").l10n = createL10nShim() as any;
+export const extensions: typeof import("vscode").extensions = createExtensionsShim() as any;
 export let languages: typeof import("vscode").languages;
 export let commands: typeof import("vscode").commands;
-export let l10n: typeof import("vscode").l10n;
-export let extensions: typeof import("vscode").extensions;
 export let window: typeof import("vscode").window;
 export let env: typeof import("vscode").env;
 export let workspace: typeof import("vscode").workspace;
@@ -49,11 +49,20 @@ export function initializeShimServices(
   const windowService = new WindowShimService(delegate);
   const context = createContextShim(initOptions.tsExtLogPath ?? os.tmpdir());
 
+  const dispose = () => {
+    configurationService.dispose();
+    languageFeaturesService.dispose();
+    commandsService.dispose();
+    workspaceService.dispose();
+    windowService.dispose();
+    context.subscriptions.forEach((d) => {
+      d.dispose();
+    });
+  };
+
   languages = languageFeaturesService as any;
   commands = commandsService as any;
   workspace = workspaceService as any;
-  l10n = createL10nShim() as any;
-  extensions = createExtensionsShim() as any;
   window = windowService as any;
   env = {
     language: initOptions.locale ?? "en",
@@ -72,5 +81,6 @@ export function initializeShimServices(
     l10n,
     extensions,
     env,
+    dispose,
   };
 }

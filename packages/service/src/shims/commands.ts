@@ -1,5 +1,6 @@
-import { TSLanguageServiceDelegate } from "../languageService";
+import { Disposable } from "utils/dispose";
 import * as lsp from "vscode-languageserver-protocol";
+import { TSLanguageServiceDelegate } from "../languageService";
 
 export interface ICommand {
   id: string;
@@ -8,13 +9,17 @@ export interface ICommand {
   // description?: ICommandHandlerDescription | null;
 }
 
-export class CommandsShimService {
+export class CommandsShimService extends Disposable {
   private readonly _commands = new Map<string, ICommand>();
 
-  private readonly _onDidRegisterCommand = new lsp.Emitter<string>();
+  private readonly _onDidRegisterCommand = this._register(new lsp.Emitter<string>());
   readonly onDidRegisterCommand = this._onDidRegisterCommand.event;
 
-  constructor(private readonly delegate: TSLanguageServiceDelegate) {}
+  constructor(private readonly delegate: TSLanguageServiceDelegate) {
+    super();
+    // shim missing command
+    this._register(this.registerCommand("setContext", () => {}));
+  }
 
   async getCommands(filterInternal = false): Promise<string[]> {
     const result = [];
@@ -35,9 +40,11 @@ export class CommandsShimService {
     }
     this._commands.set(id, { id, callback, thisArg });
 
-    return lsp.Disposable.create(() => {
-      this._commands.delete(id);
-    });
+    return this._register(
+      lsp.Disposable.create(() => {
+        this._commands.delete(id);
+      })
+    );
   }
 
   async executeCommand<T, A extends any[]>(id: string, ...args: A): Promise<T | undefined> {
@@ -53,5 +60,10 @@ export class CommandsShimService {
     } catch (e) {
       this.delegate.logMessage(lsp.MessageType.Error, `Execute command ${id} failed: ${String(e)}`);
     }
+  }
+
+  public override dispose() {
+    this._commands.clear();
+    super.dispose();
   }
 }

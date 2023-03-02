@@ -12,15 +12,14 @@ import {
 import { Barrier } from "./utils/barrier";
 import { TSLspConverter } from "./utils/converter";
 
-let tsExtension: { activate: (context: vscode.ExtensionContext) => void; deactivate?: () => void };
-
 async function startVsTsExtension(context: vscode.ExtensionContext) {
-  tsExtension = await import("@vsc-ts/extension");
-  return tsExtension.activate(context);
-}
-
-function disposeVsTsExtension() {
-  tsExtension?.deactivate?.();
+  const tsExtension = await import("@vsc-ts/extension");
+  return {
+    extensionApi: tsExtension.activate(context),
+    dispose() {
+      tsExtension.deactivate();
+    },
+  };
 }
 
 function createTSLanguageServiceEvents() {
@@ -117,8 +116,16 @@ export function createTSLanguageService(initOptions: TSLanguageServiceOptions) {
     },
   };
 
-  const shims = initializeShimServices(initOptions, delegate);
+  // TODO
+  const toDisposeSet = new Set<lsp.Disposable>();
+  const registerToDispose = <T extends lsp.Disposable>(v: T) => {
+    toDisposeSet.add(v);
+    return v;
+  };
+
+  const shims = registerToDispose(initializeShimServices(initOptions, delegate));
   const l = shims.languageFeaturesService;
+
   l.onDidChangeDiagnostics((e) => {
     const handler = getHandler("diagnostics");
     if (handler) {
@@ -160,11 +167,8 @@ export function createTSLanguageService(initOptions: TSLanguageServiceOptions) {
       }
 
       try {
-        // shim missing command
-        shims.commandsService.registerCommand("setContext", () => {});
-
         shims.configurationService.$changeConfiguration(config);
-        await startVsTsExtension(shims.context);
+        registerToDispose(await startVsTsExtension(shims.context));
         initialized.open();
       } catch (e) {
         tsLanguageService.dispose();
@@ -173,10 +177,7 @@ export function createTSLanguageService(initOptions: TSLanguageServiceOptions) {
     },
     dispose() {
       if (initialized.isOpen() && !disposed) {
-        disposeVsTsExtension();
-        shims.context.subscriptions.forEach((d) => {
-          d.dispose();
-        });
+        toDisposeSet.forEach((v) => v.dispose());
         disposed = true;
       }
     },

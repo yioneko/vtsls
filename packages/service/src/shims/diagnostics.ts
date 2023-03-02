@@ -1,22 +1,36 @@
+import { Disposable } from "utils/dispose";
 import * as vscode from "vscode";
-import { Emitter } from "vscode-languageserver-protocol";
+import * as lsp from "vscode-languageserver-protocol";
 import { URI } from "vscode-uri";
 import { DebouncedEmitter } from "../utils/debouncedEmitter";
 import { onCaseInsensitiveFileSystem } from "../utils/fs";
 import { ResourceMap } from "../utils/resourceMap";
 import { generateUuid } from "../utils/uuid";
 
-export class DiagnosticsShimService {
+export class DiagnosticsShimService extends Disposable {
   private diagnosticsCollections = new Map<string, DiagnosticCollection>();
 
-  readonly onDidChangeDiagnostics = new DebouncedEmitter<vscode.DiagnosticChangeEvent>();
+  readonly onDidChangeDiagnostics = this._register(
+    new DebouncedEmitter<vscode.DiagnosticChangeEvent>()
+  );
+
+  constructor() {
+    super();
+  }
+
+  public override dispose() {
+    super.dispose();
+    this.diagnosticsCollections.clear();
+  }
 
   createDiagnosticCollection(name?: string) {
     const collectionName = name ?? generateUuid();
-    const collection = new DiagnosticCollection(
-      collectionName,
-      onCaseInsensitiveFileSystem(),
-      this.onDidChangeDiagnostics
+    const collection = this._register(
+      new DiagnosticCollection(
+        collectionName,
+        onCaseInsensitiveFileSystem(),
+        this.onDidChangeDiagnostics
+      )
     );
     this.diagnosticsCollections.set(collectionName, collection);
     return collection;
@@ -58,7 +72,7 @@ export class DiagnosticsShimService {
 }
 
 export class DiagnosticCollection implements vscode.DiagnosticCollection {
-  private readonly _onDidChangeDiagnostics: Emitter<vscode.DiagnosticChangeEvent>;
+  private readonly _onDidChangeDiagnostics: lsp.Emitter<vscode.DiagnosticChangeEvent>;
   private readonly _data: ResourceMap<vscode.Diagnostic[]>;
 
   private _isDisposed = false;
@@ -66,7 +80,7 @@ export class DiagnosticCollection implements vscode.DiagnosticCollection {
   constructor(
     private readonly _name: string,
     onCaseInsensitiveFileSystem: boolean,
-    onDidChangeDiagnostics: Emitter<vscode.DiagnosticChangeEvent>
+    onDidChangeDiagnostics: lsp.Emitter<vscode.DiagnosticChangeEvent>
   ) {
     this._data = new ResourceMap(undefined, { onCaseInsensitiveFileSystem });
     this._onDidChangeDiagnostics = onDidChangeDiagnostics;

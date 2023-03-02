@@ -1,22 +1,31 @@
+import { Disposable, disposeAll } from "utils/dispose";
 import * as vscode from "vscode";
 import * as lsp from "vscode-languageserver-protocol";
 import { TSLanguageServiceDelegate } from "../languageService";
 import { isPrimitive } from "../utils/types";
 
-export class WindowShimService {
+export class WindowShimService extends Disposable {
   private outputChannels = new Map<string, vscode.OutputChannel>();
 
-  private _onDidChangeActiveTextEditor = new lsp.Emitter<vscode.TextEditor>();
+  private _onDidChangeActiveTextEditor = this._register(new lsp.Emitter<vscode.TextEditor>());
   readonly onDidChangeActiveTextEditor = this._onDidChangeActiveTextEditor.event;
 
-  private _onDidChangeVisibleTextEditors = new lsp.Emitter<vscode.TextEditor[]>();
+  private _onDidChangeVisibleTextEditors = this._register(new lsp.Emitter<vscode.TextEditor[]>());
   readonly onDidChangeVisibleTextEditors = this._onDidChangeVisibleTextEditors.event;
 
-  constructor(private readonly delegate: TSLanguageServiceDelegate) {}
+  constructor(private readonly delegate: TSLanguageServiceDelegate) {
+    super();
+    this._register(
+      lsp.Disposable.create(() => {
+        disposeAll([...this.outputChannels.values()]);
+        this.outputChannels.clear();
+      })
+    );
+  }
 
   createOutputChannel(name: string) {
     const win = this;
-    const newChannel: vscode.OutputChannel = {
+    const newChannel: vscode.OutputChannel = this._register({
       get name() {
         return name;
       },
@@ -35,7 +44,7 @@ export class WindowShimService {
         }
       },
       show() {},
-    };
+    });
 
     this.outputChannels.set(name, newChannel);
     return newChannel;

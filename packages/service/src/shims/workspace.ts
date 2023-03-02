@@ -1,4 +1,5 @@
 import * as path from "path";
+import { Disposable } from "utils/dispose";
 import * as vscode from "vscode";
 import * as lsp from "vscode-languageserver-protocol";
 import { TextDocument } from "vscode-languageserver-textdocument";
@@ -10,25 +11,29 @@ import { ResourceMap } from "../utils/resourceMap";
 import { ConfigurationShimService } from "./configuration";
 import * as types from "./types";
 
-export class WorkspaceShimService {
-  private _onDidOpenTextDocument = new lsp.Emitter<vscode.TextDocument>();
+export class WorkspaceShimService extends Disposable {
+  private _onDidOpenTextDocument = this._register(new lsp.Emitter<vscode.TextDocument>());
   readonly onDidOpenTextDocument = this._onDidOpenTextDocument.event;
 
-  private _onDidCloseTextDocument = new lsp.Emitter<vscode.TextDocument>();
+  private _onDidCloseTextDocument = this._register(new lsp.Emitter<vscode.TextDocument>());
   readonly onDidCloseTextDocument = this._onDidCloseTextDocument.event;
 
-  private _onDidChangeTextDocument = new lsp.Emitter<vscode.TextDocumentChangeEvent>();
+  private _onDidChangeTextDocument = this._register(
+    new lsp.Emitter<vscode.TextDocumentChangeEvent>()
+  );
   readonly onDidChangeTextDocument = this._onDidChangeTextDocument.event;
 
-  private _onDidRenameFiles = new lsp.Emitter<vscode.FileRenameEvent>();
+  private _onDidRenameFiles = this._register(new lsp.Emitter<vscode.FileRenameEvent>());
   readonly onDidRenameFiles = this._onDidRenameFiles.event;
 
   readonly onDidChangeConfiguration = this.configurationShim.onDidChangeConfiguration;
 
-  private _onDidChangeWorkspaceFolders = new lsp.Emitter<vscode.WorkspaceFoldersChangeEvent>();
+  private _onDidChangeWorkspaceFolders = this._register(
+    new lsp.Emitter<vscode.WorkspaceFoldersChangeEvent>()
+  );
   readonly onDidChangeWorkspaceFolders = this._onDidChangeWorkspaceFolders.event;
 
-  private _onDidGrantWorkspaceTrust = new lsp.Emitter();
+  private _onDidGrantWorkspaceTrust = this._register(new lsp.Emitter());
   readonly onDidGrantWorkspaceTrust = this._onDidGrantWorkspaceTrust.event;
 
   private _documents: ResourceMap<TextDocument>;
@@ -41,6 +46,8 @@ export class WorkspaceShimService {
     private readonly configurationShim: ConfigurationShimService,
     initWorkspaceFolders?: lsp.WorkspaceFolder[]
   ) {
+    super();
+
     this._documents = new ResourceMap(undefined, {
       onCaseInsensitiveFileSystem: onCaseInsensitiveFileSystem(),
     });

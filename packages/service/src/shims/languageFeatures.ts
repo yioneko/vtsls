@@ -1,4 +1,5 @@
 import { Barrier } from "utils/barrier";
+import { Disposable } from "utils/dispose";
 import * as vscode from "vscode";
 import * as lsp from "vscode-languageserver-protocol";
 import { URI } from "vscode-uri";
@@ -17,63 +18,89 @@ export type ProviderRegistry<T, Args = unknown> = {
   selector: vscode.DocumentSelector;
 } & Args;
 
-export type ProviderCollection<T, Args = unknown> = {
-  [id: number]: ProviderRegistry<T, Args>;
-};
+class ProviderCollection<T, Args = unknown> extends Disposable {
+  private registries = new Map<number, ProviderRegistry<T, Args>>();
 
-type CodeActionProviderCollection = ProviderCollection<
+  register(id: number, registry: ProviderRegistry<T, Args>) {
+    this.registries.set(id, registry);
+    return this._register(lsp.Disposable.create(() => this.registries.delete(id)));
+  }
+
+  [Symbol.iterator]() {
+    return this.registries[Symbol.iterator]();
+  }
+
+  public override dispose() {
+    this.registries.clear();
+    super.dispose();
+  }
+}
+
+type InferRegistry<Collection extends ProviderCollection<any, any>> =
+  Collection extends ProviderCollection<infer T, infer A> ? ProviderRegistry<T, A> : never;
+
+class CodeActionProviderCollection extends ProviderCollection<
   vscode.CodeActionProvider,
   { metadata?: vscode.CodeActionProviderMetadata }
->;
+> {}
 
-type CompletionProviderCollection = ProviderCollection<
+class CompletionProviderCollection extends ProviderCollection<
   vscode.CompletionItemProvider,
   { triggerCharacters: string[] }
->;
+> {}
 
-class LanguagesFeaturesRegistryService {
+class LanguagesFeaturesRegistryService extends Disposable {
   private _idGen = 0;
 
   private _providers = {
-    callHierarchy: {} as ProviderCollection<vscode.CallHierarchyProvider>,
-    codeActions: {} as CodeActionProviderCollection,
-    codeLens: {} as ProviderCollection<vscode.CodeLensProvider>,
-    completionItem: {} as CompletionProviderCollection,
-    declaration: {} as ProviderCollection<vscode.DeclarationProvider>,
-    definition: {} as ProviderCollection<vscode.DefinitionProvider>,
-    documentFormattingEdit: {} as ProviderCollection<vscode.DocumentFormattingEditProvider>,
-    documentHighlight: {} as ProviderCollection<vscode.DocumentHighlightProvider>,
-    documentLink: {} as ProviderCollection<vscode.DocumentLinkProvider>,
-    documentRangeFormattignEdit:
-      {} as ProviderCollection<vscode.DocumentRangeFormattingEditProvider>,
-    documentRangeSemanticTokens:
-      {} as ProviderCollection<vscode.DocumentRangeSemanticTokensProvider>,
-    documentSymbol: {} as ProviderCollection<vscode.DocumentSymbolProvider>,
-    documentSemanticTokens: {} as ProviderCollection<vscode.DocumentSemanticTokensProvider>,
-    foldingRange: {} as ProviderCollection<vscode.FoldingRangeProvider>,
-    hover: {} as ProviderCollection<vscode.HoverProvider>,
-    implementation: {} as ProviderCollection<vscode.ImplementationProvider>,
-    inlayHints: {} as ProviderCollection<vscode.InlayHintsProvider>,
-    onTypeFormatting: {} as ProviderCollection<
-      vscode.OnTypeFormattingEditProvider,
-      { firstTriggerCharacter: string; moreTriggerCharacter: string[] }
-    >,
-    linkedEditingRange: {} as ProviderCollection<vscode.LinkedEditingRangeProvider>,
-    reference: {} as ProviderCollection<vscode.ReferenceProvider>,
-    rename: {} as ProviderCollection<vscode.RenameProvider>,
-    selectionRange: {} as ProviderCollection<vscode.SelectionRangeProvider>,
-    signatureHelp: {} as ProviderCollection<
-      vscode.SignatureHelpProvider,
-      vscode.SignatureHelpProviderMetadata
-    >,
-    typeDefinition: {} as ProviderCollection<vscode.TypeDefinitionProvider>,
-    typeHierarchy: {} as ProviderCollection<vscode.TypeHierarchyProvider>,
-    workspaceSymbol: {} as ProviderCollection<vscode.WorkspaceSymbolProvider>,
+    callHierarchy: this._register(new ProviderCollection<vscode.CallHierarchyProvider>()),
+    codeActions: this._register(new CodeActionProviderCollection()),
+    codeLens: this._register(new ProviderCollection<vscode.CodeLensProvider>()),
+    completionItem: this._register(new CompletionProviderCollection()),
+    declaration: this._register(new ProviderCollection<vscode.DeclarationProvider>()),
+    definition: this._register(new ProviderCollection<vscode.DefinitionProvider>()),
+    documentFormattingEdit: this._register(
+      new ProviderCollection<vscode.DocumentFormattingEditProvider>()
+    ),
+    documentHighlight: this._register(new ProviderCollection<vscode.DocumentHighlightProvider>()),
+    documentLink: this._register(new ProviderCollection<vscode.DocumentLinkProvider>()),
+    documentRangeFormattignEdit: this._register(
+      new ProviderCollection<vscode.DocumentRangeFormattingEditProvider>()
+    ),
+    documentRangeSemanticTokens: this._register(
+      new ProviderCollection<vscode.DocumentRangeSemanticTokensProvider>()
+    ),
+    documentSymbol: this._register(new ProviderCollection<vscode.DocumentSymbolProvider>()),
+    documentSemanticTokens: this._register(
+      new ProviderCollection<vscode.DocumentSemanticTokensProvider>()
+    ),
+    foldingRange: this._register(new ProviderCollection<vscode.FoldingRangeProvider>()),
+    hover: this._register(new ProviderCollection<vscode.HoverProvider>()),
+    implementation: this._register(new ProviderCollection<vscode.ImplementationProvider>()),
+    inlayHints: this._register(new ProviderCollection<vscode.InlayHintsProvider>()),
+    onTypeFormatting: this._register(
+      new ProviderCollection<
+        vscode.OnTypeFormattingEditProvider,
+        { firstTriggerCharacter: string; moreTriggerCharacter: string[] }
+      >()
+    ),
+    linkedEditingRange: this._register(new ProviderCollection<vscode.LinkedEditingRangeProvider>()),
+    reference: this._register(new ProviderCollection<vscode.ReferenceProvider>()),
+    rename: this._register(new ProviderCollection<vscode.RenameProvider>()),
+    selectionRange: this._register(new ProviderCollection<vscode.SelectionRangeProvider>()),
+    signatureHelp: this._register(
+      new ProviderCollection<vscode.SignatureHelpProvider, vscode.SignatureHelpProviderMetadata>()
+    ),
+    typeDefinition: this._register(new ProviderCollection<vscode.TypeDefinitionProvider>()),
+    typeHierarchy: this._register(new ProviderCollection<vscode.TypeHierarchyProvider>()),
+    workspaceSymbol: this._register(new ProviderCollection<vscode.WorkspaceSymbolProvider>()),
   };
 
   readonly onDidChangeDiagnostics = this.diagnostics.onDidChangeDiagnostics.event;
 
-  constructor(private readonly diagnostics: DiagnosticsShimService) {}
+  constructor(private readonly diagnostics: DiagnosticsShimService) {
+    super();
+  }
 
   // only for capturing registration timing for initialization
   // ref: patches/020-trigger-features-registered-event.patch
@@ -95,15 +122,12 @@ class LanguagesFeaturesRegistryService {
     return this._providers;
   }
 
-  private _register<T, A>(
-    collections: ProviderCollection<T, A>,
+  private registerProvider<T, A>(
+    collection: ProviderCollection<T, A>,
     registration: ProviderRegistry<T, A>
   ) {
     const id = this._idGen++;
-    collections[id] = registration;
-    return lsp.Disposable.create(() => {
-      delete collections[id];
-    });
+    return collection.register(id, registration);
   }
 
   registerCompletionItemProvider(
@@ -111,7 +135,7 @@ class LanguagesFeaturesRegistryService {
     provider: vscode.CompletionItemProvider,
     ...triggerCharacters: string[]
   ) {
-    return this._register(this._providers.completionItem, {
+    return this.registerProvider(this._providers.completionItem, {
       selector,
       provider,
       triggerCharacters,
@@ -123,7 +147,7 @@ class LanguagesFeaturesRegistryService {
     provider: vscode.CodeActionProvider,
     metadata?: vscode.CodeActionProviderMetadata
   ) {
-    return this._register(this._providers.codeActions, {
+    return this.registerProvider(this._providers.codeActions, {
       selector,
       provider,
       metadata,
@@ -131,7 +155,7 @@ class LanguagesFeaturesRegistryService {
   }
 
   registerCodeLensProvider(selector: vscode.DocumentSelector, provider: vscode.CodeLensProvider) {
-    return this._register(this._providers.codeLens, {
+    return this.registerProvider(this._providers.codeLens, {
       selector,
       provider,
     });
@@ -141,7 +165,7 @@ class LanguagesFeaturesRegistryService {
     selector: vscode.DocumentSelector,
     provider: vscode.DefinitionProvider
   ) {
-    return this._register(this._providers.definition, {
+    return this.registerProvider(this._providers.definition, {
       selector,
       provider,
     });
@@ -151,7 +175,7 @@ class LanguagesFeaturesRegistryService {
     selector: vscode.DocumentSelector,
     provider: vscode.ImplementationProvider
   ) {
-    return this._register(this._providers.implementation, {
+    return this.registerProvider(this._providers.implementation, {
       selector,
       provider,
     });
@@ -161,7 +185,7 @@ class LanguagesFeaturesRegistryService {
     selector: vscode.DocumentSelector,
     provider: vscode.TypeDefinitionProvider
   ) {
-    return this._register(this._providers.typeDefinition, {
+    return this.registerProvider(this._providers.typeDefinition, {
       selector,
       provider,
     });
@@ -171,18 +195,18 @@ class LanguagesFeaturesRegistryService {
     selector: vscode.DocumentSelector,
     provider: vscode.DeclarationProvider
   ) {
-    return this._register(this._providers.declaration, { selector, provider });
+    return this.registerProvider(this._providers.declaration, { selector, provider });
   }
 
   registerHoverProvider(selector: vscode.DocumentSelector, provider: vscode.HoverProvider) {
-    return this._register(this._providers.hover, { selector, provider });
+    return this.registerProvider(this._providers.hover, { selector, provider });
   }
 
   registerDocumentHighlightProvider(
     selector: vscode.DocumentSelector,
     provider: vscode.DocumentHighlightProvider
   ) {
-    return this._register(this._providers.documentHighlight, {
+    return this.registerProvider(this._providers.documentHighlight, {
       selector,
       provider,
     });
@@ -192,29 +216,29 @@ class LanguagesFeaturesRegistryService {
     selector: vscode.DocumentSelector,
     provider: vscode.DocumentSymbolProvider
   ) {
-    return this._register(this._providers.documentSymbol, {
+    return this.registerProvider(this._providers.documentSymbol, {
       selector,
       provider,
     });
   }
 
   registerWorkspaceSymbolProvider(provider: vscode.WorkspaceSymbolProvider) {
-    return this._register(this._providers.workspaceSymbol, { provider, selector: "*" });
+    return this.registerProvider(this._providers.workspaceSymbol, { provider, selector: "*" });
   }
 
   registerReferenceProvider(selector: vscode.DocumentSelector, provider: vscode.ReferenceProvider) {
-    return this._register(this._providers.reference, { selector, provider });
+    return this.registerProvider(this._providers.reference, { selector, provider });
   }
 
   registerRenameProvider(selector: vscode.DocumentSelector, provider: vscode.RenameProvider) {
-    return this._register(this._providers.rename, { selector, provider });
+    return this.registerProvider(this._providers.rename, { selector, provider });
   }
 
   registerDocumentSemanticTokensProvider(
     selector: vscode.DocumentSelector,
     provider: vscode.DocumentSemanticTokensProvider
   ) {
-    return this._register(this._providers.documentSemanticTokens, {
+    return this.registerProvider(this._providers.documentSemanticTokens, {
       selector,
       provider,
     });
@@ -224,7 +248,7 @@ class LanguagesFeaturesRegistryService {
     selector: vscode.DocumentSelector,
     provider: vscode.DocumentRangeSemanticTokensProvider
   ) {
-    return this._register(this._providers.documentRangeSemanticTokens, {
+    return this.registerProvider(this._providers.documentRangeSemanticTokens, {
       selector,
       provider,
     });
@@ -234,7 +258,7 @@ class LanguagesFeaturesRegistryService {
     selector: vscode.DocumentSelector,
     provider: vscode.DocumentFormattingEditProvider
   ) {
-    return this._register(this._providers.documentFormattingEdit, {
+    return this.registerProvider(this._providers.documentFormattingEdit, {
       selector,
       provider,
     });
@@ -244,7 +268,7 @@ class LanguagesFeaturesRegistryService {
     selector: vscode.DocumentSelector,
     provider: vscode.DocumentRangeFormattingEditProvider
   ) {
-    return this._register(this._providers.documentRangeFormattignEdit, {
+    return this.registerProvider(this._providers.documentRangeFormattignEdit, {
       selector,
       provider,
     });
@@ -255,7 +279,7 @@ class LanguagesFeaturesRegistryService {
     provider: vscode.SignatureHelpProvider,
     metadata: vscode.SignatureHelpProviderMetadata
   ) {
-    return this._register(this._providers.signatureHelp, {
+    return this.registerProvider(this._providers.signatureHelp, {
       selector,
       provider,
       ...metadata,
@@ -266,14 +290,14 @@ class LanguagesFeaturesRegistryService {
     selector: vscode.DocumentSelector,
     provider: vscode.DocumentLinkProvider
   ) {
-    return this._register(this._providers.documentLink, { selector, provider });
+    return this.registerProvider(this._providers.documentLink, { selector, provider });
   }
 
   registerInlayHintsProvider(
     selector: vscode.DocumentSelector,
     provider: vscode.InlayHintsProvider
   ) {
-    return this._register(this._providers.inlayHints, { selector, provider });
+    return this.registerProvider(this._providers.inlayHints, { selector, provider });
   }
 
   registerOnTypeFormattingEditProvider(
@@ -282,7 +306,7 @@ class LanguagesFeaturesRegistryService {
     firstTriggerCharacter: string,
     ...moreTriggerCharacter: string[]
   ) {
-    return this._register(this._providers.onTypeFormatting, {
+    return this.registerProvider(this._providers.onTypeFormatting, {
       selector,
       provider,
       firstTriggerCharacter,
@@ -294,14 +318,14 @@ class LanguagesFeaturesRegistryService {
     selector: vscode.DocumentSelector,
     provider: vscode.FoldingRangeProvider
   ) {
-    return this._register(this._providers.foldingRange, { selector, provider });
+    return this.registerProvider(this._providers.foldingRange, { selector, provider });
   }
 
   registerSelectionRangeProvider(
     selector: vscode.DocumentSelector,
     provider: vscode.SelectionRangeProvider
   ) {
-    return this._register(this._providers.selectionRange, {
+    return this.registerProvider(this._providers.selectionRange, {
       selector,
       provider,
     });
@@ -311,7 +335,7 @@ class LanguagesFeaturesRegistryService {
     selector: vscode.DocumentSelector,
     provider: vscode.CallHierarchyProvider
   ) {
-    return this._register(this._providers.callHierarchy, {
+    return this.registerProvider(this._providers.callHierarchy, {
       selector,
       provider,
     });
@@ -321,7 +345,7 @@ class LanguagesFeaturesRegistryService {
     selector: vscode.DocumentSelector,
     provider: vscode.TypeHierarchyProvider
   ) {
-    return this._register(this._providers.typeHierarchy, {
+    return this.registerProvider(this._providers.typeHierarchy, {
       selector,
       provider,
     });
@@ -331,7 +355,7 @@ class LanguagesFeaturesRegistryService {
     selector: vscode.DocumentSelector,
     provider: vscode.LinkedEditingRangeProvider
   ) {
-    return this._register(this._providers.linkedEditingRange, {
+    return this.registerProvider(this._providers.linkedEditingRange, {
       selector,
       provider,
     });
@@ -342,10 +366,12 @@ class LanguagesFeaturesRegistryService {
   }
 }
 
-abstract class DataCache<P extends ProviderCollection<any>> {
-  constructor(private readonly providers: P) {}
+abstract class DataCache<P extends ProviderCollection<any>> extends Disposable {
+  constructor(private readonly providers: P) {
+    super();
+  }
 
-  protected createData(providerId: string, index: number, cacheId: number) {
+  protected createData(providerId: number, index: number, cacheId: number) {
     return {
       providerId,
       index,
@@ -353,25 +379,29 @@ abstract class DataCache<P extends ProviderCollection<any>> {
     };
   }
 
-  protected resolveData(data?: any):
-    | {
-        providerId: string;
-        index: number;
-        cacheId: number;
-        registry: P[number] | undefined;
-      }
-    | undefined {
-    const { providerId, index, cacheId } = data || {};
-    if ([providerId, index, cacheId].some(isNil)) {
+  protected resolveData(data?: any) {
+    const { providerId: _providerId, index: _index, cacheId: _cacheId } = data || {};
+    if ([_providerId, _index, _cacheId].some(isNil)) {
       return;
     }
-    let registry: P[number] | undefined = undefined;
-    for (const [id, p] of Object.entries(this.providers)) {
-      if (id === providerId) {
-        registry = p;
+    const providerId = _providerId as number;
+    const index = _index as number;
+    const cacheId = _cacheId as number;
+    for (const [id, p] of this.providers) {
+      if (id === _providerId) {
+        return {
+          providerId,
+          index,
+          cacheId,
+          registry: p as InferRegistry<P>,
+        };
       }
     }
-    return { providerId, index, cacheId, registry };
+    return {
+      providerId,
+      index,
+      cacheId,
+    };
   }
 }
 
@@ -380,28 +410,35 @@ export class CodeActionCache extends DataCache<CodeActionProviderCollection> {
 
   constructor(providers: CodeActionProviderCollection, commands: CommandsShimService) {
     super(providers);
-    commands.registerCommand(CodeActionCache.id, (...args) => {
-      const data = this.resolveData(args[0]);
-      if (!data) {
-        throw new lsp.ResponseError(lsp.ErrorCodes.InvalidParams, "code action item data missing");
-      }
-      const { cacheId, index } = data;
-      const cachedItem = this.codeActionCache.get(cacheId)?.[index];
-      if (cachedItem?.command) {
-        const command =
-          typeof cachedItem.command === "string" ? (cachedItem as lsp.Command) : cachedItem.command;
-        if (command && command.command !== CodeActionCache.id) {
-          return commands.executeCommand(command.command, ...(command.arguments || []));
+    this._register(
+      commands.registerCommand(CodeActionCache.id, (...args) => {
+        const data = this.resolveData(args[0]);
+        if (!data) {
+          throw new lsp.ResponseError(
+            lsp.ErrorCodes.InvalidParams,
+            "code action item data missing"
+          );
         }
-      }
-    });
+        const { cacheId, index } = data;
+        const cachedItem = this.codeActionCache.get(cacheId)?.[index];
+        if (cachedItem?.command) {
+          const command =
+            typeof cachedItem.command === "string"
+              ? (cachedItem as lsp.Command)
+              : cachedItem.command;
+          if (command && command.command !== CodeActionCache.id) {
+            return commands.executeCommand(command.command, ...(command.arguments || []));
+          }
+        }
+      })
+    );
   }
 
-  private readonly codeActionCache = new RestrictedCache<(vscode.Command | vscode.CodeAction)[]>(
-    10
+  private readonly codeActionCache = this._register(
+    new RestrictedCache<(vscode.Command | vscode.CodeAction)[]>(10)
   );
 
-  store(items: (vscode.Command | vscode.CodeAction)[], providerId: string) {
+  store(items: (vscode.Command | vscode.CodeAction)[], providerId: number) {
     const cacheId = this.codeActionCache.store(items);
     return (index: number, item: lsp.CodeAction | lsp.Command) => {
       const data = this.createData(providerId, index, cacheId);
@@ -439,25 +476,29 @@ export class CompletionCache extends DataCache<CompletionProviderCollection> {
 
   constructor(providers: CompletionProviderCollection, commands: CommandsShimService) {
     super(providers);
-    commands.registerCommand(CompletionCache.id, (...args) => {
-      const data = this.resolveData(args[0]);
-      if (!data) {
-        throw new lsp.ResponseError(lsp.ErrorCodes.InvalidParams, "completion item data missing");
-      }
-      const { cacheId, index } = data;
-      const cachedItem = this.completionItemCache.get(cacheId)?.[index];
-      if (cachedItem?.command && cachedItem.command.command !== CompletionCache.id) {
-        return commands.executeCommand(
-          cachedItem.command.command,
-          ...(cachedItem.command.arguments || [])
-        );
-      }
-    });
+    this._register(
+      commands.registerCommand(CompletionCache.id, (...args) => {
+        const data = this.resolveData(args[0]);
+        if (!data) {
+          throw new lsp.ResponseError(lsp.ErrorCodes.InvalidParams, "completion item data missing");
+        }
+        const { cacheId, index } = data;
+        const cachedItem = this.completionItemCache.get(cacheId)?.[index];
+        if (cachedItem?.command && cachedItem.command.command !== CompletionCache.id) {
+          return commands.executeCommand(
+            cachedItem.command.command,
+            ...(cachedItem.command.arguments || [])
+          );
+        }
+      })
+    );
   }
 
-  private readonly completionItemCache = new RestrictedCache<vscode.CompletionItem[]>(5);
+  private readonly completionItemCache = this._register(
+    new RestrictedCache<vscode.CompletionItem[]>(5)
+  );
 
-  store(items: vscode.CompletionItem[], providerId: string) {
+  store(items: vscode.CompletionItem[], providerId: number) {
     const cacheId = this.completionItemCache.store(items);
     return (index: number, item: lsp.CompletionItem) => {
       const data = this.createData(providerId, index, cacheId);
@@ -497,13 +538,11 @@ export class LanguageFeaturesShimService extends LanguagesFeaturesRegistryServic
     super(diagnostics);
   }
 
-  private readonly completionCache = new CompletionCache(
-    this.$providers.completionItem,
-    this.commands
+  private readonly completionCache = this._register(
+    new CompletionCache(this.$providers.completionItem, this.commands)
   );
-  private readonly codeActionCache = new CodeActionCache(
-    this.$providers.codeActions,
-    this.commands
+  private readonly codeActionCache = this._register(
+    new CodeActionCache(this.$providers.codeActions, this.commands)
   );
 
   async completion(params: lsp.CompletionParams, token = lsp.CancellationToken.None) {
@@ -1198,7 +1237,7 @@ export class LanguageFeaturesShimService extends LanguagesFeaturesRegistryServic
   ) {
     await this.$staticFeaturesRegistered.wait();
     const scoreWithProviders: {
-      id: string;
+      id: number;
       score: number;
       provider: T;
       args: Args;
@@ -1208,7 +1247,7 @@ export class LanguageFeaturesShimService extends LanguagesFeaturesRegistryServic
       throw new Error(`Cannot find docuemnt ${uri}`);
     }
     const doc = this.delegate.converter.convertTextDocuemntFromLsp(lspDoc);
-    for (const [id, reg] of Object.entries(providers)) {
+    for (const [id, reg] of providers) {
       const { provider, selector, ...args } = reg;
       scoreWithProviders.push({
         id,
@@ -1241,13 +1280,13 @@ export class LanguageFeaturesShimService extends LanguagesFeaturesRegistryServic
   }
 
   private async prepareProviderById<Collection extends ProviderCollection<any>>(
-    id: string,
+    id: number,
     providers: Collection
   ) {
     await this.$staticFeaturesRegistered.wait();
-    for (const [providerId, reg] of Object.entries(providers)) {
+    for (const [providerId, reg] of providers) {
       if (id === providerId) {
-        return reg as Collection[number];
+        return reg as InferRegistry<Collection>;
       }
     }
     throw new lsp.ResponseError(lsp.ErrorCodes.InvalidRequest, `Provider with id ${id} not found`);
@@ -1257,7 +1296,7 @@ export class LanguageFeaturesShimService extends LanguagesFeaturesRegistryServic
     providers: ProviderCollection<T, Args>
   ) {
     await this.$staticFeaturesRegistered.wait();
-    for (const [id, reg] of Object.entries(providers)) {
+    for (const [id, reg] of providers) {
       return { id, ...reg };
     }
     throw new lsp.ResponseError(
