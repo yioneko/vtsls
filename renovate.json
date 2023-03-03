@@ -4,7 +4,12 @@
   "automerge": true,
   "git-submodules": {
     "schedule": ["after 10pm on Sunday"],
-    "semanticCommitType": "fix",
+    "packageRules": [
+      {
+        "matchPackageNames": ["packages/service/vscode"],
+        "semanticCommitType": "fix"
+      }
+    ],
     "enabled": true
   },
   "npm": {
