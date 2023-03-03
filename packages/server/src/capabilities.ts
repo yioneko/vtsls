@@ -46,6 +46,7 @@ export function getTsLspDefaultCapabilities(): ServerCapabilities {
       resolveProvider: true,
     },
     codeLensProvider: { resolveProvider: true },
+    // documentLinkProvider: { resolveProvider: false },
     documentLinkProvider: undefined,
     colorProvider: false,
     workspaceSymbolProvider: { resolveProvider: false },

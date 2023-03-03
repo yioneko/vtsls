@@ -204,6 +204,7 @@ export function createTSLanguageService(initOptions: TSLanguageServiceOptions) {
     completionItemResolve: waitInit(l.completionItemResolve.bind(l)),
     documentHighlight: waitInit(l.documentHighlight.bind(l)),
     signatureHelp: waitInit(l.signatureHelp.bind(l)),
+    documentLinks: waitInit(l.documentLinks.bind(l)),
     definition: waitInit(l.definition.bind(l)),
     references: waitInit(l.references.bind(l)),
     hover: waitInit(l.hover.bind(l)),

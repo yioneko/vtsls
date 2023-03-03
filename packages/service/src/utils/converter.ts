@@ -343,6 +343,15 @@ export class TSLspConverter {
     );
   };
 
+  convertDocumentLink = (link: vscode.DocumentLink, data?: any): lsp.DocumentLink => {
+    return {
+      range: this.convertRange(link.range),
+      target: link.target?.toString(),
+      tooltip: link.tooltip,
+      data,
+    };
+  };
+
   convertDiagnosticFromLsp = (diagnostic: lsp.Diagnostic): vscode.Diagnostic => {
     const d = new types.Diagnostic(
       types.Range.of(diagnostic.range),

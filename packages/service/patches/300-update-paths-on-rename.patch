@@ -2,22 +2,6 @@ diff --git a/src/languageFeatures/updatePathsOnRename.ts b/src/languageFeatures/
 index 3c149ba..e0e8e9f 100644
 --- a/src/languageFeatures/updatePathsOnRename.ts
 +++ b/src/languageFeatures/updatePathsOnRename.ts
-@@ -16,13 +16,14 @@ import * as fileSchemes from '../utils/fileSchemes';
- import { doesResourceLookLikeATypeScriptFile } from '../utils/languageDescription';
- import * as typeConverters from '../utils/typeConverters';
- import FileConfigurationManager from './fileConfigurationManager';
-+import * as fs from 'fs/promises';
- 
- 
- const updateImportsOnFileMoveName = 'updateImportsOnFileMove.enabled';
- 
- async function isDirectory(resource: vscode.Uri): Promise<boolean> {
- 	try {
--		return (await vscode.workspace.fs.stat(resource)).type === vscode.FileType.Directory;
-+		return (await fs.stat(resource.fsPath)).isDirectory()
- 	} catch {
- 		return false;
- 	}
 @@ -99,13 +100,13 @@ class UpdateImportsOnFileRenameHandler extends Disposable {
  			const resourcesBeingRenamed: vscode.Uri[] = [];
  

@@ -9,6 +9,7 @@ import { Barrier } from "../utils/barrier";
 import { onCaseInsensitiveFileSystem } from "../utils/fs";
 import { ResourceMap } from "../utils/resourceMap";
 import { ConfigurationShimService } from "./configuration";
+import { createFileSystemShim } from "./fs";
 import * as types from "./types";
 
 export class WorkspaceShimService extends Disposable {
@@ -64,6 +65,12 @@ export class WorkspaceShimService extends Disposable {
         uri,
       });
     }
+  }
+
+  private readonly _fs = createFileSystemShim();
+
+  get fs() {
+    return this._fs;
   }
 
   get textDocuments(): vscode.TextDocument[] {

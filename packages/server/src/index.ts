@@ -112,6 +112,7 @@ function bindServiceHandlers(
   conn.onCompletionResolve(service.completionItemResolve);
   conn.onDocumentHighlight(service.documentHighlight);
   conn.onSignatureHelp(service.signatureHelp);
+  // conn.onDocumentLinks(service.documentLinks);
   conn.onDefinition(service.definition);
   conn.onReferences(service.references);
   conn.onHover(service.hover);

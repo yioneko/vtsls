@@ -681,6 +681,23 @@ export class LanguageFeaturesShimService extends LanguagesFeaturesRegistryServic
     }
   }
 
+  async documentLinks(params: lsp.DocumentLinkParams, token = lsp.CancellationToken.None) {
+    const { doc, providers } = await this.prepareProviderHandle(
+      params.textDocument.uri,
+      this.$providers.documentLink
+    );
+
+    let results: lsp.DocumentLink[] = [];
+    for (const { provider } of providers) {
+      const links = await provider.provideDocumentLinks(doc, token);
+      if (links && links.length > 0) {
+        results = results.concat(links.map(this.delegate.converter.convertDocumentLink));
+      }
+    }
+
+    return results.length > 0 ? results : null;
+  }
+
   async definition(params: lsp.DefinitionParams, token = lsp.CancellationToken.None) {
     const { doc, provider } = await this.prepareHighestProviderHandle(
       params.textDocument.uri,
