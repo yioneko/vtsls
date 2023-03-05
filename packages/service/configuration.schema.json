@@ -1048,6 +1048,19 @@
     "vtsls.typescript.format.indentStyle": {
       "type": "number",
       "description": "0: None 1: Block 2: Smart"
+    },
+    "vtsls.experimental.completion.enableServerSideFuzzyMatch": {
+      "default": false,
+      "type": "boolean",
+      "description": "Execute fuzzy match of completion items on server side. Enable this will help filter out useless completion items from tsserver."
+    },
+    "vtsls.experimental.completion.entriesLimit": {
+      "default": null,
+      "type": [
+        "number",
+        "null"
+      ],
+      "description": "Maximum number of completion entries to return. Recommend to toggle `enableServerSideFuzzyMatch` either to preserve items with higher accuracy."
     }
   }
 }

@@ -1,5 +1,7 @@
+import { fuzzyScore, fuzzyScoreGracefulAggressive } from "@vtsls/vscode-fuzzy";
 import { Barrier } from "utils/barrier";
 import { Disposable } from "utils/dispose";
+import { getCompletionItemFuzzyScorer } from "utils/fuzzy";
 import * as vscode from "vscode";
 import * as lsp from "vscode-languageserver-protocol";
 import { URI } from "vscode-uri";
@@ -8,6 +10,7 @@ import { RestrictedCache } from "../utils/cache";
 import { deepClone } from "../utils/objects";
 import { isNil } from "../utils/types";
 import { CommandsShimService } from "./commands";
+import { ConfigurationShimService } from "./configuration";
 import { DiagnosticsShimService } from "./diagnostics";
 import { score } from "./selector";
 import * as types from "./types";
@@ -440,7 +443,7 @@ export class CodeActionCache extends DataCache<CodeActionProviderCollection> {
       if (typeof item.command === "string") {
         return { command: CodeActionCache.id, title: "", arguments: [data] };
       } else {
-        (item as lsp.CodeAction).data = data;
+        (item as lsp.CodeAction).data = Object.assign((item as lsp.CodeAction).data || {}, data);
         if (item.command) {
           item.command = { command: CodeActionCache.id, title: "", arguments: [data] };
         }
@@ -497,7 +500,7 @@ export class CompletionCache extends DataCache<CompletionProviderCollection> {
     const cacheId = this.completionItemCache.store(items);
     return (index: number, item: lsp.CompletionItem) => {
       const data = this.createData(providerId, index, cacheId);
-      item.data = data;
+      item.data = Object.assign(item.data || {}, data);
       if (item.command) {
         item.command = { command: CompletionCache.id, title: "", arguments: [data] };
       }
@@ -527,6 +530,7 @@ export class LanguageFeaturesShimService extends LanguagesFeaturesRegistryServic
     private readonly delegate: TSLanguageServiceDelegate,
     private readonly workspace: WorkspaceShimService,
     private readonly commands: CommandsShimService,
+    private readonly configuration: ConfigurationShimService,
     diagnostics: DiagnosticsShimService,
     private readonly clientCapabilities: lsp.ClientCapabilities
   ) {
@@ -546,6 +550,14 @@ export class LanguageFeaturesShimService extends LanguagesFeaturesRegistryServic
       this.$providers.completionItem
     );
 
+    const experimentalCompletionConfig = this.configuration.getConfiguration(
+      "vtsls.experimental.completion"
+    );
+    const enableServerSideFuzzyMatch = experimentalCompletionConfig.get<boolean>(
+      "enableServerSideFuzzyMatch"
+    );
+    const entriesLimit = experimentalCompletionConfig.get<number | null>("entriesLimit");
+
     const ctx = params.context
       ? {
           triggerKind: params.context.triggerKind - 1,
@@ -557,6 +569,7 @@ export class LanguageFeaturesShimService extends LanguagesFeaturesRegistryServic
         };
     const pos = types.Position.of(params.position);
     const wordRange = doc.getWordRangeAtPosition(pos);
+    const leadingLineContent = doc.getText(new types.Range(pos.line, 0, pos.line, pos.character));
     const inWord = wordRange?.contains(new types.Position(pos.line, pos.character - 1));
 
     const results: lsp.CompletionItem[][] = [];
@@ -595,14 +608,62 @@ export class LanguageFeaturesShimService extends LanguagesFeaturesRegistryServic
       }
 
       const transform = this.completionCache.store(itemsArr, providerId);
-      results.push(
-        itemsArr.map((item, index) =>
-          transform(index, this.delegate.converter.convertCompletionItem(item))
-        )
-      );
+
+      if (enableServerSideFuzzyMatch) {
+        const scoreFn = itemsArr.length > 2000 ? fuzzyScore : fuzzyScoreGracefulAggressive;
+        const fuzzyMatcher = getCompletionItemFuzzyScorer(
+          pos,
+          wordRange?.start ?? pos,
+          leadingLineContent,
+          scoreFn
+        );
+        const matchedItems: lsp.CompletionItem[] = [];
+        for (let i = 0; i < itemsArr.length; ++i) {
+          const item = itemsArr[i];
+          const match = fuzzyMatcher(item);
+          if (match) {
+            const transformed = transform(
+              i,
+              // pass match result to data
+              this.delegate.converter.convertCompletionItem(item, { match })
+            );
+            matchedItems.push(transformed);
+          }
+        }
+
+        results.push(matchedItems);
+      } else {
+        results.push(
+          itemsArr.map((item, index) =>
+            transform(index, this.delegate.converter.convertCompletionItem(item))
+          )
+        );
+      }
     }
 
-    return lsp.CompletionList.create(results.flat(), isIncomplete);
+    let resultItems = results.flat();
+    if (!isNil(entriesLimit) && resultItems.length > entriesLimit) {
+      // mark as inComplete as some entries are trimmed
+      isIncomplete = true;
+      resultItems.sort((a, b) => {
+        // use fuzzy matched score if possible
+        if (a.data?.match && b.data?.match) {
+          return b.data.match[0] - a.data.match[0];
+        } else {
+          const aText = a.sortText ?? a.label;
+          const bText = b.sortText ?? b.label;
+          if (aText === bText) {
+            return 0;
+          } else if (aText < bText) {
+            return -1;
+          } else {
+            return 1;
+          }
+        }
+      });
+      resultItems = resultItems.slice(0, entriesLimit);
+    }
+    return lsp.CompletionList.create(resultItems, isIncomplete);
   }
 
   async completionItemResolve(item: lsp.CompletionItem, token = lsp.CancellationToken.None) {

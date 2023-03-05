@@ -46,7 +46,7 @@ async function genSchema() {
 
   processProperties(properties);
 
-  const additionalConfig = (lang) => ({
+  const additionalConfigByLang = (lang) => ({
     [`vtsls.${lang}.format.baseIndentSize`]: {
       type: "number",
     },
@@ -71,13 +71,29 @@ async function genSchema() {
     },
   });
 
+  const additionalConfig = {
+    ...additionalConfigByLang("javascript"),
+    ...additionalConfigByLang("typescript"),
+    "vtsls.experimental.completion.enableServerSideFuzzyMatch": {
+      default: false,
+      type: "boolean",
+      description:
+        "Execute fuzzy match of completion items on server side. Enable this will help filter out useless completion items from tsserver.",
+    },
+    "vtsls.experimental.completion.entriesLimit": {
+      default: null,
+      type: ["number", "null"],
+      description:
+        "Maximum number of completion entries to return. Recommend to toggle `enableServerSideFuzzyMatch` either to preserve items with higher accuracy.",
+    },
+  };
+
   return {
     $schema: "http://json-schema.org/draft-07/schema#",
     description: "Configuration for Typescript language service",
     properties: {
       ...properties,
-      ...additionalConfig("javascript"),
-      ...additionalConfig("typescript"),
+      ...additionalConfig,
     },
   };
 }

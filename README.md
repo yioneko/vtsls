@@ -10,7 +10,7 @@ Unlike other similar projects, this is implemented by filling VSCode APIs and ap
 
 Install by `npm install -g @vtsls/language-server`, then run `vtsls --stdio`. Requires `node >= 14`.
 
-## Supported LSP Features
+## LSP Features
 
 See [available server capabilities](./packages/server/src/capabilities.ts).
 
@@ -50,10 +50,6 @@ Some other commands are undocumented because either it is private for server or 
 
 Same as VSCode. The list below may be outdated.
 
-#### Quickfix
-
-Only `quickfix` kind is supported. No sub-kind is defined.
-
 #### Source Actions
 
 - `source.organizeImports`
@@ -85,9 +81,20 @@ Almost the same as the original VSCode extension, with a few additional settings
 
 See the configuration schema [here](./packages/service/configuration.schema.json).
 
-## Known Issues
+## Troubleshooting
 
-See [Known issues](https://github.com/yioneko/vtsls/issues/26)
+Please see [Known issues](https://github.com/yioneko/vtsls/issues/26) first.
+
+### Bad performance of completion
+
+`tsserver` could throw out plenty of completion entries, most of them are globally accessible variables, modules or namespaces. Some LSP clients have poor performance for fuzzy matching or filtering, and cause noticeable delay of completion.
+
+Instead of switching client, some server configuration options could also make partial optimizations:
+
+- `vtsls.experimental.completion.enableServerSideFuzzyMatch`: before returning all the completion candidates from `tsserver`, the server will do fuzzy matching and filter out entries with no match. This can significantly reduce the number of invalid entries.
+- `vtsls.experimental.completion.entriesLimit`: set the maximum number of completion entries to return.
+- `typescript.preferences.includePackageJsonAutoImports = 'off'`
+- `typescript.preferences.autoImportFileExcludePatterns`
 
 ## Not Planned
 
