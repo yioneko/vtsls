@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.1.14](https://github.com/yioneko/vtsls/compare/service-v0.1.13...service-v0.1.14) (2023-03-05)
+
+
+### Features
+
+* initial support for document link ([ec94085](https://github.com/yioneko/vtsls/commit/ec9408525e0bb99e399a16f92fa59debbb2daa95))
+
+
+### Bug Fixes
+
+* check insertReplaceEdit capability of client ([bcdd593](https://github.com/yioneko/vtsls/commit/bcdd593e39d41585eb1de251385506a6651258f8))
+* improve service initialization ([aaa1932](https://github.com/yioneko/vtsls/commit/aaa19329ccc96b8a291a7db38ee124cf7f842c73))
+* make service really disposable ([77553f2](https://github.com/yioneko/vtsls/commit/77553f2429baa904eb3732b289695f1f37dd00a9))
+
 ## [0.1.13](https://github.com/yioneko/vtsls/compare/service-v0.1.12...service-v0.1.13) (2023-03-01)
 
 
