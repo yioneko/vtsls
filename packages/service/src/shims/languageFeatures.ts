@@ -29,11 +29,6 @@ class ProviderCollection<T, Args = unknown> extends Disposable {
   [Symbol.iterator]() {
     return this.registries[Symbol.iterator]();
   }
-
-  public override dispose() {
-    this.registries.clear();
-    super.dispose();
-  }
 }
 
 type InferRegistry<Collection extends ProviderCollection<any, any>> =
@@ -564,7 +559,7 @@ export class LanguageFeaturesShimService extends LanguagesFeaturesRegistryServic
     const wordRange = doc.getWordRangeAtPosition(pos);
     const inWord = wordRange?.contains(new types.Position(pos.line, pos.character - 1));
 
-    let merged: lsp.CompletionItem[] = [];
+    const results: lsp.CompletionItem[][] = [];
     let isIncomplete = false;
 
     for (const {
@@ -600,13 +595,14 @@ export class LanguageFeaturesShimService extends LanguagesFeaturesRegistryServic
       }
 
       const transform = this.completionCache.store(itemsArr, providerId);
-      merged = merged.concat(
+      results.push(
         itemsArr.map((item, index) =>
           transform(index, this.delegate.converter.convertCompletionItem(item))
         )
       );
     }
-    return lsp.CompletionList.create(merged, isIncomplete);
+
+    return lsp.CompletionList.create(results.flat(), isIncomplete);
   }
 
   async completionItemResolve(item: lsp.CompletionItem, token = lsp.CancellationToken.None) {
@@ -774,7 +770,7 @@ export class LanguageFeaturesShimService extends LanguagesFeaturesRegistryServic
         lsp.CodeActionTriggerKind.Invoked) as vscode.CodeActionTriggerKind,
     };
 
-    let results: (lsp.Command | lsp.CodeAction)[] = [];
+    const results: (lsp.Command | lsp.CodeAction)[][] = [];
     // if no kinds passed, assume requesting all
     const kinds = ctx.only?.sort() || [""];
 
@@ -818,7 +814,7 @@ export class LanguageFeaturesShimService extends LanguagesFeaturesRegistryServic
         }
 
         const transform = this.codeActionCache.store(actions, id);
-        results = results.concat(
+        results.push(
           actions.map((action, index) =>
             transform(index, this.delegate.converter.convertCodeAction(action))
           )
@@ -827,7 +823,7 @@ export class LanguageFeaturesShimService extends LanguagesFeaturesRegistryServic
     }
 
     if (results.length > 0) {
-      return results;
+      return results.flat();
     } else {
       return null;
     }

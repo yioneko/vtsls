@@ -246,10 +246,18 @@ export class TSLspConverter {
           range: this.convertRange(item.range),
           newText: insertText ?? label,
         };
-      } else {
+      } else if (
+        this.clientCapabilities.textDocument?.completion?.completionItem?.insertReplaceSupport
+      ) {
         textEdit = {
           insert: this.convertRange(item.range.inserting),
           replace: this.convertRange(item.range.replacing),
+          newText: insertText ?? label,
+        };
+      } else {
+        textEdit = {
+          // TODO:: use item.range.replacing?
+          range: this.convertRange(item.range.inserting),
           newText: insertText ?? label,
         };
       }
@@ -267,9 +275,12 @@ export class TSLspConverter {
       preselect: item.preselect,
       sortText: item.sortText,
       filterText: item.filterText,
-      insertTextMode: convertOrFalsy(item.keepWhitespace, (v) =>
-        v ? lsp.InsertTextMode.adjustIndentation : lsp.InsertTextMode.asIs
-      ),
+      insertTextMode:
+        item.keepWhitespace === undefined
+          ? undefined
+          : item.keepWhitespace
+          ? lsp.InsertTextMode.adjustIndentation
+          : lsp.InsertTextMode.asIs,
       insertTextFormat: isSnippet ? lsp.InsertTextFormat.Snippet : lsp.InsertTextFormat.PlainText,
       insertText,
       textEdit,
