@@ -1,5 +1,4 @@
 import { contributes as pkgContributes } from "typescript-language-features/package.json";
-import { EditorSettings } from "typescript/lib/tsserverlibrary";
 import { Disposable } from "utils/dispose";
 import { isPrimitive } from "utils/types";
 import * as vscode from "vscode";
@@ -46,12 +45,12 @@ function recursiveUpdate<T>(cur: any, value: T): T {
   return cur as T;
 }
 
-export interface VtslsConfig {
-  format?: EditorSettings;
-}
-
 export class ConfigurationShimService extends Disposable {
-  private defaultConfig: any = {};
+  private defaultConfig: any = {
+    "vtsls.experimental.completion.enableServerSideFuzzyMatch": false,
+    "vtsls.experimental.completion.entriesLimit": null,
+  };
+
   private workspaceConfig: any = {};
 
   private _onDidChangeConfiguration = this._register(

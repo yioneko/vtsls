@@ -24,6 +24,11 @@
       "package-name": "@vtsls/language-server",
       "release-type": "node",
       "component": "server"
+    },
+    "packages/vscode-fuzzy": {
+      "package-name": "@vtsls/vscode-fuzzy",
+      "release-type": "node",
+      "component": "vscode-fuzzy"
     }
   }
 }

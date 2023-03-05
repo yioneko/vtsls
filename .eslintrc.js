@@ -14,6 +14,7 @@ module.exports = {
   ignorePatterns: [
     "packages/service/src/typescript-language-features",
     "packages/service/vscode",
+    "packages/vscode-fuzzy",
     // TODO: specific rules for scripts file
     "packages/**/*.js",
     "packages/service/vitest.config.ts",

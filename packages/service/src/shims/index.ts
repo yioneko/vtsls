@@ -44,6 +44,7 @@ export function initializeShimServices(
     delegate,
     workspaceService,
     commandsService,
+    configurationService,
     diagnosticsSerivce,
     initOptions.clientCapabilities
   );
