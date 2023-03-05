@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.1.14](https://github.com/yioneko/vtsls/compare/server-v0.1.13...server-v0.1.14) (2023-03-05)
+
+
+### Features
+
+* initial support for document link ([ec94085](https://github.com/yioneko/vtsls/commit/ec9408525e0bb99e399a16f92fa59debbb2daa95))
+
+
+### Bug Fixes
+
+* improve service initialization ([aaa1932](https://github.com/yioneko/vtsls/commit/aaa19329ccc96b8a291a7db38ee124cf7f842c73))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @vtsls/language-service bumped from workspace:0.1.13 to workspace:0.1.14
+
 ## [0.1.13](https://github.com/yioneko/vtsls/compare/server-v0.1.12...server-v0.1.13) (2023-03-01)
 
 
