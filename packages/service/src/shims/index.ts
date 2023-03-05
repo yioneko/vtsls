@@ -8,7 +8,6 @@ import { ConfigurationShimService } from "./configuration";
 import { createContextShim } from "./context";
 import { DiagnosticsShimService } from "./diagnostics";
 import { createExtensionsShim } from "./extensions";
-import { createFileSystemShim } from "./fs";
 import { createL10nShim } from "./l10n";
 import { LanguageFeaturesShimService } from "./languageFeatures";
 import { UIKind } from "./types";

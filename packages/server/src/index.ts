@@ -38,18 +38,15 @@ function onServerInitialize(conn: Connection, params: InitializeParams) {
   });
 
   async function initializeService() {
-    if (clientCapabilities.workspace?.configuration) {
-      void conn
-        .sendRequest(ConfigurationRequest.type, { items: [{ section: "" }] })
-        .then((config) => {
-          void service.initialize(Array.isArray(config) ? config[0] : {});
-        });
-    } else {
-      void service.initialize({});
-    }
-
     try {
-      await service.waitInitialized();
+      if (clientCapabilities.workspace?.configuration) {
+        const config = await conn.sendRequest(ConfigurationRequest.type, {
+          items: [{ section: "" }],
+        });
+        await service.initialize(Array.isArray(config) ? config[0] : {});
+      } else {
+        await service.initialize({});
+      }
     } catch (e) {
       conn.console.error(`Server initialization failed: ${String(e)}`);
       conn.dispose();

@@ -137,12 +137,15 @@ export function createTSLanguageService(initOptions: TSLanguageServiceOptions) {
     }
   });
 
-  const initialized = new Barrier();
-  let disposed = false;
+  const serviceState = {
+    state: "uninitialized" as "uninitialized" | "initializing" | "initialized",
+    initialized: new Barrier(),
+    disposed: false,
+  };
 
   function waitInit<P extends any[], R>(handler: (...args: P) => R) {
     return (async (...args: P) => {
-      await initialized.wait();
+      await serviceState.initialized.wait();
       // eslint-disable-next-line @typescript-eslint/await-thenable
       return await handler(...args);
     }) as unknown as (...args: P) => R extends Thenable<any> ? R : Thenable<R>;
@@ -150,36 +153,44 @@ export function createTSLanguageService(initOptions: TSLanguageServiceOptions) {
 
   const tsLanguageService = {
     ...events,
-    initialized() {
-      return initialized.isOpen();
-    },
-    async waitInitialized() {
-      await initialized.wait();
-    },
     // wait initial config
     async initialize(config: TSLanguageServiceConfig | undefined) {
-      if (initialized.isOpen()) {
-        return;
-      }
-
-      try {
-        shims.configurationService.$changeConfiguration(config);
-        toDispose.add(await startVsTsExtension(shims.context));
-        initialized.open();
-      } catch (e) {
-        tsLanguageService.dispose();
-        throw e;
+      switch (serviceState.state) {
+        case "uninitialized":
+          try {
+            serviceState.state = "initializing";
+            shims.configurationService.$changeConfiguration(config);
+            toDispose.add(await startVsTsExtension(shims.context));
+            serviceState.state = "initialized";
+            serviceState.initialized.open();
+          } catch (e) {
+            tsLanguageService.dispose();
+            throw e;
+          }
+          break;
+        case "initializing":
+          shims.configurationService.$changeConfiguration(config);
+          await serviceState.initialized.wait();
+          break;
+        default:
+          break;
       }
     },
     dispose() {
-      if (initialized.isOpen() && !disposed) {
+      if (!serviceState.disposed) {
         toDispose.dispose();
-        disposed = true;
+        serviceState.disposed = true;
       }
+    },
+    get initialized() {
+      return serviceState.state === "initialized";
+    },
+    get disposed() {
+      return serviceState.disposed;
     },
     changeConfiguration(params: lsp.DidChangeConfigurationParams) {
       // set initialized after didChangeConfiguration
-      if (!initialized.isOpen()) {
+      if (serviceState.state === "uninitialized") {
         void tsLanguageService.initialize(params.settings);
       } else {
         shims.configurationService.$changeConfiguration(params.settings);

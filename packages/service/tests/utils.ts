@@ -15,6 +15,9 @@ export async function createTestService(workspacePath: string) {
     },
     workspaceFolders: [{ name: "test", uri: URI.file(workspacePath).toString() }],
   });
+
+  service.onLogMessage((p) => console.log(p.message));
+
   await service.initialize({
     typescript: {
       preferences: {
@@ -32,9 +35,6 @@ export async function createTestService(workspacePath: string) {
       },
     },
   });
-  service.onLogMessage((p) => console.log(p.message));
-
-  await service.waitInitialized();
 
   const uri = URI.file(path.resolve(workspacePath, "index.ts")).toString();
   service.openTextDocument({
