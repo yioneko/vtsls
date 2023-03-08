@@ -4,7 +4,7 @@ import * as vscode from "vscode";
 import * as lsp from "vscode-languageserver-protocol";
 import { TextDocument } from "vscode-languageserver-textdocument";
 import { URI, Utils as uriUtils } from "vscode-uri";
-import { TSLanguageServiceDelegate } from "../languageService";
+import { TSLanguageServiceDelegate } from "../service";
 import { Barrier } from "../utils/barrier";
 import { onCaseInsensitiveFileSystem } from "../utils/fs";
 import { ResourceMap } from "../utils/resourceMap";

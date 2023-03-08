@@ -1,4 +1,5 @@
-import { CodeActionCache, CompletionCache } from "shims/languageFeatures";
+import { CodeActionCache } from "service/codeAction";
+import { CompletionCache } from "service/completion";
 import {
   activationEvents as pkgJsonEvents,
   contributes as pkgJsonContributes,
