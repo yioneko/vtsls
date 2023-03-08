@@ -1,7 +1,7 @@
 import { Disposable, disposeAll } from "utils/dispose";
 import * as vscode from "vscode";
 import * as lsp from "vscode-languageserver-protocol";
-import { TSLanguageServiceDelegate } from "../languageService";
+import { TSLanguageServiceDelegate } from "../service";
 import { isPrimitive } from "../utils/types";
 
 export class WindowShimService extends Disposable {
