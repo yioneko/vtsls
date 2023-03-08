@@ -91,7 +91,7 @@ Please see [Known issues](https://github.com/yioneko/vtsls/issues/26) first.
 
 Instead of switching client, some server configuration options could also make partial optimizations:
 
-- `vtsls.experimental.completion.enableServerSideFuzzyMatch`: before returning all the completion candidates from `tsserver`, the server will do fuzzy matching and filter out entries with no match. This can significantly reduce the number of invalid entries.
+- `vtsls.experimental.completion.enableServerSideFuzzyMatch`: before returning all the completion candidates from `tsserver`, the server will do fuzzy matching and filter out entries with no match. This can reduce the number of invalid entries in the response.
 - `vtsls.experimental.completion.entriesLimit`: set the maximum number of completion entries to return.
 - `typescript.preferences.includePackageJsonAutoImports = 'off'`
 - `typescript.preferences.autoImportFileExcludePatterns`

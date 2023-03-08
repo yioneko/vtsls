@@ -84,7 +84,7 @@ async function genSchema() {
       default: null,
       type: ["number", "null"],
       description:
-        "Maximum number of completion entries to return. Recommend to toggle `enableServerSideFuzzyMatch` either to preserve items with higher accuracy.",
+        "Maximum number of completion entries to return. Recommend to also toggle `enableServerSideFuzzyMatch` to preserve items with higher accuracy.",
     },
   };
 
