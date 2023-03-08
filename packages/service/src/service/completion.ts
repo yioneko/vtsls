@@ -87,13 +87,18 @@ export class TSCompletionFeature extends Disposable {
     this.cache = this._register(new CompletionCache(commands));
   }
 
+  private lastCompleteResult:
+    | {
+        items: vscode.CompletionItem[];
+        providerId: number;
+      }[]
+    | null = null;
+
   async completion(
     doc: vscode.TextDocument,
     params: Omit<lsp.CompletionParams, "textDocument">,
     token: lsp.CancellationToken
   ) {
-    const providers = this.registry.getProviders(doc);
-
     const experimentalCompletionConfig = this.configuration.getConfiguration(
       "vtsls.experimental.completion"
     );
@@ -102,84 +107,102 @@ export class TSCompletionFeature extends Disposable {
     );
     const entriesLimit = experimentalCompletionConfig.get<number | null>("entriesLimit");
 
-    const ctx = params.context
-      ? {
-          triggerKind: params.context.triggerKind - 1,
-          triggerCharacter: params.context.triggerCharacter,
-        }
-      : {
-          triggerKind: types.CompletionTriggerKind.Invoke,
-          triggerCharacter: "",
-        };
     const pos = types.Position.of(params.position);
     const wordRange = doc.getWordRangeAtPosition(pos);
     const leadingLineContent = doc.getText(new types.Range(pos.line, 0, pos.line, pos.character));
-    const inWord = wordRange?.contains(new types.Position(pos.line, pos.character - 1));
 
-    const results: {
+    let results: {
       items: vscode.CompletionItem[];
-      matches?: FuzzyScore[];
       providerId: number;
     }[] = [];
     let isIncomplete = false;
 
-    for (const {
-      id: providerId,
-      provider,
-      args: { triggerCharacters },
-    } of providers) {
-      const checkTriggerCharacter =
-        ctx.triggerCharacter && triggerCharacters.includes(ctx.triggerCharacter);
-      if (
-        ctx.triggerKind === types.CompletionTriggerKind.TriggerCharacter &&
-        !checkTriggerCharacter &&
-        !inWord // by default, identifier chars should be also considered as trigger char
-      ) {
-        continue;
+    if (
+      params.context?.triggerKind === lsp.CompletionTriggerKind.TriggerForIncompleteCompletions &&
+      this.lastCompleteResult
+    ) {
+      results = this.lastCompleteResult;
+      isIncomplete = true;
+    } else {
+      const providers = this.registry.getProviders(doc);
+
+      const ctx = params.context
+        ? {
+            triggerKind: params.context.triggerKind - 1,
+            triggerCharacter: params.context.triggerCharacter,
+          }
+        : {
+            triggerKind: types.CompletionTriggerKind.Invoke,
+            triggerCharacter: "",
+          };
+      const inWord = wordRange?.contains(new types.Position(pos.line, pos.character - 1));
+
+      for (const {
+        id: providerId,
+        provider,
+        args: { triggerCharacters },
+      } of providers) {
+        const checkTriggerCharacter =
+          ctx.triggerCharacter && triggerCharacters.includes(ctx.triggerCharacter);
+        if (
+          ctx.triggerKind === types.CompletionTriggerKind.TriggerCharacter &&
+          !checkTriggerCharacter &&
+          !inWord // by default, identifier chars should be also considered as trigger char
+        ) {
+          continue;
+        }
+
+        const items = await provider.provideCompletionItems(doc, pos, token, ctx);
+        if (!items) {
+          continue;
+        }
+
+        let itemsArr: vscode.CompletionItem[];
+        if (Array.isArray(items)) {
+          itemsArr = items;
+        } else {
+          isIncomplete = isIncomplete || Boolean(items.isIncomplete);
+          itemsArr = items.items;
+        }
+
+        if (itemsArr.length === 0) {
+          continue;
+        }
+
+        results.push({ items: itemsArr, providerId });
       }
 
-      const items = await provider.provideCompletionItems(doc, pos, token, ctx);
-      if (!items) {
-        continue;
-      }
+      this.lastCompleteResult = isIncomplete ? null : results;
+    }
 
-      let itemsArr: vscode.CompletionItem[];
-      if (Array.isArray(items)) {
-        itemsArr = items;
-      } else {
-        isIncomplete = isIncomplete || Boolean(items.isIncomplete);
-        itemsArr = items.items;
-      }
-
-      if (itemsArr.length === 0) {
-        continue;
-      }
-
-      if (enableServerSideFuzzyMatch && wordRange) {
-        const { filteredItems, matches } = this.filterByFuzzyMatches(
-          itemsArr,
+    const shouldFuzzy = enableServerSideFuzzyMatch && wordRange;
+    const fuzzyScorer = shouldFuzzy
+      ? this.getCompletionItemFuzzyScorer(
+          results.map((r) => r.items.length).reduce((a, b) => a + b),
           pos,
           wordRange,
           leadingLineContent
-        );
-
-        if (filteredItems.length > 0) {
-          results.push({ items: filteredItems, matches, providerId });
-        }
-      } else {
-        results.push({ items: itemsArr, providerId });
-      }
-    }
+        )
+      : () => void 0;
 
     let resultItems: lsp.CompletionItem[] = [];
-    for (const { items, matches, providerId } of results) {
+
+    for (const { items, providerId } of results) {
       const overrideFields = this.cache.store(items, providerId);
+
       for (let i = 0; i < items.length; ++i) {
         const { data, command } = overrideFields[i];
+        const item = items[i];
+        const match = fuzzyScorer(item);
+        // remove item with no match
+        if (shouldFuzzy && !match) {
+          continue;
+        }
+
         const converted = this.converter.convertCompletionItem(items[i], {
           ...data,
           // attach match result in data for trimming
-          match: matches?.[i],
+          match,
         });
         resultItems.push({
           ...converted,
@@ -217,17 +240,17 @@ export class TSCompletionFeature extends Disposable {
     }
   }
 
-  private filterByFuzzyMatches(
-    items: vscode.CompletionItem[],
+  private getCompletionItemFuzzyScorer(
+    itemsLen: number,
     position: vscode.Position,
     wordRange: vscode.Range,
     leadingLineContent: string
   ) {
-    const scoreFn = items.length > 2000 ? fuzzyScore : fuzzyScoreGracefulAggressive;
+    const scoreFn = itemsLen ? fuzzyScore : fuzzyScoreGracefulAggressive;
 
     let word = "";
     let wordLow = "";
-    const getFuzzyScore = (item: vscode.CompletionItem) => {
+    return (item: vscode.CompletionItem) => {
       const editStartColumn = item.range
         ? types.Range.isRange(item.range)
           ? item.range.start.character
@@ -275,19 +298,6 @@ export class TSCompletionFeature extends Disposable {
         }
       }
     };
-
-    const filteredItems: vscode.CompletionItem[] = [];
-    const matches: FuzzyScore[] = [];
-
-    for (const item of items) {
-      const match = getFuzzyScore(item);
-      if (match) {
-        filteredItems.push(item);
-        matches.push(match);
-      }
-    }
-
-    return { filteredItems, matches };
   }
 
   private trimCompletionItems(items: lsp.CompletionItem[], limit: number) {
