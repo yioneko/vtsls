@@ -1,8 +1,8 @@
-import { Disposable } from "utils/dispose";
 import * as vscode from "vscode";
 import * as lsp from "vscode-languageserver-protocol";
 import { URI } from "vscode-uri";
 import { DebouncedEmitter } from "../utils/debouncedEmitter";
+import { Disposable } from "../utils/dispose";
 import { onCaseInsensitiveFileSystem } from "../utils/fs";
 import { ResourceMap } from "../utils/resourceMap";
 import { generateUuid } from "../utils/uuid";

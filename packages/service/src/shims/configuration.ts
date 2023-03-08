@@ -1,9 +1,9 @@
-import { contributes as pkgContributes } from "typescript-language-features/package.json";
-import { Disposable } from "utils/dispose";
-import { isPrimitive } from "utils/types";
 import * as vscode from "vscode";
 import { Emitter } from "vscode-languageserver-protocol";
 import { TSLanguageServiceConfig } from "../types";
+import { contributes as pkgContributes } from "../typescript-language-features/package.json";
+import { Disposable } from "../utils/dispose";
+import { isPrimitive } from "../utils/types";
 
 function lookUp<T>(tree: any, key: string | undefined): T | undefined {
   if (key) {

@@ -1,5 +1,3 @@
-import { DisposableStore } from "utils/dispose";
-import { deepClone } from "utils/objects";
 import type * as vscode from "vscode";
 import * as lsp from "vscode-languageserver-protocol";
 import { URI } from "vscode-uri";
@@ -15,6 +13,8 @@ import {
 } from "../types";
 import { Barrier } from "../utils/barrier";
 import { TSLspConverter } from "../utils/converter";
+import { DisposableStore } from "../utils/dispose";
+import { deepClone } from "../utils/objects";
 import { TSCodeActionFeature } from "./codeAction";
 import { TSCompletionFeature } from "./completion";
 

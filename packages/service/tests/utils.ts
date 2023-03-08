@@ -3,7 +3,7 @@ import * as path from "node:path";
 import * as lsp from "vscode-languageserver-protocol";
 import { TextDocument } from "vscode-languageserver-textdocument";
 import { URI } from "vscode-uri";
-import { createTSLanguageService, TSLanguageService } from "../";
+import { createTSLanguageService, TSLanguageService } from "../src/service";
 
 export async function createTestService(workspacePath: string) {
   const service = createTSLanguageService({

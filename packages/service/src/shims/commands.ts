@@ -1,6 +1,6 @@
-import { Disposable } from "utils/dispose";
 import * as lsp from "vscode-languageserver-protocol";
 import { TSLanguageServiceDelegate } from "../service";
+import { Disposable } from "../utils/dispose";
 
 export interface ICommand {
   id: string;

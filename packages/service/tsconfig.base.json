@@ -1,10 +1,10 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "baseUrl": "./src",
+    "baseUrl": "./",
     "resolveJsonModule": true,
     "paths": {
-      "@vsc-ts/*": ["typescript-language-features/src/*"]
+      "@vsc-ts/*": ["src/typescript-language-features/src/*"]
     }
   },
   "include": ["src/**/*"],

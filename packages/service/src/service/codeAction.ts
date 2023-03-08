@@ -1,12 +1,12 @@
-import { CommandsShimService } from "shims/commands";
-import { CodeActionRegistryHandle } from "shims/languageFeatures";
-import * as types from "shims/types";
-import { RestrictedCache } from "utils/cache";
-import { TSLspConverter } from "utils/converter";
-import { Disposable } from "utils/dispose";
-import { isNil } from "utils/types";
 import * as vscode from "vscode";
 import * as lsp from "vscode-languageserver-protocol";
+import { CommandsShimService } from "../shims/commands";
+import { CodeActionRegistryHandle } from "../shims/languageFeatures";
+import * as types from "../shims/types";
+import { RestrictedCache } from "../utils/cache";
+import { TSLspConverter } from "../utils/converter";
+import { Disposable } from "../utils/dispose";
+import { isNil } from "../utils/types";
 
 interface CodeActionData {
   providerId: number;

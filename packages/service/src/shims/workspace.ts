@@ -1,11 +1,11 @@
 import * as path from "path";
-import { Disposable } from "utils/dispose";
 import * as vscode from "vscode";
 import * as lsp from "vscode-languageserver-protocol";
 import { TextDocument } from "vscode-languageserver-textdocument";
 import { URI, Utils as uriUtils } from "vscode-uri";
 import { TSLanguageServiceDelegate } from "../service";
 import { Barrier } from "../utils/barrier";
+import { Disposable } from "../utils/dispose";
 import { onCaseInsensitiveFileSystem } from "../utils/fs";
 import { ResourceMap } from "../utils/resourceMap";
 import { ConfigurationShimService } from "./configuration";

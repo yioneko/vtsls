@@ -1,8 +1,8 @@
-import { Barrier } from "utils/barrier";
-import { Disposable } from "utils/dispose";
 import * as vscode from "vscode";
 import * as lsp from "vscode-languageserver-protocol";
 import { URI } from "vscode-uri";
+import { Barrier } from "../utils/barrier";
+import { Disposable } from "../utils/dispose";
 import { DiagnosticsShimService } from "./diagnostics";
 import { score } from "./selector";
 

@@ -3,8 +3,8 @@
   "compilerOptions": {
     "outDir": "./dist",
     "paths": {
-      "@vsc-ts/*": ["typescript-language-features/src/*"],
-      "vscode": ["shims"]
+      "@vsc-ts/*": ["src/typescript-language-features/src/*"],
+      "vscode": ["src/shims"]
     }
   }
 }

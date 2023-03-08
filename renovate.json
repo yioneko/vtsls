@@ -3,7 +3,7 @@
   "extends": ["config:base", "schedule:automergeDaily", "helpers:disableTypesNodeMajor"],
   "automerge": true,
   "git-submodules": {
-    "schedule": ["after 10pm on Sunday"],
+    "schedule": ["after 6pm on Sunday"],
     "packageRules": [
       {
         "matchPackageNames": ["packages/service/vscode"],
@@ -15,7 +15,7 @@
   "npm": {
     "ignoreDeps": ["jsonc-parser", "semver", "@types/semver", "node"],
     "rangeStrategy": "bump",
-    "schedule": ["after 10pm on Monday"],
+    "schedule": ["after 6pm on Monday"],
     "packageRules": [
       {
         "groupName": "all non-major devDependencies",
