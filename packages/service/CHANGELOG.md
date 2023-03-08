@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.1.15](https://github.com/yioneko/vtsls/compare/service-v0.1.14...service-v0.1.15) (2023-03-08)
+
+
+### Features
+
+* server side filtering ([#50](https://github.com/yioneko/vtsls/issues/50)) ([2ba2de5](https://github.com/yioneko/vtsls/commit/2ba2de561412092fc35fecbcea91659f844ad3d4))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @vtsls/vscode-fuzzy bumped from workspace:0.0.1 to workspace:1.0.0
+
 ## [0.1.14](https://github.com/yioneko/vtsls/compare/service-v0.1.13...service-v0.1.14) (2023-03-05)
 
 
