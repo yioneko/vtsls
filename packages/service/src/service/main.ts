@@ -57,13 +57,14 @@ export function createTSLanguageService(initOptions: TSLanguageServiceOptions) {
     )
   );
 
-  function wrapRequestHandler<P extends any[], R>(handler: (...args: P) => R) {
-    return (async (...args: P) => {
+  function wrapRequestHandler<P, R>(
+    handler: (params: P, token: lsp.CancellationToken) => Promise<R>
+  ) {
+    return async (params: P, token: lsp.CancellationToken = lsp.CancellationToken.None) => {
       await serviceState.initialized.wait();
       await l.$staticFeaturesRegistered.wait();
-      // eslint-disable-next-line @typescript-eslint/await-thenable
-      return await handler(...args);
-    }) as unknown as (...args: P) => R extends Thenable<any> ? R : Thenable<R>;
+      return await handler(params, token);
+    };
   }
 
   function getOpenedDoc(uri: lsp.URI) {
@@ -134,153 +135,130 @@ export function createTSLanguageService(initOptions: TSLanguageServiceOptions) {
     changeWorkspaceFolders(params: lsp.DidChangeWorkspaceFoldersParams) {
       shims.workspaceService.$changeWorkspaceFolders(params);
     },
-    completion: wrapRequestHandler(
-      (params: lsp.CompletionParams, token = lsp.CancellationToken.None) => {
-        const { textDocument, ...rest } = params;
-        const doc = getOpenedDoc(textDocument.uri);
-        return completionFeature.completion(doc, rest, token);
-      }
+    completion: wrapRequestHandler((params: lsp.CompletionParams, token) => {
+      const { textDocument, ...rest } = params;
+      const doc = getOpenedDoc(textDocument.uri);
+      return completionFeature.completion(doc, rest, token);
+    }),
+    completionItemResolve: wrapRequestHandler((item: lsp.CompletionItem, token) =>
+      completionFeature.completionItemResolve(item, token)
     ),
-    completionItemResolve: wrapRequestHandler(
-      (item: lsp.CompletionItem, token = lsp.CancellationToken.None) => {
-        return completionFeature.completionItemResolve(item, token);
+    documentHighlight: wrapRequestHandler(async (params: lsp.DocumentHighlightParams, token) => {
+      const doc = getOpenedDoc(params.textDocument.uri);
+      const { provider } = providers.$getHighestProvider(doc, providers.documentHighlight);
+      const result = await provider.provideDocumentHighlights(
+        doc,
+        types.Position.of(params.position),
+        token
+      );
+      if (!Array.isArray(result)) {
+        return;
       }
-    ),
-    documentHighlight: wrapRequestHandler(
-      async (params: lsp.DocumentHighlightParams, token = lsp.CancellationToken.None) => {
-        const doc = getOpenedDoc(params.textDocument.uri);
-        const { provider } = providers.$getHighestProvider(doc, providers.documentHighlight);
-        const result = await provider.provideDocumentHighlights(
-          doc,
-          types.Position.of(params.position),
-          token
-        );
-        if (!Array.isArray(result)) {
-          return;
-        }
-        return result.map((r) => ({
-          range: converter.convertRange(r.range),
-          kind: r.kind as lsp.DocumentHighlightKind,
-        }));
-      }
-    ),
-    signatureHelp: wrapRequestHandler(
-      async (params: lsp.SignatureHelpParams, token = lsp.CancellationToken.None) => {
-        const doc = getOpenedDoc(params.textDocument.uri);
-        const { provider } = providers.$getHighestProvider(doc, providers.signatureHelp);
+      return result.map((r) => ({
+        range: converter.convertRange(r.range),
+        kind: r.kind as lsp.DocumentHighlightKind,
+      }));
+    }),
+    signatureHelp: wrapRequestHandler(async (params: lsp.SignatureHelpParams, token) => {
+      const doc = getOpenedDoc(params.textDocument.uri);
+      const { provider } = providers.$getHighestProvider(doc, providers.signatureHelp);
 
-        const ctx: Partial<lsp.SignatureHelpContext> = deepClone(params.context ?? {});
-        ctx.triggerCharacter = ctx.triggerCharacter ?? "";
-        if (ctx.activeSignatureHelp?.signatures) {
-          ctx.activeSignatureHelp.signatures = ctx.activeSignatureHelp.signatures.map(
-            converter.convertSignatureInfoFromLsp
-          ) as lsp.SignatureInformation[];
-        }
-        const result = await provider.provideSignatureHelp(
-          doc,
-          types.Position.of(params.position),
-          token,
-          ctx as vscode.SignatureHelpContext
-        );
+      const ctx: Partial<lsp.SignatureHelpContext> = deepClone(params.context ?? {});
+      ctx.triggerCharacter = ctx.triggerCharacter ?? "";
+      if (ctx.activeSignatureHelp?.signatures) {
+        ctx.activeSignatureHelp.signatures = ctx.activeSignatureHelp.signatures.map(
+          converter.convertSignatureInfoFromLsp
+        ) as lsp.SignatureInformation[];
+      }
+      const result = await provider.provideSignatureHelp(
+        doc,
+        types.Position.of(params.position),
+        token,
+        ctx as vscode.SignatureHelpContext
+      );
 
-        if (result) {
-          const transformed: lsp.SignatureHelp = {
-            signatures: result.signatures.map(converter.convertSignatureInfoToLsp),
-            activeParameter: result.activeParameter,
-            activeSignature: result.activeSignature,
-          };
-          return transformed;
-        }
+      if (result) {
+        const transformed: lsp.SignatureHelp = {
+          signatures: result.signatures.map(converter.convertSignatureInfoToLsp),
+          activeParameter: result.activeParameter,
+          activeSignature: result.activeSignature,
+        };
+        return transformed;
       }
-    ),
-    documentLinks: wrapRequestHandler(
-      async (params: lsp.DocumentLinkParams, token = lsp.CancellationToken.None) => {
-        const doc = getOpenedDoc(params.textDocument.uri);
-        const entries = providers.$getProviders(doc, providers.documentLink);
+    }),
+    documentLinks: wrapRequestHandler(async (params: lsp.DocumentLinkParams, token) => {
+      const doc = getOpenedDoc(params.textDocument.uri);
+      const entries = providers.$getProviders(doc, providers.documentLink);
 
-        let results: lsp.DocumentLink[] = [];
-        for (const { provider } of entries) {
-          const links = await provider.provideDocumentLinks(doc, token);
-          if (links && links.length > 0) {
-            results = results.concat(links.map(converter.convertDocumentLink));
-          }
+      let results: lsp.DocumentLink[] = [];
+      for (const { provider } of entries) {
+        const links = await provider.provideDocumentLinks(doc, token);
+        if (links && links.length > 0) {
+          results = results.concat(links.map(converter.convertDocumentLink));
         }
+      }
 
-        return results.length > 0 ? results : null;
-      }
-    ),
-    definition: wrapRequestHandler(
-      async (params: lsp.DefinitionParams, token = lsp.CancellationToken.None) => {
-        const doc = getOpenedDoc(params.textDocument.uri);
-        const { provider } = providers.$getHighestProvider(doc, providers.definition);
+      return results.length > 0 ? results : null;
+    }),
+    definition: wrapRequestHandler(async (params: lsp.DefinitionParams, token) => {
+      const doc = getOpenedDoc(params.textDocument.uri);
+      const { provider } = providers.$getHighestProvider(doc, providers.definition);
 
-        const result = await provider.provideDefinition(
-          doc,
-          types.Position.of(params.position),
-          token
-        );
-        if (result) {
-          return converter.convertDefinition(result);
-        }
+      const result = await provider.provideDefinition(
+        doc,
+        types.Position.of(params.position),
+        token
+      );
+      if (result) {
+        return converter.convertDefinition(result);
       }
-    ),
-    references: wrapRequestHandler(
-      async (params: lsp.ReferenceParams, token = lsp.CancellationToken.None) => {
-        const doc = getOpenedDoc(params.textDocument.uri);
-        const { provider } = providers.$getHighestProvider(doc, providers.reference);
+    }),
+    references: wrapRequestHandler(async (params: lsp.ReferenceParams, token) => {
+      const doc = getOpenedDoc(params.textDocument.uri);
+      const { provider } = providers.$getHighestProvider(doc, providers.reference);
 
-        const result = await provider.provideReferences(
-          doc,
-          types.Position.of(params.position),
-          params.context,
-          token
-        );
-        if (result) {
-          return result.map(converter.convertLocation);
-        }
+      const result = await provider.provideReferences(
+        doc,
+        types.Position.of(params.position),
+        params.context,
+        token
+      );
+      if (result) {
+        return result.map(converter.convertLocation);
       }
-    ),
-    hover: wrapRequestHandler(
-      async (params: lsp.HoverParams, token = lsp.CancellationToken.None) => {
-        const doc = getOpenedDoc(params.textDocument.uri);
-        const { provider } = providers.$getHighestProvider(doc, providers.hover);
-        const result = await provider.provideHover(doc, types.Position.of(params.position), token);
-        if (result) {
-          return converter.convertHover(result);
-        }
+    }),
+    hover: wrapRequestHandler(async (params: lsp.HoverParams, token) => {
+      const doc = getOpenedDoc(params.textDocument.uri);
+      const { provider } = providers.$getHighestProvider(doc, providers.hover);
+      const result = await provider.provideHover(doc, types.Position.of(params.position), token);
+      if (result) {
+        return converter.convertHover(result);
       }
-    ),
-    documentSymbol: wrapRequestHandler(
-      async (params: lsp.DocumentSymbolParams, token = lsp.CancellationToken.None) => {
-        const doc = getOpenedDoc(params.textDocument.uri);
-        const { provider } = providers.$getHighestProvider(doc, providers.documentSymbol);
-        const result = await provider.provideDocumentSymbols(doc, token);
-        if (result) {
-          return result.map(converter.convertSymbol) as
-            | lsp.DocumentSymbol[]
-            | lsp.SymbolInformation[];
-        }
+    }),
+    documentSymbol: wrapRequestHandler(async (params: lsp.DocumentSymbolParams, token) => {
+      const doc = getOpenedDoc(params.textDocument.uri);
+      const { provider } = providers.$getHighestProvider(doc, providers.documentSymbol);
+      const result = await provider.provideDocumentSymbols(doc, token);
+      if (result) {
+        return result.map(converter.convertSymbol) as
+          | lsp.DocumentSymbol[]
+          | lsp.SymbolInformation[];
       }
-    ),
-    workspaceSymbol: wrapRequestHandler(
-      async (params: lsp.WorkspaceSymbolParams, token = lsp.CancellationToken.None) => {
-        const { provider } = providers.$getProviderWithoutSelector(providers.workspaceSymbol);
-        const result = await provider.provideWorkspaceSymbols(params.query, token);
-        if (result) {
-          return result.map(converter.convertSymbol) as lsp.SymbolInformation[];
-        }
+    }),
+    workspaceSymbol: wrapRequestHandler(async (params: lsp.WorkspaceSymbolParams, token) => {
+      const { provider } = providers.$getProviderWithoutSelector(providers.workspaceSymbol);
+      const result = await provider.provideWorkspaceSymbols(params.query, token);
+      if (result) {
+        return result.map(converter.convertSymbol) as lsp.SymbolInformation[];
       }
-    ),
-    codeAction: wrapRequestHandler(
-      (params: lsp.CodeActionParams, token = lsp.CancellationToken.None) => {
-        const { textDocument, ...rest } = params;
-        const doc = getOpenedDoc(textDocument.uri);
-        return codeActionFeature.codeAction(doc, rest, token);
-      }
-    ),
-    codeActionResolve: wrapRequestHandler(
-      (item: lsp.CodeAction, token = lsp.CancellationToken.None) =>
-        codeActionFeature.codeActionResolve(item, token)
+    }),
+    codeAction: wrapRequestHandler((params: lsp.CodeActionParams, token) => {
+      const { textDocument, ...rest } = params;
+      const doc = getOpenedDoc(textDocument.uri);
+      return codeActionFeature.codeAction(doc, rest, token);
+    }),
+    codeActionResolve: wrapRequestHandler((item: lsp.CodeAction, token) =>
+      codeActionFeature.codeActionResolve(item, token)
     ),
     executeCommand: wrapRequestHandler(async (params: lsp.ExecuteCommandParams) => {
       const args = params.arguments || [];
@@ -307,55 +285,49 @@ export function createTSLanguageService(initOptions: TSLanguageServiceOptions) {
           return await shims.commandsService.executeCommand(params.command, ...args);
       }
     }),
-    implementation: wrapRequestHandler(
-      async (params: lsp.ImplementationParams, token = lsp.CancellationToken.None) => {
-        const doc = getOpenedDoc(params.textDocument.uri);
-        const { provider } = providers.$getHighestProvider(doc, providers.implementation);
-        const result = await provider.provideImplementation(
-          doc,
-          types.Position.of(params.position),
-          token
-        );
-        if (result) {
-          return converter.convertImplementation(result);
-        }
+    implementation: wrapRequestHandler(async (params: lsp.ImplementationParams, token) => {
+      const doc = getOpenedDoc(params.textDocument.uri);
+      const { provider } = providers.$getHighestProvider(doc, providers.implementation);
+      const result = await provider.provideImplementation(
+        doc,
+        types.Position.of(params.position),
+        token
+      );
+      if (result) {
+        return converter.convertImplementation(result);
       }
-    ),
-    typeDefinition: wrapRequestHandler(
-      async (params: lsp.TypeDefinitionParams, token = lsp.CancellationToken.None) => {
-        const doc = getOpenedDoc(params.textDocument.uri);
-        const { provider } = providers.$getHighestProvider(doc, providers.typeDefinition);
-        const result = await provider.provideTypeDefinition(
-          doc,
-          types.Position.of(params.position),
-          token
-        );
-        if (result) {
-          return converter.convertTypeDefinition(result);
-        }
+    }),
+    typeDefinition: wrapRequestHandler(async (params: lsp.TypeDefinitionParams, token) => {
+      const doc = getOpenedDoc(params.textDocument.uri);
+      const { provider } = providers.$getHighestProvider(doc, providers.typeDefinition);
+      const result = await provider.provideTypeDefinition(
+        doc,
+        types.Position.of(params.position),
+        token
+      );
+      if (result) {
+        return converter.convertTypeDefinition(result);
       }
-    ),
-    documentFormatting: wrapRequestHandler(
-      async (params: lsp.DocumentFormattingParams, token = lsp.CancellationToken.None) => {
-        const doc = getOpenedDoc(params.textDocument.uri);
-        // NOTE: typescript use range format instead
-        const { provider } = providers.$getHighestProvider(
-          doc,
-          providers.documentRangeFormattignEdit
-        );
-        const result = await provider.provideDocumentRangeFormattingEdits(
-          doc,
-          new types.Range(0, 0, doc.lineCount, 0),
-          params.options as vscode.FormattingOptions,
-          token
-        );
-        if (result) {
-          return result.map(converter.convertTextEdit);
-        }
+    }),
+    documentFormatting: wrapRequestHandler(async (params: lsp.DocumentFormattingParams, token) => {
+      const doc = getOpenedDoc(params.textDocument.uri);
+      // NOTE: typescript use range format instead
+      const { provider } = providers.$getHighestProvider(
+        doc,
+        providers.documentRangeFormattignEdit
+      );
+      const result = await provider.provideDocumentRangeFormattingEdits(
+        doc,
+        new types.Range(0, 0, doc.lineCount, 0),
+        params.options as vscode.FormattingOptions,
+        token
+      );
+      if (result) {
+        return result.map(converter.convertTextEdit);
       }
-    ),
+    }),
     documentRangeFormatting: wrapRequestHandler(
-      async (params: lsp.DocumentRangeFormattingParams, token = lsp.CancellationToken.None) => {
+      async (params: lsp.DocumentRangeFormattingParams, token) => {
         const doc = getOpenedDoc(params.textDocument.uri);
         const { provider } = providers.$getHighestProvider(
           doc,
@@ -373,7 +345,7 @@ export function createTSLanguageService(initOptions: TSLanguageServiceOptions) {
       }
     ),
     documentOnTypeFormatting: wrapRequestHandler(
-      async (params: lsp.DocumentOnTypeFormattingParams, token = lsp.CancellationToken.None) => {
+      async (params: lsp.DocumentOnTypeFormattingParams, token) => {
         const doc = getOpenedDoc(params.textDocument.uri);
         const { provider } = providers.$getHighestProvider(doc, providers.onTypeFormatting);
 
@@ -389,71 +361,63 @@ export function createTSLanguageService(initOptions: TSLanguageServiceOptions) {
         }
       }
     ),
-    prepareRename: wrapRequestHandler(
-      async (params: lsp.PrepareRenameParams, token = lsp.CancellationToken.None) => {
-        const doc = getOpenedDoc(params.textDocument.uri);
-        const { provider } = providers.$getHighestProvider(doc, providers.rename);
-        if (!provider.prepareRename) {
-          throw new lsp.ResponseError(
-            lsp.ErrorCodes.MethodNotFound,
-            "cannot find provider for prepareRename"
-          );
-        }
+    prepareRename: wrapRequestHandler(async (params: lsp.PrepareRenameParams, token) => {
+      const doc = getOpenedDoc(params.textDocument.uri);
+      const { provider } = providers.$getHighestProvider(doc, providers.rename);
+      if (!provider.prepareRename) {
+        throw new lsp.ResponseError(
+          lsp.ErrorCodes.MethodNotFound,
+          "cannot find provider for prepareRename"
+        );
+      }
 
-        const result = await provider.prepareRename(doc, types.Position.of(params.position), token);
-        if (result) {
-          if (types.Range.isRange(result)) {
-            return converter.convertRange(result);
-          } else {
-            return {
-              range: converter.convertRange(result.range),
-              placeholder: result.placeholder,
-            };
-          }
+      const result = await provider.prepareRename(doc, types.Position.of(params.position), token);
+      if (result) {
+        if (types.Range.isRange(result)) {
+          return converter.convertRange(result);
+        } else {
+          return {
+            range: converter.convertRange(result.range),
+            placeholder: result.placeholder,
+          };
         }
       }
-    ),
-    rename: wrapRequestHandler(
-      async (params: lsp.RenameParams, token = lsp.CancellationToken.None) => {
-        const doc = getOpenedDoc(params.textDocument.uri);
-        const { provider } = providers.$getHighestProvider(doc, providers.rename);
-        const result = await provider.provideRenameEdits(
-          doc,
-          types.Position.of(params.position),
-          params.newName,
-          token
-        );
-        if (result) {
-          return converter.convertWorkspaceEdit(result);
-        }
+    }),
+    rename: wrapRequestHandler(async (params: lsp.RenameParams, token: lsp.CancellationToken) => {
+      const doc = getOpenedDoc(params.textDocument.uri);
+      const { provider } = providers.$getHighestProvider(doc, providers.rename);
+      const result = await provider.provideRenameEdits(
+        doc,
+        types.Position.of(params.position),
+        params.newName,
+        token
+      );
+      if (result) {
+        return converter.convertWorkspaceEdit(result);
       }
-    ),
-    foldingRanges: wrapRequestHandler(
-      async (params: lsp.FoldingRangeParams, token = lsp.CancellationToken.None) => {
-        const doc = getOpenedDoc(params.textDocument.uri);
-        const { provider } = providers.$getHighestProvider(doc, providers.foldingRange);
-        const result = await provider.provideFoldingRanges(doc, {}, token);
-        if (result) {
-          return result.map(converter.convertFoldingRange);
-        }
+    }),
+    foldingRanges: wrapRequestHandler(async (params: lsp.FoldingRangeParams, token) => {
+      const doc = getOpenedDoc(params.textDocument.uri);
+      const { provider } = providers.$getHighestProvider(doc, providers.foldingRange);
+      const result = await provider.provideFoldingRanges(doc, {}, token);
+      if (result) {
+        return result.map(converter.convertFoldingRange);
       }
-    ),
-    selectionRanges: wrapRequestHandler(
-      async (params: lsp.SelectionRangeParams, token = lsp.CancellationToken.None) => {
-        const doc = getOpenedDoc(params.textDocument.uri);
-        const { provider } = providers.$getHighestProvider(doc, providers.selectionRange);
-        const result = await provider.provideSelectionRanges(
-          doc,
-          params.positions.map((p) => types.Position.of(p)),
-          token
-        );
-        if (result) {
-          return result.map(converter.convertSelectionRange);
-        }
+    }),
+    selectionRanges: wrapRequestHandler(async (params: lsp.SelectionRangeParams, token) => {
+      const doc = getOpenedDoc(params.textDocument.uri);
+      const { provider } = providers.$getHighestProvider(doc, providers.selectionRange);
+      const result = await provider.provideSelectionRanges(
+        doc,
+        params.positions.map((p) => types.Position.of(p)),
+        token
+      );
+      if (result) {
+        return result.map(converter.convertSelectionRange);
       }
-    ),
+    }),
     prepareCallHierarchy: wrapRequestHandler(
-      async (params: lsp.CallHierarchyPrepareParams, token = lsp.CancellationToken.None) => {
+      async (params: lsp.CallHierarchyPrepareParams, token) => {
         const doc = getOpenedDoc(params.textDocument.uri);
         const { id, provider } = providers.$getHighestProvider(doc, providers.callHierarchy);
         const result = await provider.prepareCallHierarchy(
@@ -469,7 +433,7 @@ export function createTSLanguageService(initOptions: TSLanguageServiceOptions) {
       }
     ),
     incomingCalls: wrapRequestHandler(
-      async (params: lsp.CallHierarchyIncomingCallsParams, token = lsp.CancellationToken.None) => {
+      async (params: lsp.CallHierarchyIncomingCallsParams, token) => {
         const { item } = params;
         const providerId = item.data.id;
         if (!providerId) {
@@ -491,7 +455,7 @@ export function createTSLanguageService(initOptions: TSLanguageServiceOptions) {
       }
     ),
     outgoingCalls: wrapRequestHandler(
-      async (params: lsp.CallHierarchyOutgoingCallsParams, token = lsp.CancellationToken.None) => {
+      async (params: lsp.CallHierarchyOutgoingCallsParams, token) => {
         const { item } = params;
         const providerId = item.data.id;
         if (!providerId) {
@@ -512,105 +476,97 @@ export function createTSLanguageService(initOptions: TSLanguageServiceOptions) {
         return null;
       }
     ),
-    inlayHint: wrapRequestHandler(
-      async (params: lsp.InlayHintParams, token = lsp.CancellationToken.None) => {
-        const doc = getOpenedDoc(params.textDocument.uri);
-        const { provider } = providers.$getHighestProvider(doc, providers.inlayHints);
-        const result = await provider.provideInlayHints(doc, types.Range.of(params.range), token);
-        return result ? result.map(converter.convertInlayHint) : null;
-      }
-    ),
-    codeLens: wrapRequestHandler(
-      async (params: lsp.CodeLensParams, token = lsp.CancellationToken.None) => {
-        const doc = getOpenedDoc(params.textDocument.uri);
-        const entries = providers.$getProviders(doc, providers.codeLens);
+    inlayHint: wrapRequestHandler(async (params: lsp.InlayHintParams, token) => {
+      const doc = getOpenedDoc(params.textDocument.uri);
+      const { provider } = providers.$getHighestProvider(doc, providers.inlayHints);
+      const result = await provider.provideInlayHints(doc, types.Range.of(params.range), token);
+      return result ? result.map(converter.convertInlayHint) : null;
+    }),
+    codeLens: wrapRequestHandler(async (params: lsp.CodeLensParams, token) => {
+      const doc = getOpenedDoc(params.textDocument.uri);
+      const entries = providers.$getProviders(doc, providers.codeLens);
 
-        const results = await Promise.all(
-          entries.map(async ({ provider, id }) => {
-            const items = await (provider.provideCodeLenses(doc, token) as vscode.ProviderResult<
-              import("@vsc-ts/languageFeatures/codeLens/baseCodeLensProvider").ReferencesCodeLens[]
-            >);
-            if (items) {
-              return items.map((item) =>
-                converter.convertCodeLens(item, {
-                  document: item.document.toString(),
-                  file: item.file,
-                  isResolved: false,
-                  id,
-                })
-              );
-            }
-          })
-        );
-
-        let merged: lsp.CodeLens[] = [];
-        for (const r of results) {
-          if (!r) {
-            continue;
+      const results = await Promise.all(
+        entries.map(async ({ provider, id }) => {
+          const items = await (provider.provideCodeLenses(doc, token) as vscode.ProviderResult<
+            import("@vsc-ts/languageFeatures/codeLens/baseCodeLensProvider").ReferencesCodeLens[]
+          >);
+          if (items) {
+            return items.map((item) =>
+              converter.convertCodeLens(item, {
+                document: item.document.toString(),
+                file: item.file,
+                isResolved: false,
+                id,
+              })
+            );
           }
-          merged = merged.concat(r);
+        })
+      );
+
+      let merged: lsp.CodeLens[] = [];
+      for (const r of results) {
+        if (!r) {
+          continue;
+        }
+        merged = merged.concat(r);
+      }
+
+      if (merged.length > 0) {
+        return merged;
+      }
+    }),
+    codeLensResolve: wrapRequestHandler(async (item: lsp.CodeLens, token) => {
+      const providerId = item.data.id;
+      if (!providerId || item.data.isResolved) {
+        return item;
+      }
+      const { provider } = providers.$getProviderById(providerId, providers.codeLens);
+      if (!provider.resolveCodeLens) {
+        return item;
+      }
+      // TODO: we cannot directly import this at toplevel as vscode namespace is not defined yet
+      const { ReferencesCodeLens } = await import(
+        "@vsc-ts/languageFeatures/codeLens/baseCodeLensProvider"
+      );
+      const refLens = new ReferencesCodeLens(
+        URI.parse(item.data.document),
+        item.data.file,
+        types.Range.of(item.range)
+      );
+      const result = await provider.resolveCodeLens(refLens, token);
+      if (result) {
+        if (result.command && result.command.command === "editor.action.showReferences") {
+          // NOTE: from getCommand in languageFeatures/codeLens/implementationsCodeLens.ts
+          const [document, codeLensStart, locations] = result.command.arguments as [
+            URI,
+            vscode.Position,
+            vscode.Location[]
+          ];
+          result.command.arguments = [
+            document.toString(),
+            converter.convertPosition(codeLensStart),
+            locations.map(converter.convertLocation),
+          ];
         }
 
-        if (merged.length > 0) {
-          return merged;
-        }
+        const converted = converter.convertCodeLens(result, { isResolved: true });
+        return converted;
+      } else {
+        return item;
       }
-    ),
-    codeLensResolve: wrapRequestHandler(
-      async (item: lsp.CodeLens, token = lsp.CancellationToken.None) => {
-        const providerId = item.data.id;
-        if (!providerId || item.data.isResolved) {
-          return item;
-        }
-        const { provider } = providers.$getProviderById(providerId, providers.codeLens);
-        if (!provider.resolveCodeLens) {
-          return item;
-        }
-        // TODO: we cannot directly import this at toplevel as vscode namespace is not defined yet
-        const { ReferencesCodeLens } = await import(
-          "@vsc-ts/languageFeatures/codeLens/baseCodeLensProvider"
-        );
-        const refLens = new ReferencesCodeLens(
-          URI.parse(item.data.document),
-          item.data.file,
-          types.Range.of(item.range)
-        );
-        const result = await provider.resolveCodeLens(refLens, token);
-        if (result) {
-          if (result.command && result.command.command === "editor.action.showReferences") {
-            // NOTE: from getCommand in languageFeatures/codeLens/implementationsCodeLens.ts
-            const [document, codeLensStart, locations] = result.command.arguments as [
-              URI,
-              vscode.Position,
-              vscode.Location[]
-            ];
-            result.command.arguments = [
-              document.toString(),
-              converter.convertPosition(codeLensStart),
-              locations.map(converter.convertLocation),
-            ];
-          }
-
-          const converted = converter.convertCodeLens(result, { isResolved: true });
-          return converted;
-        } else {
-          return item;
-        }
+    }),
+    semanticTokensFull: wrapRequestHandler(async (params: lsp.SemanticTokensParams, token) => {
+      const doc = getOpenedDoc(params.textDocument.uri);
+      const { provider } = providers.$getHighestProvider(doc, providers.documentSemanticTokens);
+      const result = await provider.provideDocumentSemanticTokens(doc, token);
+      if (result) {
+        return converter.convertSemanticTokens(result);
       }
-    ),
-    semanticTokensFull: wrapRequestHandler(
-      async (params: lsp.SemanticTokensParams, token = lsp.CancellationToken.None) => {
-        const doc = getOpenedDoc(params.textDocument.uri);
-        const { provider } = providers.$getHighestProvider(doc, providers.documentSemanticTokens);
-        const result = await provider.provideDocumentSemanticTokens(doc, token);
-        if (result) {
-          return converter.convertSemanticTokens(result);
-        }
-        return { data: [] };
-      }
-    ),
+      return { data: [] };
+    }),
     semanticTokensRange: wrapRequestHandler(
-      async (params: lsp.SemanticTokensRangeParams, token = lsp.CancellationToken.None) => {
+      async (params: lsp.SemanticTokensRangeParams, token) => {
         const doc = getOpenedDoc(params.textDocument.uri);
         const { provider } = providers.$getHighestProvider(
           doc,
