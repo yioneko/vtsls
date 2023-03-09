@@ -13,7 +13,7 @@ export default defineConfig({
     include: ["tests/**/*.{test,spec}.{js,ts}"],
   },
   esbuild: {
-    target: "node14",
+    target: `node${process.versions.node}`,
   },
   resolve: {
     alias: {

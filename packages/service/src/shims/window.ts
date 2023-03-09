@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import * as lsp from "vscode-languageserver-protocol";
-import { TSLanguageServiceDelegate } from "../service";
+import { TSLanguageServiceDelegate } from "../service/delegate";
 import { Disposable, disposeAll } from "../utils/dispose";
 import { isPrimitive } from "../utils/types";
 

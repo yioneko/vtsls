@@ -1,10 +1,10 @@
 import { CodeActionKind } from "vscode-languageserver-protocol";
-import { CodeActionCache } from "./service/codeAction";
-import { CompletionCache } from "./service/completion";
 import {
   activationEvents as pkgJsonEvents,
   contributes as pkgJsonContributes,
-} from "./typescript-language-features/package.json";
+} from "../typescript-language-features/package.json";
+import { CodeActionCache } from "./codeAction";
+import { CompletionCache } from "./completion";
 
 // "*" from jsdoc completion
 export const completionTriggerCharacters = [".", '"', "'", "`", "/", "@", "<", "#", " ", "*"];

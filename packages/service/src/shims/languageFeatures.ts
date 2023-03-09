@@ -1,6 +1,7 @@
 import * as vscode from "vscode";
 import * as lsp from "vscode-languageserver-protocol";
 import { URI } from "vscode-uri";
+import { TSLanguageServiceDelegate } from "../service/delegate";
 import { Barrier } from "../utils/barrier";
 import { Disposable } from "../utils/dispose";
 import { DiagnosticsShimService } from "./diagnostics";
@@ -193,12 +194,27 @@ class LanguageFeaturesRegistryStore extends Disposable {
 export class LanguageFeaturesShimService extends Disposable {
   private _registryStore = this._register(new LanguageFeaturesRegistryStore());
 
-  constructor(private readonly diagnostics: DiagnosticsShimService) {
-    super();
-  }
+  readonly onDidChangeDiagnostics = this.diagnostics.onDidChangeDiagnostics.event;
 
-  get onDidChangeDiagnostics() {
-    return this.diagnostics.onDidChangeDiagnostics.event;
+  constructor(
+    delegate: TSLanguageServiceDelegate,
+    private readonly diagnostics: DiagnosticsShimService
+  ) {
+    super();
+
+    this._register(
+      this.onDidChangeDiagnostics((e) => {
+        for (const uri of e.uris) {
+          const diagnostics = this.getDiagnostics(uri);
+          if (Array.isArray(diagnostics)) {
+            delegate.publishDiagnostics(
+              uri.toString(),
+              diagnostics.map(delegate.converter.convertDiagnosticToLsp)
+            );
+          }
+        }
+      })
+    );
   }
 
   // only for capturing registration timing for initialization

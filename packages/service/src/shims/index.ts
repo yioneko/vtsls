@@ -1,8 +1,8 @@
 import * as os from "os";
 import { Emitter } from "vscode-languageserver-protocol";
 import { URI, Utils } from "vscode-uri";
-import { TSLanguageServiceDelegate } from "../service";
-import { TSLanguageServiceOptions } from "../types";
+import { TSLanguageServiceDelegate } from "../service/delegate";
+import { TSLanguageServiceOptions } from "../service/types";
 import { CommandsShimService } from "./commands";
 import { ConfigurationShimService } from "./configuration";
 import { createContextShim } from "./context";
@@ -40,7 +40,7 @@ export function initializeShimServices(
   );
   const commandsService = new CommandsShimService(delegate);
   const diagnosticsSerivce = new DiagnosticsShimService();
-  const languageFeaturesService = new LanguageFeaturesShimService(diagnosticsSerivce);
+  const languageFeaturesService = new LanguageFeaturesShimService(delegate, diagnosticsSerivce);
   const windowService = new WindowShimService(delegate);
   const context = createContextShim(initOptions.tsExtLogPath ?? os.tmpdir());
 

@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import { Emitter } from "vscode-languageserver-protocol";
-import { TSLanguageServiceConfig } from "../types";
+import { TSLanguageServiceConfig } from "../service/types";
 import { contributes as pkgContributes } from "../typescript-language-features/package.json";
 import { Disposable } from "../utils/dispose";
 import { isPrimitive } from "../utils/types";
