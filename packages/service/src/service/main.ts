@@ -24,14 +24,21 @@ async function startVsTsExtension(context: vscode.ExtensionContext) {
 
 export type TSLanguageService = ReturnType<typeof createTSLanguageService>;
 
+let serviceInstance: TSLanguageService | null = null;
+
 export function createTSLanguageService(initOptions: TSLanguageServiceOptions) {
+  if (serviceInstance) {
+    throw new Error(
+      "Cannot create multiple ts language services at the same time, or dispose the previous created one"
+    );
+  }
+
   const converter = new TSLspConverter(initOptions.clientCapabilities);
   const { delegate, events } = createTSLanguageServiceDelegate(converter);
 
   const toDispose = new DisposableStore();
 
   const shims = toDispose.add(initializeShimServices(initOptions, delegate));
-  const l = shims.languageFeaturesService;
 
   const serviceState = {
     state: "uninitialized" as "uninitialized" | "initializing" | "initialized",
@@ -39,7 +46,7 @@ export function createTSLanguageService(initOptions: TSLanguageServiceOptions) {
     disposed: false,
   };
 
-  const providers = l.$providers;
+  const providers = shims.languageFeaturesService.$providers;
   const completionFeature = toDispose.add(
     new TSCompletionFeature(
       providers.$withRegistry(providers.completionItem),
@@ -62,7 +69,7 @@ export function createTSLanguageService(initOptions: TSLanguageServiceOptions) {
   ) {
     return async (params: P, token: lsp.CancellationToken = lsp.CancellationToken.None) => {
       await serviceState.initialized.wait();
-      await l.$staticFeaturesRegistered.wait();
+      await shims.languageFeaturesService.$staticFeaturesRegistered.wait();
       return await handler(params, token);
     };
   }
@@ -104,6 +111,7 @@ export function createTSLanguageService(initOptions: TSLanguageServiceOptions) {
       if (!serviceState.disposed) {
         toDispose.dispose();
         serviceState.disposed = true;
+        serviceInstance = null;
       }
     },
     get initialized() {
@@ -383,7 +391,7 @@ export function createTSLanguageService(initOptions: TSLanguageServiceOptions) {
         }
       }
     }),
-    rename: wrapRequestHandler(async (params: lsp.RenameParams, token: lsp.CancellationToken) => {
+    rename: wrapRequestHandler(async (params: lsp.RenameParams, token) => {
       const doc = getOpenedDoc(params.textDocument.uri);
       const { provider } = providers.$getHighestProvider(doc, providers.rename);
       const result = await provider.provideRenameEdits(
@@ -585,5 +593,6 @@ export function createTSLanguageService(initOptions: TSLanguageServiceOptions) {
     ),
   };
 
+  serviceInstance = tsLanguageService;
   return tsLanguageService;
 }

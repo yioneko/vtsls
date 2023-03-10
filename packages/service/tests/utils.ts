@@ -1,5 +1,4 @@
 import * as fs from "node:fs/promises";
-import * as path from "node:path";
 import * as lsp from "vscode-languageserver-protocol";
 import { TextDocument } from "vscode-languageserver-textdocument";
 import { URI } from "vscode-uri";
@@ -36,12 +35,6 @@ export async function createTestService(workspacePath: string) {
     },
   });
 
-  const uri = URI.file(path.resolve(workspacePath, "index.ts")).toString();
-  service.openTextDocument({
-    textDocument: { uri, languageId: "typescript", version: 0, text: "" },
-  });
-  service.closeTextDocument({ textDocument: { uri } });
-
   return service;
 }
 
@@ -61,7 +54,7 @@ export async function openDoc(service: TSLanguageService, uri: string, text?: st
     contentChanges: [{ text: resolvedText }],
   });
 
-  const doc = TextDocument.create(uri, "", 0, resolvedText);
+  const doc = TextDocument.create(uri, "typescript", 0, resolvedText);
 
   return {
     doc,
