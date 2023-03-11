@@ -4,7 +4,7 @@ export class RestrictedCache<V> implements Disposable {
   private readonly _store = new Map<number, V>();
   private _isDisposed = false;
 
-  private idGen = 1;
+  private maxId = 1;
   private lastMinId = 0;
 
   constructor(private readonly maxItems: number) {}
@@ -26,15 +26,7 @@ export class RestrictedCache<V> implements Disposable {
   }
 
   store(value: V): number {
-    if (this._isDisposed) {
-      console.warn(
-        new Error(
-          "Trying to add a disposable to cache that has already been disposed of. The added object will be leaked!"
-        ).stack
-      );
-    }
-
-    const cacheId = this.idGen++;
+    const cacheId = this.maxId++;
     this._store.set(cacheId, value);
     this._clearIfMaxReached();
     return cacheId;
@@ -51,7 +43,7 @@ export class RestrictedCache<V> implements Disposable {
       return;
     }
     this.timer = setTimeout(() => {
-      while (this._store.size > this.maxItems && this.lastMinId < this.idGen) {
+      while (this._store.size > this.maxItems && this.lastMinId < this.maxId) {
         this.lastMinId += 1;
         if (this._store.has(this.lastMinId)) {
           this.delete(this.lastMinId);

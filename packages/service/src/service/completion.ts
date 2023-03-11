@@ -37,7 +37,7 @@ export class CompletionCache extends Disposable {
   }
 
   private readonly completionItemCache = this._register(
-    new RestrictedCache<vscode.CompletionItem[]>(5)
+    new RestrictedCache<vscode.CompletionItem[]>(12)
   );
 
   store(items: vscode.CompletionItem[], providerId: number) {

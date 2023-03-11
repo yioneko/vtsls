@@ -45,7 +45,7 @@ export class CodeActionCache extends Disposable {
   }
 
   private readonly codeActionCache = this._register(
-    new RestrictedCache<(vscode.Command | vscode.CodeAction)[]>(10)
+    new RestrictedCache<(vscode.Command | vscode.CodeAction)[]>(12)
   );
 
   store(items: (vscode.Command | vscode.CodeAction)[], providerId: number) {
