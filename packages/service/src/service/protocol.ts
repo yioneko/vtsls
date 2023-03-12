@@ -39,12 +39,12 @@ export const semanticTokenTypes = [
   "method",
 ];
 export const semanticTokenModifiers = [
-  "async",
   "declaration",
-  "readonly",
   "static",
-  "local",
+  "async",
+  "readonly",
   "defaultLibrary",
+  "local",
 ];
 
 function collectCommands() {
