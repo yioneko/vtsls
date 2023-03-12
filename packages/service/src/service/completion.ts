@@ -122,7 +122,6 @@ export class TSCompletionFeature extends Disposable {
       this.lastCompleteResult
     ) {
       results = this.lastCompleteResult;
-      isIncomplete = true;
     } else {
       const providers = this.registry.getProviders(doc);
 
@@ -194,10 +193,6 @@ export class TSCompletionFeature extends Disposable {
         const { data, command } = overrideFields[i];
         const item = items[i];
         const match = fuzzyScorer(item);
-        // remove item with no match
-        if (shouldFuzzy && !match) {
-          continue;
-        }
 
         const converted = this.converter.convertCompletionItem(items[i], {
           ...data,
@@ -214,7 +209,18 @@ export class TSCompletionFeature extends Disposable {
     if (!isNil(entriesLimit) && resultItems.length > entriesLimit) {
       // mark as inComplete as some entries are trimmed
       isIncomplete = true;
-      resultItems = this.trimCompletionItems(resultItems, entriesLimit);
+
+      // remove item with no match
+      if (shouldFuzzy) {
+        resultItems = resultItems.filter((item) =>
+          Boolean((item.data as CompletionItemData).match)
+        );
+      }
+
+      // still exceeds limit after filtering
+      if (resultItems.length > entriesLimit) {
+        resultItems = this.trimCompletionItems(resultItems, entriesLimit);
+      }
     }
     return lsp.CompletionList.create(resultItems, isIncomplete);
   }
