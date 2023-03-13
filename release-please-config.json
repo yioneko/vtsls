@@ -28,8 +28,7 @@
     "packages/vscode-fuzzy": {
       "package-name": "@vtsls/vscode-fuzzy",
       "release-type": "node",
-      "component": "vscode-fuzzy",
-      "release-as": "0.0.1"
+      "component": "vscode-fuzzy"
     }
   }
 }
