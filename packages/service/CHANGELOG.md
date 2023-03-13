@@ -1,5 +1,33 @@
 # Changelog
 
+## [0.1.15](https://github.com/yioneko/vtsls/compare/service-v0.1.14...service-v0.1.15) (2023-03-13)
+
+
+### Features
+
+* server side filtering ([#50](https://github.com/yioneko/vtsls/issues/50)) ([2ba2de5](https://github.com/yioneko/vtsls/commit/2ba2de561412092fc35fecbcea91659f844ad3d4))
+
+
+### Bug Fixes
+
+* correctly set isIncomplete if filtering enabled ([830ce2f](https://github.com/yioneko/vtsls/commit/830ce2f2931b7467bae162b4178b2798f92a2355))
+* **deps:** update packages/service/vscode digest to 95ee78f ([84e6f83](https://github.com/yioneko/vtsls/commit/84e6f83d982d36133938a03bec323458b1217503))
+* ensure service to be the single instance ([07b7550](https://github.com/yioneko/vtsls/commit/07b75504e20d6f8cfe1551bc5999947c04f5a06b))
+* order of semantic token modifiers ([db8d9f0](https://github.com/yioneko/vtsls/commit/db8d9f0bf5c33677036e5871c2a28bc15431ba60))
+* slightly increase cache size for completion and code action ([4ab4bd0](https://github.com/yioneko/vtsls/commit/4ab4bd0e52d549990728241b0c48c4d27b5afe99))
+
+
+### Performance Improvements
+
+* memoize last complete completion result ([23b5782](https://github.com/yioneko/vtsls/commit/23b5782163ce564146f0be5af9d6ec3d53eafc99))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @vtsls/vscode-fuzzy bumped to 0.0.1
+
 ## [0.1.14](https://github.com/yioneko/vtsls/compare/service-v0.1.13...service-v0.1.14) (2023-03-05)
 
 
