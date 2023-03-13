@@ -23,12 +23,10 @@ jobs:
         with:
           version: 7
       - run: pnpm install --lockfile-only
-      - uses: stefanzweifel/git-auto-commit-action@v4
-        with:
-          commit_message: Update lock file
-          file_pattern: pnpm-lock.yaml
-          commit_options: --no-verify
-          push_options: --no-verify
-          commit_user_name: release-please[bot]
-          commit_user_email: 55107282+release-please[bot]@users.noreply.github.com
-          skip_dirty_check: true
+      - name: commit
+        run: |
+          git config --global user.name "release-please[bot]"
+          git config --global user.email "55107282+release-please[bot]@users.noreply.github.com"
+          git add pnpm-lock.yaml
+          git commit -m "Update lock file" --no-verify
+          git push origin --no-verify
