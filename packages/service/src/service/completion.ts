@@ -252,7 +252,7 @@ export class TSCompletionFeature extends Disposable {
     wordRange: vscode.Range,
     leadingLineContent: string
   ) {
-    const scoreFn = itemsLen ? fuzzyScore : fuzzyScoreGracefulAggressive;
+    const scoreFn = itemsLen > 2000 ? fuzzyScore : fuzzyScoreGracefulAggressive;
 
     let word = "";
     let wordLow = "";

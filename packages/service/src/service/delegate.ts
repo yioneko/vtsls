@@ -1,5 +1,5 @@
-import { TSLspConverter } from "src/utils/converter";
 import * as lsp from "vscode-languageserver-protocol";
+import { TSLspConverter } from "../utils/converter";
 import {
   EventHandlersMapping,
   EventName,
