@@ -2,7 +2,6 @@ import * as path from "node:path";
 import { afterAll, assert, describe, expect, it } from "vitest";
 import * as lsp from "vscode-languageserver-protocol";
 import { URI } from "vscode-uri";
-import { Barrier } from "../src/utils/barrier";
 import { applyEditsToText, createTestService, openDoc } from "./utils";
 
 describe("language features", async () => {
@@ -62,16 +61,17 @@ describe("language features", async () => {
     const resolvedItem = await service.completionItemResolve(item);
     expect(resolvedItem.detail).toContain('Add import from "./foo"');
 
-    const pendingEdit = new Barrier<lsp.WorkspaceEdit>();
-    const disposeHandler = service.onApplyWorkspaceEdit(async (p) => {
-      pendingEdit.open(p.edit);
-      disposeHandler.dispose();
-      return { applied: true };
+    const edit = await new Promise<lsp.WorkspaceEdit>((resolve) => {
+      const disposeHandler = service.onApplyWorkspaceEdit(async (p) => {
+        disposeHandler.dispose();
+        resolve(p.edit);
+        return { applied: true };
+      });
+
+      assert(resolvedItem.command);
+      void service.executeCommand(resolvedItem.command);
     });
 
-    assert(resolvedItem.command);
-    await service.executeCommand(resolvedItem.command);
-    const edit = await pendingEdit.wait();
     expect(edit.changes).toMatchObject({
       [testDocUri]: [
         {
@@ -314,15 +314,15 @@ function abc(a) {}`
   });
 
   it("provide quickfix", async () => {
-    setDocContent("let abc;");
-    const pendingDiagnostics = new Barrier<lsp.Diagnostic[]>();
-    const disposeDiagHandler = service.onDiagnostics(async (p) => {
-      if (p.diagnostics.length > 0) {
-        pendingDiagnostics.open(p.diagnostics);
-        disposeDiagHandler.dispose();
-      }
+    const diagnostics = await new Promise<lsp.Diagnostic[]>((resolve) => {
+      const disposeDiagHandler = service.onDiagnostics(async (p) => {
+        if (p.diagnostics.length > 0) {
+          disposeDiagHandler.dispose();
+          resolve(p.diagnostics);
+        }
+      });
+      setDocContent("let abc;");
     });
-    const diagnostics = await pendingDiagnostics.wait();
     expect(diagnostics[0]).toMatchObject({
       code: 7043,
       message:
