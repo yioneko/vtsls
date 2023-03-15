@@ -1,21 +1,20 @@
+import * as l10n from "@vscode/l10n";
 import * as os from "os";
 import { Emitter } from "vscode-languageserver-protocol";
 import { URI, Utils } from "vscode-uri";
 import { TSLanguageServiceDelegate } from "../service/delegate";
-import { TSLanguageServiceOptions } from "../service/types";
+import { TSLanguageServiceConfig, TSLanguageServiceOptions } from "../service/types";
 import { CommandsShimService } from "./commands";
 import { ConfigurationShimService } from "./configuration";
 import { createContextShim } from "./context";
 import { DiagnosticsShimService } from "./diagnostics";
 import { createExtensionsShim } from "./extensions";
-import { createL10nShim } from "./l10n";
 import { LanguageFeaturesShimService } from "./languageFeatures";
 import { UIKind } from "./types";
 import { WindowShimService } from "./window";
 import { WorkspaceShimService } from "./workspace";
 
 // in vscode namespace
-export const l10n: typeof import("vscode").l10n = createL10nShim() as any;
 export const extensions: typeof import("vscode").extensions = createExtensionsShim() as any;
 export let languages: typeof import("vscode").languages;
 export let commands: typeof import("vscode").commands;
@@ -25,14 +24,19 @@ export let workspace: typeof import("vscode").workspace;
 export { CancellationTokenSource } from "vscode-languageserver-protocol";
 export { FilePermission, FileStat, FileType } from "./fs";
 export * from "./types";
+export { l10n };
 export const EventEmitter = Emitter;
 export const Uri = Object.assign({}, URI, Utils);
 
 export function initializeShimServices(
   initOptions: TSLanguageServiceOptions,
-  delegate: TSLanguageServiceDelegate
+  delegate: TSLanguageServiceDelegate,
+  defaultConfig: TSLanguageServiceConfig,
+  defaultNls: l10n.l10nJsonFormat
 ) {
-  const configurationService = new ConfigurationShimService();
+  l10n.config({ contents: defaultNls });
+
+  const configurationService = new ConfigurationShimService(defaultConfig);
   const workspaceService = new WorkspaceShimService(
     delegate,
     configurationService,

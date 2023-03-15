@@ -10,6 +10,7 @@ import { deepClone } from "../utils/objects";
 import { TSCodeActionFeature } from "./codeAction";
 import { TSCompletionFeature } from "./completion";
 import { createTSLanguageServiceDelegate } from "./delegate";
+import { tsDefaultConfig, tsDefaultNls } from "./pkgJson";
 import { TSLanguageServiceConfig, TSLanguageServiceOptions } from "./types";
 
 async function startVsTsExtension(context: vscode.ExtensionContext) {
@@ -38,7 +39,9 @@ export function createTSLanguageService(initOptions: TSLanguageServiceOptions) {
 
   const toDispose = new DisposableStore();
 
-  const shims = toDispose.add(initializeShimServices(initOptions, delegate));
+  const shims = toDispose.add(
+    initializeShimServices(initOptions, delegate, tsDefaultConfig, tsDefaultNls)
+  );
 
   const serviceState = {
     state: "uninitialized" as "uninitialized" | "initializing" | "initialized",

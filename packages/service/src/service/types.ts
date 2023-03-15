@@ -7,7 +7,7 @@ export interface TSLanguageServiceOptions {
   tsExtLogPath?: string;
 }
 
-export type TSLanguageServiceConfig = any;
+export { TSLanguageServiceConfig } from "./pkgJson";
 
 export interface WorkDoneProgressReporter {
   readonly token: lsp.CancellationToken;
@@ -37,5 +37,5 @@ export interface TSLanguageServiceEvents {
   onShowMessage(handler: EventHandlersMapping["showMessage"]): lsp.Disposable;
   onApplyWorkspaceEdit(handler: EventHandlersMapping["applyWorkspaceEdit"]): lsp.Disposable;
   onWorkDoneProgress(handler: EventHandlersMapping["workDoneProgress"]): lsp.Disposable;
-  onDiagnostics(handler: EventHandlersMapping['diagnostics']): lsp.Disposable;
+  onDiagnostics(handler: EventHandlersMapping["diagnostics"]): lsp.Disposable;
 }

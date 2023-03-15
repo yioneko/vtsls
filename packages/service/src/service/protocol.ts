@@ -1,10 +1,7 @@
 import { CodeActionKind } from "vscode-languageserver-protocol";
-import {
-  activationEvents as pkgJsonEvents,
-  contributes as pkgJsonContributes,
-} from "../typescript-language-features/package.json";
 import { CodeActionCache } from "./codeAction";
 import { CompletionCache } from "./completion";
+import { tsCommands } from "./pkgJson";
 
 // "*" from jsdoc completion
 export const completionTriggerCharacters = [".", '"', "'", "`", "/", "@", "<", "#", " ", "*"];
@@ -47,21 +44,7 @@ export const semanticTokenModifiers = [
   "local",
 ];
 
-function collectCommands() {
-  const commandSet = new Set<string>();
-  for (const event of pkgJsonEvents) {
-    const commandName = event.split("onCommand:")[1];
-    if (commandName) {
-      commandSet.add(commandName);
-    }
-  }
-  for (const { command } of pkgJsonContributes.commands) {
-    commandSet.add(command);
-  }
-  return [...commandSet.values(), CodeActionCache.id, CompletionCache.id];
-}
-
-export const commands = collectCommands();
+export const commands = [...tsCommands, CodeActionCache.id, CompletionCache.id];
 
 export const onTypeFormatFirstTriggerCharacter = ";";
 export const onTypeFormatMoreTriggerCharacter = ["}", "\n"];

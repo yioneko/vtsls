@@ -1,7 +1,6 @@
+import { deepClone } from "src/utils/objects";
 import * as vscode from "vscode";
 import { Emitter } from "vscode-languageserver-protocol";
-import { TSLanguageServiceConfig } from "../service/types";
-import { contributes as pkgContributes } from "../typescript-language-features/package.json";
 import { Disposable } from "../utils/dispose";
 import { isPrimitive } from "../utils/types";
 
@@ -46,11 +45,7 @@ function recursiveUpdate<T>(cur: any, value: T): T {
 }
 
 export class ConfigurationShimService extends Disposable {
-  private defaultConfig: any = {
-    "vtsls.experimental.completion.enableServerSideFuzzyMatch": false,
-    "vtsls.experimental.completion.entriesLimit": null,
-  };
-
+  private defaultConfig: any;
   private workspaceConfig: any = {};
 
   private _onDidChangeConfiguration = this._register(
@@ -58,21 +53,9 @@ export class ConfigurationShimService extends Disposable {
   );
   readonly onDidChangeConfiguration = this._onDidChangeConfiguration.event;
 
-  constructor() {
+  constructor(defaultConfig: any) {
     super();
-
-    const contributed = pkgContributes.configuration.properties || {};
-    for (const [key, val] of Object.entries(contributed)) {
-      let defaultVal = "default" in val ? val.default : undefined;
-      if (!defaultVal) {
-        if (val.type === "string") {
-          defaultVal = "";
-        } else if (val.type === "array") {
-          defaultVal = [];
-        }
-      }
-      update(this.defaultConfig, key, defaultVal);
-    }
+    this.defaultConfig = deepClone(defaultConfig);
   }
 
   getConfiguration(section?: string) {
@@ -122,7 +105,7 @@ export class ConfigurationShimService extends Disposable {
     return vscConfig;
   }
 
-  $changeConfiguration(config: TSLanguageServiceConfig) {
+  $changeConfiguration(config: any) {
     recursiveUpdate(this.workspaceConfig, config);
   }
 }
