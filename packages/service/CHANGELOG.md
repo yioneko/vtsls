@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.1.16](https://github.com/yioneko/vtsls/compare/service-v0.1.15...service-v0.1.16) (2023-03-21)
+
+
+### Bug Fixes
+
+* **deps:** update dependency typescript to v5 ([0bbc01b](https://github.com/yioneko/vtsls/commit/0bbc01baa819e4078d4f1adb5e65c5a45bbe7443))
+* **deps:** update packages/service/vscode digest to 2f0f935 ([97f732f](https://github.com/yioneko/vtsls/commit/97f732f88aca9315e503906ac45ab62b7902ba65))
+* missing completion length threshold ([39fb8c4](https://github.com/yioneko/vtsls/commit/39fb8c48e4279697b42f146f906261f2888d9272))
+
 ## [0.1.15](https://github.com/yioneko/vtsls/compare/service-v0.1.14...service-v0.1.15) (2023-03-13)
 
 
