@@ -19,7 +19,7 @@
     "@vtsls/language-service": "workspace:0.1.15"
   },
   "devDependencies": {
-    "esbuild": "^0.17.11"
+    "esbuild": "^0.17.12"
   },
   "scripts": {
     "build": "node build.js",
