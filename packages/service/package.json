@@ -33,7 +33,7 @@
   },
   "devDependencies": {
     "@types/semver": "^5.5.0",
-    "esbuild": "^0.17.12",
+    "esbuild": "^0.17.14",
     "vitest": "^0.29.7"
   },
   "scripts": {
