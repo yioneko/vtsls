@@ -1,0 +1,33 @@
+diff --git a/src/typeScriptServiceClientHost.ts b/src/typeScriptServiceClientHost.ts
+index 58f4b1f..f098036 100644
+--- a/src/typeScriptServiceClientHost.ts
++++ b/src/typeScriptServiceClientHost.ts
+@@ -22,14 +22,12 @@ import { TsServerProcessFactory } from './tsServer/server';
+ import { ITypeScriptVersionProvider } from './tsServer/versionProvider';
+ import TypeScriptServiceClient from './typescriptServiceClient';
+ import { IntellisenseStatus } from './ui/intellisenseStatus';
+-import { VersionStatus } from './ui/versionStatus';
+ import { ActiveJsTsEditorTracker } from './utils/activeJsTsEditorTracker';
+ import { coalesce } from './utils/arrays';
+ import { ServiceConfigurationProvider } from './utils/configuration';
+ import { Disposable } from './utils/dispose';
+ import * as errorCodes from './utils/errorCodes';
+ import { DiagnosticLanguage, LanguageDescription } from './utils/languageDescription';
+-import * as LargeProjectStatus from './utils/largeProjectStatus';
+ import { LogLevelMonitor } from './utils/logLevelMonitor';
+ import { Logger } from './utils/logger';
+ import { PluginManager } from './utils/plugins';
+@@ -97,11 +95,11 @@ export default class TypeScriptServiceClientHost extends Disposable {
+ 		this.client.onConfigDiagnosticsReceived(diag => this.configFileDiagnosticsReceived(diag), null, this._disposables);
+ 		this.client.onResendModelsRequested(() => this.populateService(), null, this._disposables);
+ 
+-		this._register(new VersionStatus(this.client));
++		// this._register(new VersionStatus(this.client));
+ 		this._register(new IntellisenseStatus(this.client, services.commandManager, services.activeJsTsEditorTracker));
+ 		this._register(new AtaProgressReporter(this.client));
+ 		this.typingsStatus = this._register(new TypingsStatus(this.client));
+-		this._register(LargeProjectStatus.create(this.client));
++		// this._register(LargeProjectStatus.create(this.client));
+ 
+ 		this.fileConfigurationManager = this._register(new FileConfigurationManager(this.client, onCaseInsensitiveFileSystem));
+ 
