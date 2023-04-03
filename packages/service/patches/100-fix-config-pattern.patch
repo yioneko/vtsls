@@ -1,7 +1,7 @@
-diff --git a/src/utils/languageDescription.ts b/src/utils/languageDescription.ts
+diff --git a/src/configuration/languageDescription.ts b/src/configuration/languageDescription.ts
 index 95c165b..a97530e 100644
---- a/src/utils/languageDescription.ts
-+++ b/src/utils/languageDescription.ts
+--- a/src/configuration/languageDescription.ts
++++ b/src/configuration/languageDescription.ts
 @@ -32,7 +32,7 @@ export const standardLanguageDescriptions: LanguageDescription[] = [
  		diagnosticSource: 'ts',
  		diagnosticLanguage: DiagnosticLanguage.TypeScript,

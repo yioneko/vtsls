@@ -1,10 +1,10 @@
 diff --git a/src/commands/goToProjectConfiguration.ts b/src/commands/goToProjectConfiguration.ts
-index fde3a4e..7fef03b 100644
+index 0222f32..a6e2172 100644
 --- a/src/commands/goToProjectConfiguration.ts
 +++ b/src/commands/goToProjectConfiguration.ts
-@@ -8,6 +8,7 @@ import { ActiveJsTsEditorTracker } from '../utils/activeJsTsEditorTracker';
+@@ -8,6 +8,7 @@ import { ActiveJsTsEditorTracker } from '../ui/activeJsTsEditorTracker';
  import { Lazy } from '../utils/lazy';
- import { openProjectConfigForFile, ProjectType } from '../utils/tsconfig';
+ import { openProjectConfigForFile, ProjectType } from '../tsconfig';
  import { Command } from './commandManager';
 +import * as vscode from "vscode";
  

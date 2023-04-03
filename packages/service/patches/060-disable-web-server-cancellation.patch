@@ -1,17 +1,16 @@
 diff --git a/src/tsServer/server.ts b/src/tsServer/server.ts
-index 935d473..261c1e2 100644
+index 7bdf6b8..9ea6358 100644
 --- a/src/tsServer/server.ts
 +++ b/src/tsServer/server.ts
-@@ -4,7 +4,7 @@
+@@ -3,7 +3,6 @@
+  *  Licensed under the MIT License. See License.txt in the project root for license information.
   *--------------------------------------------------------------------------------------------*/
  
- import * as vscode from 'vscode';
 -import { Cancellation } from '@vscode/sync-api-common/lib/common/messageCancellation';
-+// import { Cancellation } from '@vscode/sync-api-common/lib/common/messageCancellation';
- import type * as Proto from '../protocol';
- import { EventName } from '../protocol.const';
- import { CallbackMap } from '../tsServer/callbackMap';
-@@ -224,12 +224,12 @@ export class ProcessBasedTsServer extends Disposable implements ITypeScriptServe
+ import * as vscode from 'vscode';
+ import { TypeScriptServiceConfiguration } from '../configuration/configuration';
+ import { TelemetryReporter } from '../logging/telemetry';
+@@ -228,12 +227,12 @@ export class SingleTsServer extends Disposable implements ITypeScriptServer {
  
  				if (executeInfo.token) {
  

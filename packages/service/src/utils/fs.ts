@@ -1,1 +1,1 @@
-export { onCaseInsensitiveFileSystem } from "@vsc-ts/utils/fileSystem.electron";
+export { onCaseInsensitiveFileSystem } from "@vsc-ts/utils/fs.electron"
