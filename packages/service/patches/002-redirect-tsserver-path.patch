@@ -1,10 +1,10 @@
 diff --git a/src/tsServer/versionProvider.electron.ts b/src/tsServer/versionProvider.electron.ts
-index dca0fb2..190b8e2 100644
+index 239519e..148f4b5 100644
 --- a/src/tsServer/versionProvider.electron.ts
 +++ b/src/tsServer/versionProvider.electron.ts
-@@ -10,6 +10,9 @@ import API from '../utils/api';
- import { TypeScriptServiceConfiguration } from '../utils/configuration';
+@@ -10,6 +10,9 @@ import { TypeScriptServiceConfiguration } from '../configuration/configuration';
  import { RelativeWorkspacePathResolver } from '../utils/relativePathResolver';
+ import { API } from './api';
  import { ITypeScriptVersionProvider, TypeScriptVersion, TypeScriptVersionSource } from './versionProvider';
 +import { createRequire } from 'module';
 +import { fileURLToPath } from 'url';
@@ -12,7 +12,7 @@ index dca0fb2..190b8e2 100644
  
  
  export class DiskTypeScriptVersionProvider implements ITypeScriptVersionProvider {
-@@ -78,14 +81,16 @@ export class DiskTypeScriptVersionProvider implements ITypeScriptVersionProvider
+@@ -78,14 +81,15 @@ export class DiskTypeScriptVersionProvider implements ITypeScriptVersionProvider
  
  	private getContributedVersion(source: TypeScriptVersionSource, extensionId: string, pathToTs: readonly string[]): TypeScriptVersion | undefined {
  		try {
@@ -23,7 +23,6 @@ index dca0fb2..190b8e2 100644
 +			// if (extension) {
 +				const tsPath = req.resolve("typescript", { paths: [fileURLToPath(import.meta.url)] })
 +				const serverPath = path.join(path.dirname(tsPath), 'tsserver.js');
-+
  				const bundledVersion = new TypeScriptVersion(source, serverPath, DiskTypeScriptVersionProvider.getApiVersion(serverPath), '');
  				if (bundledVersion.isValid) {
  					return bundledVersion;

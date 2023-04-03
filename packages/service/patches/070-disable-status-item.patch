@@ -1,22 +1,17 @@
 diff --git a/src/typeScriptServiceClientHost.ts b/src/typeScriptServiceClientHost.ts
-index 58f4b1f..f098036 100644
+index 7009799..116630c 100644
 --- a/src/typeScriptServiceClientHost.ts
 +++ b/src/typeScriptServiceClientHost.ts
-@@ -22,14 +22,12 @@ import { TsServerProcessFactory } from './tsServer/server';
- import { ITypeScriptVersionProvider } from './tsServer/versionProvider';
+@@ -30,9 +30,7 @@ import * as typeConverters from './typeConverters';
  import TypeScriptServiceClient from './typescriptServiceClient';
+ import { ActiveJsTsEditorTracker } from './ui/activeJsTsEditorTracker';
  import { IntellisenseStatus } from './ui/intellisenseStatus';
+-import * as LargeProjectStatus from './ui/largeProjectStatus';
+ import TypingsStatus, { AtaProgressReporter } from './ui/typingsStatus';
 -import { VersionStatus } from './ui/versionStatus';
- import { ActiveJsTsEditorTracker } from './utils/activeJsTsEditorTracker';
  import { coalesce } from './utils/arrays';
- import { ServiceConfigurationProvider } from './utils/configuration';
  import { Disposable } from './utils/dispose';
- import * as errorCodes from './utils/errorCodes';
- import { DiagnosticLanguage, LanguageDescription } from './utils/languageDescription';
--import * as LargeProjectStatus from './utils/largeProjectStatus';
- import { LogLevelMonitor } from './utils/logLevelMonitor';
- import { Logger } from './utils/logger';
- import { PluginManager } from './utils/plugins';
+ 
 @@ -97,11 +95,11 @@ export default class TypeScriptServiceClientHost extends Disposable {
  		this.client.onConfigDiagnosticsReceived(diag => this.configFileDiagnosticsReceived(diag), null, this._disposables);
  		this.client.onResendModelsRequested(() => this.populateService(), null, this._disposables);
