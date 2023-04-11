@@ -1,8 +1,8 @@
 diff --git a/src/extension.ts b/src/extension.ts
-index c92617f..e697dc5 100644
+index 22fdd25..e15bda6 100644
 --- a/src/extension.ts
 +++ b/src/extension.ts
-@@ -3,25 +3,20 @@
+@@ -3,14 +3,11 @@
   *  Licensed under the MIT License. See License.txt in the project root for license information.
   *--------------------------------------------------------------------------------------------*/
  
@@ -17,10 +17,7 @@ index c92617f..e697dc5 100644
  import { createLazyClientHost, lazilyActivateClient } from './lazyClientHost';
  import { nodeRequestCancellerFactory } from './tsServer/cancellation.electron';
  import { NodeLogDirectoryProvider } from './tsServer/logDirectoryProvider.electron';
- import { ElectronServiceProcessFactory } from './tsServer/serverProcess.electron';
- import { DiskTypeScriptVersionProvider } from './tsServer/versionProvider.electron';
- import { ActiveJsTsEditorTracker } from './ui/activeJsTsEditorTracker';
--import { JsWalkthroughState, registerJsNodeWalkthrough } from './ui/jsNodeWalkthrough.electron';
+@@ -20,7 +17,6 @@ import { ActiveJsTsEditorTracker } from './ui/activeJsTsEditorTracker';
  import { ElectronServiceConfigurationProvider } from './configuration/configuration.electron';
  import { onCaseInsensitiveFileSystem } from './utils/fs.electron';
  import { Logger } from './logging/logger';
@@ -28,14 +25,9 @@ index c92617f..e697dc5 100644
  import { PluginManager } from './tsServer/plugins';
  import * as temp from './utils/temp.electron';
  
-@@ -43,21 +38,21 @@ export function activate(
+@@ -42,18 +38,18 @@ export function activate(
  	const activeJsTsEditorTracker = new ActiveJsTsEditorTracker();
  	context.subscriptions.push(activeJsTsEditorTracker);
- 
--	const jsWalkthroughState = new JsWalkthroughState();
--	context.subscriptions.push(jsWalkthroughState);
-+	// const jsWalkthroughState = new JsWalkthroughState();
-+	// context.subscriptions.push(jsWalkthroughState);
  
 -	let experimentTelemetryReporter: IExperimentationTelemetryReporter | undefined;
 -	const packageInfo = getPackageInfo(context);
@@ -61,12 +53,9 @@ index c92617f..e697dc5 100644
  
  	const logger = new Logger();
  
-@@ -77,15 +72,15 @@ export function activate(
- 	});
+@@ -74,13 +70,13 @@ export function activate(
  
  	registerBaseCommands(commandManager, lazyClientHost, pluginManager, activeJsTsEditorTracker);
--	registerJsNodeWalkthrough(commandManager, jsWalkthroughState);
-+	// registerJsNodeWalkthrough(commandManager, jsWalkthroughState);
  
 -	import('./task/taskProvider').then(module => {
 -		context.subscriptions.push(module.register(lazyClientHost.map(x => x.serviceClient)));
