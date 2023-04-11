@@ -646,4 +646,8 @@ export class TSLspConverter {
   convertSemanticTokens = (tokens: vscode.SemanticTokens): lsp.SemanticTokens => {
     return { data: Array.from(tokens.data), resultId: tokens.resultId };
   };
+
+  convertLinkedEditingRanges = (data: vscode.LinkedEditingRanges): lsp.LinkedEditingRanges => {
+    return { ranges: data.ranges.map(this.convertRange), wordPattern: data.wordPattern?.source };
+  };
 }

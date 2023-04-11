@@ -137,6 +137,7 @@ function bindServiceHandlers(
   conn.languages.inlayHint.on(service.inlayHint);
   conn.languages.semanticTokens.on(service.semanticTokensFull);
   conn.languages.semanticTokens.onRange(service.semanticTokensRange);
+  conn.languages.onLinkedEditingRange(service.linkedEditingRange);
   /* eslint-enable @typescript-eslint/no-misused-promises, @typescript-eslint/unbound-method*/
 }
 
