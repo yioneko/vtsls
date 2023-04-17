@@ -23,6 +23,7 @@ export let env: typeof import("vscode").env;
 export let workspace: typeof import("vscode").workspace;
 export { CancellationTokenSource } from "vscode-languageserver-protocol";
 export { FilePermission, FileStat, FileType } from "./fs";
+export { LogLevel } from "./log";
 export * from "./types";
 export { l10n };
 export const EventEmitter = Emitter;

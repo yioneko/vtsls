@@ -21,6 +21,7 @@ export interface WorkDoneProgressReporter {
 export type EventHandlersMapping = {
   showDocument: (params: lsp.ShowDocumentParams) => Promise<boolean>;
   logMessage: (params: lsp.LogMessageParams) => void;
+  logTrace: (params: lsp.LogTraceParams) => void;
   showMessage: (params: lsp.ShowMessageRequestParams) => Promise<lsp.MessageActionItem | null>;
   applyWorkspaceEdit: (
     params: lsp.ApplyWorkspaceEditParams
@@ -34,6 +35,7 @@ export type EventName = keyof EventHandlersMapping;
 export interface TSLanguageServiceEvents {
   onShowDocument(handler: EventHandlersMapping["showDocument"]): lsp.Disposable;
   onLogMessage(handler: EventHandlersMapping["logMessage"]): lsp.Disposable;
+  onLogTrace(handler: EventHandlersMapping["logTrace"]): lsp.Disposable;
   onShowMessage(handler: EventHandlersMapping["showMessage"]): lsp.Disposable;
   onApplyWorkspaceEdit(handler: EventHandlersMapping["applyWorkspaceEdit"]): lsp.Disposable;
   onWorkDoneProgress(handler: EventHandlersMapping["workDoneProgress"]): lsp.Disposable;

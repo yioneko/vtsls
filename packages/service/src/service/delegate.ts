@@ -11,6 +11,7 @@ export interface TSLanguageServiceDelegate {
   converter: TSLspConverter;
   openExternal: (uri: lsp.URI) => Promise<boolean>;
   logMessage: (type: lsp.MessageType, message: string) => void;
+  logTrace: (message: string) => void;
   showMessage: (
     type: lsp.MessageType,
     message: string,
@@ -43,6 +44,7 @@ export function createTSLanguageServiceDelegate(converter: TSLspConverter) {
   const events: TSLanguageServiceEvents = {
     onShowDocument: onHandler("showDocument"),
     onLogMessage: onHandler("logMessage"),
+    onLogTrace: onHandler("logTrace"),
     onShowMessage: onHandler("showMessage"),
     onApplyWorkspaceEdit: onHandler("applyWorkspaceEdit"),
     onWorkDoneProgress: onHandler("workDoneProgress"),
@@ -77,6 +79,12 @@ export function createTSLanguageServiceDelegate(converter: TSLspConverter) {
       const handler = getHandler("logMessage");
       if (handler) {
         handler({ type, message });
+      }
+    },
+    logTrace(message) {
+      const handler = getHandler("logTrace");
+      if (handler) {
+        handler({ message });
       }
     },
     async showMessage(type, message, ...actions) {
