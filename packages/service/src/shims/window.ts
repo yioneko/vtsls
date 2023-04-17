@@ -3,6 +3,7 @@ import * as lsp from "vscode-languageserver-protocol";
 import { TSLanguageServiceDelegate } from "../service/delegate";
 import { Disposable, disposeAll } from "../utils/dispose";
 import { isPrimitive } from "../utils/types";
+import { LogOutputChannel, OutputChannel } from "./log";
 
 export class WindowShimService extends Disposable {
   private outputChannels = new Map<string, vscode.OutputChannel>();
@@ -23,28 +24,11 @@ export class WindowShimService extends Disposable {
     );
   }
 
-  createOutputChannel(name: string) {
-    const win = this;
-    const newChannel: vscode.OutputChannel = this._register({
-      get name() {
-        return name;
-      },
-      append(value) {
-        win.delegate.logMessage(lsp.MessageType.Info, value);
-      },
-      appendLine(value) {
-        win.delegate.logMessage(lsp.MessageType.Info, value);
-      },
-      clear() {},
-      hide() {},
-      replace() {},
-      dispose() {
-        if (win.outputChannels.has(name)) {
-          win.outputChannels.delete(name);
-        }
-      },
-      show() {},
-    });
+  createOutputChannel(name: string, options: string | { log: true } | undefined) {
+    const log = typeof options === "object" && options.log;
+    const newChannel = this._register(
+      log ? new LogOutputChannel(this.delegate, name) : new OutputChannel(this.delegate, name)
+    );
 
     this.outputChannels.set(name, newChannel);
     return newChannel;

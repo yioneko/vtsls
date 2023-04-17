@@ -77,6 +77,7 @@ function bindServiceHandlers(
   clientCapabilities: ClientCapabilities
 ) {
   service.onLogMessage((params) => void conn.sendNotification(LogMessageNotification.type, params));
+  service.onLogTrace((params) => void conn.tracer.log(params.message));
   if (clientCapabilities.window?.showMessage) {
     service.onShowMessage((params) => conn.sendRequest(ShowMessageRequest.type, params));
   }
