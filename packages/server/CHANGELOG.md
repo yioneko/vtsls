@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.1.17](https://github.com/yioneko/vtsls/compare/server-v0.1.16...server-v0.1.17) (2023-04-17)
+
+
+### Bug Fixes
+
+* **deps:** update packages/service/vscode digest to 1e77437 ([#64](https://github.com/yioneko/vtsls/issues/64)) ([8f840e2](https://github.com/yioneko/vtsls/commit/8f840e27bbb6f993c6deb6fb636ad4ef2af1cc68))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @vtsls/language-service bumped from workspace:0.1.16 to workspace:0.1.17
+
 ## [0.1.16](https://github.com/yioneko/vtsls/compare/server-v0.1.15...server-v0.1.16) (2023-03-21)
 
 
