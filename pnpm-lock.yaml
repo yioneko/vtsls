@@ -29,7 +29,7 @@ importers:
   packages/server:
     dependencies:
       '@vtsls/language-service':
-        specifier: workspace:0.1.16
+        specifier: workspace:0.1.17
         version: link:../service
       vscode-languageserver:
         specifier: ^8.1.0
