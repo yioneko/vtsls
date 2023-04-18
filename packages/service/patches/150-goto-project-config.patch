@@ -1,5 +1,5 @@
 diff --git a/src/commands/goToProjectConfiguration.ts b/src/commands/goToProjectConfiguration.ts
-index 0222f32..a6e2172 100644
+index 0222f32..08f7b7c 100644
 --- a/src/commands/goToProjectConfiguration.ts
 +++ b/src/commands/goToProjectConfiguration.ts
 @@ -8,6 +8,7 @@ import { ActiveJsTsEditorTracker } from '../ui/activeJsTsEditorTracker';
@@ -27,3 +27,19 @@ index 0222f32..a6e2172 100644
  	}
  }
  
+@@ -33,10 +34,10 @@ export class JavaScriptGoToProjectConfigCommand implements Command {
+ 		private readonly lazyClientHost: Lazy<TypeScriptServiceClientHost>,
+ 	) { }
+ 
+-	public execute() {
+-		const editor = this.activeJsTsEditorTracker.activeJsTsEditor;
+-		if (editor) {
+-			openProjectConfigForFile(ProjectType.JavaScript, this.lazyClientHost.value.serviceClient, editor.document.uri);
+-		}
++	public execute(uri: string) {
++		// const editor = this.activeJsTsEditorTracker.activeJsTsEditor;
++		// if (editor) {
++			openProjectConfigForFile(ProjectType.JavaScript, this.lazyClientHost.value.serviceClient, vscode.Uri.parse(uri));
++		// }
+ 	}
+ }

@@ -31,10 +31,12 @@ Some other commands are undocumented because either it is private for server or 
 - `typescript.openTsServerLog`
 - `typescript.restartTsServer`
 - `typescript.reloadProjects`
+- `javascript.reloadProjects`
 - `typescript.selectTypeScriptVersion`
 - `typescript.goToSourceDefinition`: `[DocumentUri, Position] => Location[]`
 - `typescript.findAllFileReferences`: `[DocumentUri] => Location[]`
 - `typescript.goToProjectConfig`: `[DocumentUri] => null`
+- `javascript.goToProjectConfig`: `[DocumentUri] => null`
 - `_typescript.configurePlugin`: `[pluginName: string, config: any] => any`
 - `typescript.tsserverRequest`: `[RequestType, args: any, config: any] => any`
 

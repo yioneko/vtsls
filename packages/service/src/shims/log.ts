@@ -1,6 +1,6 @@
-import { TSLanguageServiceDelegate } from "src/service/delegate";
 import * as vscode from "vscode";
 import * as lsp from "vscode-languageserver-protocol";
+import { TSLanguageServiceDelegate } from "../service/delegate";
 import { Disposable } from "../utils/dispose";
 
 function format(args: any): string {
