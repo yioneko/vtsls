@@ -45,8 +45,8 @@ importers:
   packages/service:
     dependencies:
       '@vscode/l10n':
-        specifier: ^0.0.13
-        version: 0.0.13
+        specifier: ^0.0.14
+        version: 0.0.14
       '@vtsls/vscode-fuzzy':
         specifier: workspace:0.0.1
         version: link:../vscode-fuzzy
@@ -760,8 +760,8 @@ packages:
       pretty-format: 27.5.1
     dev: true
 
-  /@vscode/l10n@0.0.13:
-    resolution: {integrity: sha512-A3uY356uOU9nGa+TQIT/i3ziWUgJjVMUrGGXSrtRiTwklyCFjGVWIOHoEIHbJpiyhDkJd9kvIWUOfXK1IkK8XQ==}
+  /@vscode/l10n@0.0.14:
+    resolution: {integrity: sha512-/yrv59IEnmh655z1oeDnGcvMYwnEzNzHLgeYcQCkhYX0xBvYWrAuefoiLcPBUkMpJsb46bqQ6Yv4pwTTQ4d3Qg==}
     dev: false
 
   /acorn-jsx@5.3.2(acorn@8.8.2):
