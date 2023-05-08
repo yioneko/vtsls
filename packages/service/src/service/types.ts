@@ -32,12 +32,11 @@ export type EventHandlersMapping = {
 
 export type EventName = keyof EventHandlersMapping;
 
-export interface TSLanguageServiceEvents {
-  onShowDocument(handler: EventHandlersMapping["showDocument"]): lsp.Disposable;
-  onLogMessage(handler: EventHandlersMapping["logMessage"]): lsp.Disposable;
-  onLogTrace(handler: EventHandlersMapping["logTrace"]): lsp.Disposable;
-  onShowMessage(handler: EventHandlersMapping["showMessage"]): lsp.Disposable;
-  onApplyWorkspaceEdit(handler: EventHandlersMapping["applyWorkspaceEdit"]): lsp.Disposable;
-  onWorkDoneProgress(handler: EventHandlersMapping["workDoneProgress"]): lsp.Disposable;
-  onDiagnostics(handler: EventHandlersMapping["diagnostics"]): lsp.Disposable;
-}
+type UppercaseFirst<S extends string> = S extends `${infer H}${infer R}`
+  ? `${Uppercase<H>}${R}`
+  : Uppercase<S>;
+export type TSLanguageServiceEvents = {
+  [K in keyof EventHandlersMapping as `on${UppercaseFirst<K>}`]: (
+    handler: EventHandlersMapping[K]
+  ) => lsp.Disposable;
+};
