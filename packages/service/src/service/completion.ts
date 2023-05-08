@@ -30,7 +30,7 @@ export class CompletionCache extends Disposable {
           throw new lsp.ResponseError(lsp.ErrorCodes.InvalidParams, "completion item data missing");
         }
         if (item.command && item.command.command !== CompletionCache.id) {
-          return commands.executeCommand(item.command.command, ...item.command.arguments);
+          return commands.executeCommand(item.command.command, ...(item.command.arguments || []));
         }
       })
     );
