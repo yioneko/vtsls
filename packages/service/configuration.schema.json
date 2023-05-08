@@ -375,6 +375,11 @@
         "Remove unnecessary semicolons."
       ]
     },
+    "typescript.format.indentSwitchCase": {
+      "type": "boolean",
+      "default": true,
+      "description": "Indent case clauses in switch statements. Requires using TypeScript 5.1+ in the workspace."
+    },
     "javascript.validate.enable": {
       "type": "boolean",
       "default": true,
@@ -707,11 +712,17 @@
         "index",
         "js"
       ],
+      "enumItemLabels": [
+        null,
+        null,
+        null,
+        "%typescript.preferences.importModuleSpecifierEnding.label.js%"
+      ],
       "markdownEnumDescriptions": [
         "Use project settings to select a default.",
         "Shorten `./component/index.js` to `./component`.",
         "Shorten `./component/index.js` to `./component/index`.",
-        "Do not shorten path endings; include the `.js` extension."
+        "Do not shorten path endings; include the `.js` or `.ts` extension."
       ],
       "default": "auto",
       "description": "Preferred path ending for auto imports."
@@ -724,11 +735,17 @@
         "index",
         "js"
       ],
+      "enumItemLabels": [
+        null,
+        null,
+        null,
+        "%typescript.preferences.importModuleSpecifierEnding.label.js%"
+      ],
       "markdownEnumDescriptions": [
         "Use project settings to select a default.",
         "Shorten `./component/index.js` to `./component`.",
         "Shorten `./component/index.js` to `./component/index`.",
-        "Do not shorten path endings; include the `.js` extension."
+        "Do not shorten path endings; include the `.js` or `.ts` extension."
       ],
       "default": "auto",
       "description": "Preferred path ending for auto imports."
