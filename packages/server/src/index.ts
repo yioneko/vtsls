@@ -35,6 +35,7 @@ function onServerInitialize(conn: Connection, params: InitializeParams) {
     locale: params.locale,
     workspaceFolders: folders,
     clientCapabilities,
+    tsExtLogPath: params.initializationOptions?.tsLogPath,
   });
 
   async function initializeService() {
