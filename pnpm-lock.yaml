@@ -57,8 +57,8 @@ importers:
         specifier: 5.5.1
         version: 5.5.1
       typescript:
-        specifier: 5.1.0-dev.20230502
-        version: 5.1.0-dev.20230502
+        specifier: 5.1.0-dev.20230515
+        version: 5.1.0-dev.20230515
       vscode-languageserver-protocol:
         specifier: ^3.17.3
         version: 3.17.3
@@ -2125,17 +2125,10 @@ packages:
     engines: {node: '>=10'}
     dev: true
 
-  /typescript@5.1.0-dev.20230502:
-    resolution: {integrity: sha512-xhGigho37UgtjMkTWMKDtIBV6ElFjcMFdzwTPQ0knTCSJ8tq0ENGsQPeTe0E7Db7mgZYWULEZnzs8KZ8IlHHLQ==}
-    engines: {node: '>=14.17'}
-    hasBin: true
-    dev: false
-
   /typescript@5.1.0-dev.20230515:
     resolution: {integrity: sha512-yn0MGsy6U0QAVF+lXW6LPupQmuRsyA0xUJetqw2tDqa+49231BpkhTuY6oEwLsc98tiEzCfIw7hzbLsiwVGFaA==}
     engines: {node: '>=14.17'}
     hasBin: true
-    dev: true
 
   /ufo@1.1.1:
     resolution: {integrity: sha512-MvlCc4GHrmZdAllBc0iUDowff36Q9Ndw/UzqmEKyrfSzokTd9ZCy1i+IIk5hrYKkjoYVQyNbrw7/F8XJ2rEwTg==}
