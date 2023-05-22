@@ -34,7 +34,7 @@
   "devDependencies": {
     "@types/semver": "^5.5.0",
     "esbuild": "^0.17.19",
-    "vitest": "^0.31.0"
+    "vitest": "^0.31.1"
   },
   "scripts": {
     "build": "node scripts/build.js && tsc",
