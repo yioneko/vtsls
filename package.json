@@ -1,5 +1,9 @@
 {
   "private": true,
+  "engines": {
+    "node": ">=14",
+    "pnpm": "8"
+  },
   "devDependencies": {
     "@types/node": "^14.18.47",
     "@typescript-eslint/eslint-plugin": "^5.59.7",

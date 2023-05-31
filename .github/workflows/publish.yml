@@ -22,7 +22,7 @@ jobs:
           registry-url: "https://registry.npmjs.org"
       - uses: pnpm/action-setup@v2
         with:
-          version: 7
+          version: 8
       - run: pnpm install
       - run: pnpm build
       - name: Publish package

@@ -22,7 +22,7 @@ jobs:
           node-version: 16
       - uses: pnpm/action-setup@v2
         with:
-          version: 7
+          version: 8
       - run: pnpm install
       - run: pnpm build
       - run: pnpm lint
@@ -31,7 +31,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        node: [14, 16, 18]
+        node: [16, 18]
         os: [ubuntu-latest]
         include:
           - os: macos-latest
@@ -48,7 +48,7 @@ jobs:
           node-version: ${{ matrix.node }}
       - uses: pnpm/action-setup@v2
         with:
-          version: 7
+          version: 8
       - run: pnpm install
       - run: pnpm build
       - run: pnpm test
