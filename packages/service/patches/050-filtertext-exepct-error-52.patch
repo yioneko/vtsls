@@ -1,0 +1,12 @@
+diff --git a/src/languageFeatures/completions.ts b/src/languageFeatures/completions.ts
+index 8b5100f..e677490 100644
+--- a/src/languageFeatures/completions.ts
++++ b/src/languageFeatures/completions.ts
+@@ -93,6 +93,7 @@ class MyCompletionItem extends vscode.CompletionItem {
+ 		this.range = this.getRangeFromReplacementSpan(tsEntry, completionContext);
+ 		this.commitCharacters = MyCompletionItem.getCommitCharacters(completionContext, tsEntry);
+ 		this.insertText = isSnippet && tsEntry.insertText ? new vscode.SnippetString(tsEntry.insertText) : tsEntry.insertText;
++		// @ts-expect-error ts 5.2
+ 		this.filterText = tsEntry.filterText || this.getFilterText(completionContext.line, tsEntry.insertText);
+ 
+ 		if (completionContext.isMemberCompletion && completionContext.dotAccessorContext && !(this.insertText instanceof vscode.SnippetString)) {
