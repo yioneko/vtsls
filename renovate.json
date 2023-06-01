@@ -23,6 +23,7 @@
         "groupSlug": "all-minor-patch-dev-deps",
         "schedule": ["every 2 months after 6pm on the 15th day of the month"],
         "matchPackagePatterns": ["*"],
+        "excludeDepNames": ["typescript"],
         "matchDepTypes": ["devDependencies"],
         "matchUpdateTypes": ["minor", "patch"]
       }

@@ -82,6 +82,8 @@ export class CodeActionCache extends Disposable {
   }
 }
 
+const UNSUPPORTED_ACTIONS = ["refactor.move.file"];
+
 export class TSCodeActionFeature extends Disposable {
   private cache: CodeActionCache;
 
@@ -154,15 +156,24 @@ export class TSCodeActionFeature extends Disposable {
 
         const overrideFields = this.cache.store(actions, id);
         results.push(
-          actions.map((action, index) => {
-            const converted = this.converter.convertCodeAction(action);
-            const { data, command } = overrideFields[index];
-            if (typeof converted.command === "string") {
-              return command;
-            } else {
-              return { ...(converted as lsp.CodeAction), data, command };
-            }
-          })
+          actions
+            .filter(
+              (action) =>
+                !(
+                  "kind" in action &&
+                  action.kind &&
+                  UNSUPPORTED_ACTIONS.includes(action.kind.value)
+                )
+            )
+            .map((action, index) => {
+              const converted = this.converter.convertCodeAction(action);
+              const { data, command } = overrideFields[index];
+              if (typeof converted.command === "string") {
+                return command;
+              } else {
+                return { ...(converted as lsp.CodeAction), data, command };
+              }
+            })
         );
       }
     }
