@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.1.18](https://github.com/yioneko/vtsls/compare/server-v0.1.17...server-v0.1.18) (2023-06-02)
+
+
+### Features
+
+* linked editing range ([#67](https://github.com/yioneko/vtsls/issues/67)) ([451943f](https://github.com/yioneko/vtsls/commit/451943f815fed2e0ba16045c405297c87db93cc9))
+
+
+### Bug Fixes
+
+* allow passing tsserver log path through initialization options ([dd50fe3](https://github.com/yioneko/vtsls/commit/dd50fe3230c644d2e470f6e157b537056c6f783e))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @vtsls/language-service bumped from workspace:0.1.17 to workspace:0.1.18
+
 ## [0.1.17](https://github.com/yioneko/vtsls/compare/server-v0.1.16...server-v0.1.17) (2023-04-17)
 
 

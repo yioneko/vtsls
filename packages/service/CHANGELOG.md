@@ -1,5 +1,26 @@
 # Changelog
 
+## [0.1.18](https://github.com/yioneko/vtsls/compare/service-v0.1.17...service-v0.1.18) (2023-06-02)
+
+
+### Features
+
+* linked editing range ([#67](https://github.com/yioneko/vtsls/issues/67)) ([451943f](https://github.com/yioneko/vtsls/commit/451943f815fed2e0ba16045c405297c87db93cc9))
+
+
+### Bug Fixes
+
+* **deps:** bump typescript to 5.1.0 dev ([0022acb](https://github.com/yioneko/vtsls/commit/0022acbe1cb53c44bae747c262193bd81cd00707))
+* **deps:** update dependency @vscode/l10n to ^0.0.14 ([5c53e98](https://github.com/yioneko/vtsls/commit/5c53e98002ae349be631224558505ded0d9dce4c))
+* **deps:** update dependency typescript to v5.1.0-dev.20230515 ([74f69fd](https://github.com/yioneko/vtsls/commit/74f69fdcda13fa3b7b86cd73ac4c57968b51335b))
+* **deps:** update dependency typescript to v5.1.3 ([3149515](https://github.com/yioneko/vtsls/commit/31495153915375c966832297e1b9b0a56715e9fe))
+* **deps:** update packages/service/vscode digest to 60fe2d5 ([#74](https://github.com/yioneko/vtsls/issues/74)) ([b18da2e](https://github.com/yioneko/vtsls/commit/b18da2e577301cdf49cd1de24b6f3f5460e84994))
+* **deps:** update packages/service/vscode digest to 9084e08 ([ba2d0a9](https://github.com/yioneko/vtsls/commit/ba2d0a900d410e9fad9b8c2b5a6533262e1045a5))
+* **deps:** update packages/service/vscode digest to fa8eefd ([#80](https://github.com/yioneko/vtsls/issues/80)) ([1ecf6bb](https://github.com/yioneko/vtsls/commit/1ecf6bb30aa3cddd9ff38903eb6b95c3ff9fc7e1))
+* hide unsupported move to file action ([bd040c5](https://github.com/yioneko/vtsls/commit/bd040c522b363a8f8dc4280f85e32bd49a101ced))
+* link rendering in hover content ([102c73a](https://github.com/yioneko/vtsls/commit/102c73a429100a9ed2f983c448a264ca57a17f16))
+* patch `javascript.goToProjectConfig` command ([8ac1796](https://github.com/yioneko/vtsls/commit/8ac17967b1bf627a1cbde538f1fe30ddd0bae2bc))
+
 ## [0.1.17](https://github.com/yioneko/vtsls/compare/service-v0.1.16...service-v0.1.17) (2023-04-17)
 
 
