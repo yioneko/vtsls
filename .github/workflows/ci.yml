@@ -19,7 +19,7 @@ jobs:
           submodules: "true"
       - uses: actions/setup-node@v3
         with:
-          node-version: 16
+          node-version: 18
       - uses: pnpm/action-setup@v2
         with:
           version: 8
@@ -31,7 +31,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        node: [16, 18]
+        node: [14, 16, 18]
         os: [ubuntu-latest]
         include:
           - os: macos-latest
@@ -45,10 +45,17 @@ jobs:
           submodules: "true"
       - uses: actions/setup-node@v3
         with:
-          node-version: ${{ matrix.node }}
+          node-version: 18
       - uses: pnpm/action-setup@v2
         with:
           version: 8
       - run: pnpm install
+      - uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node }}
+      - if: ${{ matrix.node == 14 }}
+        uses: pnpm/action-setup@v2
+        with:
+          version: 7
       - run: pnpm build
       - run: pnpm test
