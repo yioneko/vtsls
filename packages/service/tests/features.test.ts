@@ -421,4 +421,38 @@ function abc(a) {}`
       "
     `);
   });
+
+  it("provide linked editing range", async () => {
+    const jsxDocUri = URI.file(path.resolve(workspacePath, "linked.jsx")).toString();
+    await openDoc(service, jsxDocUri, "const a = <div></div>", "javascriptreact");
+    const response = await service.linkedEditingRange({
+      textDocument: { uri: jsxDocUri },
+      position: { line: 0, character: 11 },
+    });
+    expect(response).toMatchObject({
+      ranges: [
+        {
+          start: {
+            character: 11,
+            line: 0,
+          },
+          end: {
+            character: 14,
+            line: 0,
+          },
+        },
+        {
+          start: {
+            character: 17,
+            line: 0,
+          },
+          end: {
+            character: 20,
+            line: 0,
+          },
+        },
+      ],
+      wordPattern: "[a-zA-Z0-9:\\-\\._$]*",
+    });
+  });
 });

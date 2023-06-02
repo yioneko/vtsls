@@ -594,6 +594,16 @@ export function createTSLanguageService(initOptions: TSLanguageServiceOptions) {
         return { data: [] };
       }
     ),
+    linkedEditingRange: wrapRequestHandler(async (params: lsp.LinkedEditingRangeParams, token) => {
+      const doc = getOpenedDoc(params.textDocument.uri);
+      const { provider } = providers.$getHighestProvider(doc, providers.linkedEditingRange);
+      const result = await provider.provideLinkedEditingRanges(
+        doc,
+        types.Position.of(params.position),
+        token
+      );
+      return result && converter.convertLinkedEditingRanges(result);
+    }),
   };
 
   serviceInstance = tsLanguageService;

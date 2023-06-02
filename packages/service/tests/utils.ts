@@ -38,12 +38,17 @@ export async function createTestService(workspacePath: string) {
   return service;
 }
 
-export async function openDoc(service: TSLanguageService, uri: string, text?: string) {
+export async function openDoc(
+  service: TSLanguageService,
+  uri: string,
+  text?: string,
+  languageId = "typescript"
+) {
   const resolvedText = text ?? (await readFsUriContent(uri));
   service.openTextDocument({
     textDocument: {
       uri,
-      languageId: "typescript",
+      languageId,
       version: 0,
       text: resolvedText,
     },

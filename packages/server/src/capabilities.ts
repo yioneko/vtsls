@@ -65,7 +65,7 @@ export function getTsLspDefaultCapabilities(): ServerCapabilities {
       commands,
     },
     callHierarchyProvider: true,
-    linkedEditingRangeProvider: false,
+    linkedEditingRangeProvider: true,
     semanticTokensProvider: {
       legend: {
         tokenTypes: semanticTokenTypes,
