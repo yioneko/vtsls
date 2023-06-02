@@ -1,5 +1,5 @@
 {
-  "packages/server": "0.1.17",
-  "packages/service": "0.1.17",
+  "packages/server": "0.1.18",
+  "packages/service": "0.1.18",
   "packages/vscode-fuzzy": "0.0.1"
 }
