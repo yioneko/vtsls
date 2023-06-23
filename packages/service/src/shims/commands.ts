@@ -48,6 +48,13 @@ export class CommandsShimService extends Disposable {
   }
 
   async executeCommand<T, A extends any[]>(id: string, ...args: A): Promise<T | undefined> {
+    if (id.startsWith("editor.")) {
+      this.delegate.logMessage(
+        lsp.MessageType.Error,
+        `Command ${id} is an client side command and should not be sent to server for execution`
+      );
+      return;
+    }
     const command = this._commands.get(id);
     if (!command) {
       this.delegate.logMessage(lsp.MessageType.Error, `Command ${id} not found`);

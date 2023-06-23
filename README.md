@@ -73,6 +73,12 @@ Same as VSCode. The list below may be outdated.
 - `refactor.rewrite.arrow.braces`
 - `refactor.rewrite.property.generateAccessors`
 
+Inline refactor action can carry an additional `editor.action.rename` command for immediate renaming of new extracted symbol. The command should be executed on the client side. Command arguments:
+
+```
+[uri: DocumentUri, position: Position][]
+```
+
 ### Update paths on rename
 
 Require client to send [`workspace/didRenameFiles`](https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#workspace_didRenameFiles) notification on rename of file/folder.
