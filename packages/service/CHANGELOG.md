@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.1.19](https://github.com/yioneko/vtsls/compare/service-v0.1.18...service-v0.1.19) (2023-06-24)
+
+
+### Bug Fixes
+
+* **deps:** update packages/service/vscode digest to 7ff66b3 ([4f3e0ce](https://github.com/yioneko/vtsls/commit/4f3e0cea6fc32d34cdd73fbe02685081eebd64b9))
+* drop the hacky replacement of code action command ([#86](https://github.com/yioneko/vtsls/issues/86)) ([8b1cff9](https://github.com/yioneko/vtsls/commit/8b1cff978f280cd07570c38cb832c0ad31b59ad1))
+* less strict checking of create file capability ([a870ab7](https://github.com/yioneko/vtsls/commit/a870ab7508ec18aaff9b7b9a7f8442fa2359b067))
+
 ## [0.1.18](https://github.com/yioneko/vtsls/compare/service-v0.1.17...service-v0.1.18) (2023-06-02)
 
 
