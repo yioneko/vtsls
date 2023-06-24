@@ -1,5 +1,4 @@
 import { CodeActionKind } from "vscode-languageserver-protocol";
-import { CodeActionCache } from "./codeAction";
 import { CompletionCache } from "./completion";
 import { tsCommands } from "./pkgJson";
 
@@ -44,7 +43,7 @@ export const semanticTokenModifiers = [
   "local",
 ];
 
-export const commands = [...tsCommands, CodeActionCache.id, CompletionCache.id];
+export const commands = [...tsCommands, CompletionCache.id];
 
 export const onTypeFormatFirstTriggerCharacter = ";";
 export const onTypeFormatMoreTriggerCharacter = ["}", "\n"];

@@ -23,32 +23,38 @@ function convertOrFalsy<T, R>(val: T | undefined | null, cvtFn: (v: T) => R): R 
   return val !== undefined && val !== null ? cvtFn(val) : undefined;
 }
 
-export class TSLspConverter {
-  constructor(private readonly clientCapabilities: lsp.ClientCapabilities) {
-    // TODO: method overload doesn't support bind shortcut
-    this.convertCodeAction = this.convertCodeAction.bind(this);
-  }
-
+class LspInvariantConverter {
   convertTextEdit = (edit: vscode.TextEdit): lsp.TextEdit => {
     return {
-      range: this.convertRange(edit.range),
+      range: this.convertRangeToLsp(edit.range),
       newText: edit.newText,
     };
   };
 
-  convertPosition = (pos: vscode.Position): lsp.Position => {
+  convertPositionToLsp = (pos: vscode.Position): lsp.Position => {
     return {
       line: pos.line,
       character: pos.character,
     };
   };
 
-  convertRange = (range: vscode.Range): lsp.Range => {
+  convertRangeToLsp = (range: vscode.Range): lsp.Range => {
     return {
       start: range.start,
       end: range.end,
     };
   };
+
+  convertPositionFromLsp = (position: lsp.Position): vscode.Position => types.Position.of(position);
+  convertRangeFromLsp = (range: lsp.Range): vscode.Range => types.Range.of(range);
+}
+
+export class TSLspConverter extends LspInvariantConverter {
+  constructor(private readonly clientCapabilities: lsp.ClientCapabilities) {
+    super();
+    // TODO: method overload doesn't support bind shortcut
+    this.convertCodeAction = this.convertCodeAction.bind(this);
+  }
 
   convertWorkspaceEdit = (edit: vscode.WorkspaceEdit): lsp.WorkspaceEdit => {
     const resouceOpKinds =
@@ -243,21 +249,21 @@ export class TSLspConverter {
     if (item.range) {
       if (lsp.Range.is(item.range)) {
         textEdit = {
-          range: this.convertRange(item.range),
+          range: this.convertRangeToLsp(item.range),
           newText: insertText ?? label,
         };
       } else if (
         this.clientCapabilities.textDocument?.completion?.completionItem?.insertReplaceSupport
       ) {
         textEdit = {
-          insert: this.convertRange(item.range.inserting),
-          replace: this.convertRange(item.range.replacing),
+          insert: this.convertRangeToLsp(item.range.inserting),
+          replace: this.convertRangeToLsp(item.range.replacing),
           newText: insertText ?? label,
         };
       } else {
         textEdit = {
           // TODO:: use item.range.replacing?
-          range: this.convertRange(item.range.inserting),
+          range: this.convertRangeToLsp(item.range.inserting),
           newText: insertText ?? label,
         };
       }
@@ -293,10 +299,10 @@ export class TSLspConverter {
 
   convertLocationLink = (location: vscode.LocationLink): lsp.LocationLink => {
     return {
-      originSelectionRange: convertOrFalsy(location.originSelectionRange, this.convertRange),
+      originSelectionRange: convertOrFalsy(location.originSelectionRange, this.convertRangeToLsp),
       targetUri: location.targetUri.toString(),
-      targetRange: this.convertRange(location.targetRange),
-      targetSelectionRange: this.convertRange(
+      targetRange: this.convertRangeToLsp(location.targetRange),
+      targetSelectionRange: this.convertRangeToLsp(
         location.targetSelectionRange || location.targetRange
       ),
     };
@@ -305,14 +311,14 @@ export class TSLspConverter {
   convertLocationLinkToLocation = (location: vscode.LocationLink): lsp.Location => {
     return {
       uri: location.targetUri.toString(),
-      range: this.convertRange(location.targetRange),
+      range: this.convertRangeToLsp(location.targetRange),
     };
   };
 
   convertLocation = (location: vscode.Location): lsp.Location => {
     return {
       uri: location.uri.toString(),
-      range: this.convertRange(location.range),
+      range: this.convertRangeToLsp(location.range),
     };
   };
 
@@ -356,7 +362,7 @@ export class TSLspConverter {
 
   convertDocumentLink = (link: vscode.DocumentLink, data?: any): lsp.DocumentLink => {
     return {
-      range: this.convertRange(link.range),
+      range: this.convertRangeToLsp(link.range),
       target: link.target?.toString(),
       tooltip: link.tooltip,
       data,
@@ -392,7 +398,7 @@ export class TSLspConverter {
         : diagnostic.code;
 
     return {
-      range: this.convertRange(diagnostic.range),
+      range: this.convertRangeToLsp(diagnostic.range),
       message: diagnostic.message,
       code,
       codeDescription: target
@@ -451,7 +457,7 @@ export class TSLspConverter {
     }
     return {
       contents: mergedString.value,
-      range: hover.range ? this.convertRange(hover.range) : undefined,
+      range: hover.range ? this.convertRangeToLsp(hover.range) : undefined,
     };
   };
 
@@ -463,8 +469,8 @@ export class TSLspConverter {
         name: symbol.name,
         detail: symbol.detail,
         kind: (symbol.kind + 1) as lsp.SymbolKind,
-        range: this.convertRange(symbol.range),
-        selectionRange: this.convertRange(symbol.selectionRange),
+        range: this.convertRangeToLsp(symbol.range),
+        selectionRange: this.convertRangeToLsp(symbol.selectionRange),
         tags: symbol.tags as lsp.SymbolTag[],
         // deprecated: symbol.tags?.includes(types.SymbolTag.Deprecated) ?? false,
         children:
@@ -553,8 +559,8 @@ export class TSLspConverter {
       uri: item.uri.toString(),
       kind: (item.kind + 1) as lsp.SymbolKind,
       name: item.name,
-      range: this.convertRange(item.range),
-      selectionRange: this.convertRange(item.selectionRange),
+      range: this.convertRangeToLsp(item.range),
+      selectionRange: this.convertRangeToLsp(item.selectionRange),
       detail: item.detail,
       tags: item.tags as any,
       data,
@@ -574,7 +580,7 @@ export class TSLspConverter {
 
   convertInlayHint = (hint: vscode.InlayHint): lsp.InlayHint => {
     return {
-      position: this.convertPosition(hint.position),
+      position: this.convertPositionToLsp(hint.position),
       label:
         typeof hint.label === "string"
           ? hint.label
@@ -595,14 +601,14 @@ export class TSLspConverter {
   convertIncomingCall = (item: vscode.CallHierarchyIncomingCall): lsp.CallHierarchyIncomingCall => {
     return {
       from: this.convertCallHierarcgyItemToLsp(item.from),
-      fromRanges: item.fromRanges.map(this.convertRange),
+      fromRanges: item.fromRanges.map(this.convertRangeToLsp),
     };
   };
 
   convertOutgoingCall = (item: vscode.CallHierarchyOutgoingCall): lsp.CallHierarchyOutgoingCall => {
     return {
       to: this.convertCallHierarcgyItemToLsp(item.to),
-      fromRanges: item.fromRanges.map(this.convertRange),
+      fromRanges: item.fromRanges.map(this.convertRangeToLsp),
     };
   };
 
@@ -630,14 +636,14 @@ export class TSLspConverter {
 
   convertSelectionRange = (range: vscode.SelectionRange): lsp.SelectionRange => {
     return {
-      range: this.convertRange(range.range),
+      range: this.convertRangeToLsp(range.range),
       parent: convertOrFalsy(range.parent, this.convertSelectionRange),
     };
   };
 
   convertCodeLens = (lens: vscode.CodeLens, data?: any): lsp.CodeLens => {
     return {
-      range: this.convertRange(lens.range),
+      range: this.convertRangeToLsp(lens.range),
       command: lens.command,
       data,
     };
@@ -648,6 +654,9 @@ export class TSLspConverter {
   };
 
   convertLinkedEditingRanges = (data: vscode.LinkedEditingRanges): lsp.LinkedEditingRanges => {
-    return { ranges: data.ranges.map(this.convertRange), wordPattern: data.wordPattern?.source };
+    return {
+      ranges: data.ranges.map(this.convertRangeToLsp),
+      wordPattern: data.wordPattern?.source,
+    };
   };
 }

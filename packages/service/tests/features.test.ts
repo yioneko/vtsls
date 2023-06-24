@@ -2,25 +2,21 @@ import * as path from "node:path";
 import { afterAll, assert, describe, expect, it } from "vitest";
 import * as lsp from "vscode-languageserver-protocol";
 import { URI } from "vscode-uri";
-import { applyEditsToText, createTestService, openDoc } from "./utils";
+import { applyEditsToText, createTestService } from "./utils";
 
 describe("language features", async () => {
   const workspacePath = path.join(__dirname, "workspace");
-  const service = await createTestService(workspacePath);
+  const { service, openDoc } = await createTestService(workspacePath);
 
   afterAll(() => {
     service.dispose();
   });
 
-  const testDocUri = URI.file(path.resolve(workspacePath, "index.ts")).toString();
-  const { change: setDocContent } = await openDoc(service, testDocUri);
-  const testDocParams = { textDocument: { uri: testDocUri } };
-
   it("provide selection ranges", async () => {
-    setDocContent("a.b");
+    const { uri } = await openDoc("index.ts", { text: "a.b" });
     const response = await service.selectionRanges({
       positions: [{ line: 0, character: 2 }],
-      ...testDocParams,
+      textDocument: { uri },
     });
     assert(response);
     expect(response[0]).toMatchObject({
@@ -30,9 +26,9 @@ describe("language features", async () => {
   });
 
   it("provide basic completion", async () => {
-    setDocContent("func");
+    const { uri } = await openDoc("index.ts", { text: "func" });
     const response = await service.completion({
-      ...testDocParams,
+      textDocument: { uri },
       position: { line: 0, character: 4 },
       context: {
         triggerKind: lsp.CompletionTriggerKind.Invoked,
@@ -46,12 +42,10 @@ describe("language features", async () => {
 
   it("provide auto-import completion", async () => {
     // NOTE: the file need to be on disk
-    const newDocUri = URI.file(path.resolve(workspacePath, "foo.ts")).toString();
-    await openDoc(service, newDocUri, "export function foo() {}");
-
-    setDocContent("foo");
+    await openDoc("foo.ts", { text: "export function foo() {}" });
+    const { uri } = await openDoc("index.ts", { text: "foo" });
     const { items } = await service.completion({
-      ...testDocParams,
+      textDocument: { uri },
       position: { line: 0, character: 2 },
     });
 
@@ -73,7 +67,7 @@ describe("language features", async () => {
     });
 
     expect(edit.changes).toMatchObject({
-      [testDocUri]: [
+      [uri]: [
         {
           newText: expect.stringContaining('import { foo } from "./foo";'),
           range: {
@@ -92,13 +86,13 @@ describe("language features", async () => {
   });
 
   it("provide jsdoc compleion", async () => {
-    setDocContent(
-      `/***/
-function abc(a) {}`
-    );
+    const { uri } = await openDoc("index.ts", {
+      text: `/***/
+function abc(a) {}`,
+    });
 
     const response = await service.completion({
-      ...testDocParams,
+      textDocument: { uri },
       position: { line: 0, character: 3 },
       context: {
         triggerKind: lsp.CompletionTriggerKind.TriggerCharacter,
@@ -115,8 +109,10 @@ function abc(a) {}`
   });
 
   it("provide references code lenses", async () => {
-    setDocContent("export function a() {}\nfunction b() { a() }");
-    const lenses = await service.codeLens(testDocParams);
+    const { uri } = await openDoc("index.ts", {
+      text: "export function a() {}\nfunction b() { a() }",
+    });
+    const lenses = await service.codeLens({ textDocument: { uri } });
     assert(lenses);
 
     const lens = lenses[0];
@@ -136,7 +132,7 @@ function abc(a) {}`
     const resolved = await service.codeLensResolve(lens);
     expect(resolved.command).toMatchObject({
       arguments: [
-        testDocUri,
+        uri,
         {
           character: 16,
           line: 0,
@@ -153,7 +149,7 @@ function abc(a) {}`
                 line: 1,
               },
             },
-            uri: testDocUri,
+            uri,
           },
         ],
       ],
@@ -162,8 +158,10 @@ function abc(a) {}`
     });
 
     it("provide implementations code lenses", async () => {
-      setDocContent("export interface A {}\nclass B implements A {}");
-      const lenses = await service.codeLens(testDocParams);
+      const { uri } = await openDoc("index.ts", {
+        text: "export interface A {}\nclass B implements A {}",
+      });
+      const lenses = await service.codeLens({ textDocument: { uri } });
       assert(lenses);
 
       const lens = lenses[0];
@@ -183,7 +181,7 @@ function abc(a) {}`
       const resolved = await service.codeLensResolve(lens);
       expect(resolved.command).toMatchObject({
         arguments: [
-          testDocUri,
+          uri,
           {
             character: 17,
             line: 0,
@@ -200,7 +198,7 @@ function abc(a) {}`
                   line: 1,
                 },
               },
-              uri: testDocUri,
+              uri: uri,
             },
           ],
         ],
@@ -211,8 +209,10 @@ function abc(a) {}`
   });
 
   it("provide document symbols", async () => {
-    setDocContent("function a() { function b() {} }");
-    const response = await service.documentSymbol(testDocParams);
+    const { uri } = await openDoc("index.ts", {
+      text: "function a() { function b() {} }",
+    });
+    const response = await service.documentSymbol({ textDocument: { uri } });
     assert(response);
     expect(response[0]).toMatchObject({
       detail: "",
@@ -269,9 +269,11 @@ function abc(a) {}`
   });
 
   it("provide defintion", async () => {
-    setDocContent("function a() {} a()");
+    const { uri } = await openDoc("index.ts", {
+      text: "function a() {} a()",
+    });
     const response = await service.definition({
-      ...testDocParams,
+      textDocument: { uri },
       position: {
         line: 0,
         character: 16,
@@ -279,7 +281,7 @@ function abc(a) {}`
     });
     assert(response);
     expect(response[0]).toMatchObject({
-      targetUri: testDocUri,
+      targetUri: uri,
       originSelectionRange: {
         end: {
           character: 17,
@@ -314,6 +316,7 @@ function abc(a) {}`
   });
 
   it("provide quickfix", async () => {
+    const { uri, changeContent } = await openDoc("index.ts");
     const diagnostics = await new Promise<lsp.Diagnostic[]>((resolve) => {
       const disposeDiagHandler = service.onDiagnostics(async (p) => {
         if (p.diagnostics.length > 0) {
@@ -321,7 +324,7 @@ function abc(a) {}`
           resolve(p.diagnostics);
         }
       });
-      setDocContent("let abc;");
+      changeContent("let abc;");
     });
     expect(diagnostics[0]).toMatchObject({
       code: 7043,
@@ -332,13 +335,18 @@ function abc(a) {}`
     const codeActions = await service.codeAction({
       context: { diagnostics, only: [lsp.CodeActionKind.QuickFix] },
       range: { start: { line: 0, character: 4 }, end: { line: 0, character: 5 } },
-      ...testDocParams,
+      textDocument: { uri },
     });
     assert(codeActions);
-    expect(codeActions[0]).toMatchObject({
+    const action = await service.codeActionResolve(codeActions[0] as lsp.CodeAction);
+    expect(action).toMatchObject({
+      command: {
+        command: "_typescript.applyCodeActionCommand",
+        title: "",
+      },
       edit: {
         changes: {
-          [testDocUri]: [
+          [uri]: [
             {
               newText: ": any",
               range: {
@@ -359,17 +367,51 @@ function abc(a) {}`
     });
   });
 
-  const formatDocUri = URI.file(path.resolve(workspacePath, "unformatted.ts")).toString();
-  const { doc: formatDoc } = await openDoc(service, formatDocUri);
-  const formatDocParams = { textDocument: { uri: formatDocUri } };
+  it("provide refactor", async () => {
+    const { uri } = await openDoc("refactor.ts", { text: "const a = 1 + 2;" });
+    const codeActions = await service.codeAction({
+      context: {
+        diagnostics: [],
+        only: [lsp.CodeActionKind.Refactor],
+        triggerKind: lsp.CodeActionTriggerKind.Invoked,
+      },
+      range: { start: { line: 0, character: 10 }, end: { line: 0, character: 15 } },
+      textDocument: { uri },
+    });
+    assert(codeActions);
+    const action = await service.codeActionResolve(codeActions[1] as lsp.CodeAction);
+    expect(action).toMatchObject({
+      command: {
+        arguments: [
+          [
+            uri,
+            {
+              character: 10,
+              line: 1,
+            },
+          ],
+        ],
+        command: "editor.action.rename",
+        title: "",
+      },
+      edit: {
+        documentChanges: expect.any(Array),
+      },
+      kind: "refactor.extract.constant",
+      title: "Extract to constant in enclosing scope",
+    });
+  });
 
+  // FIXME: Why is this needed before "it" statements?
+  await openDoc("unformatted.ts");
   it("provide document formatting", async () => {
+    const { uri, doc } = await openDoc("unformatted.ts");
     const edits = await service.documentFormatting({
-      ...formatDocParams,
+      textDocument: { uri },
       options: { tabSize: 6, insertSpaces: true },
     });
     assert(edits);
-    expect(applyEditsToText(formatDoc.getText(), edits)).toMatchInlineSnapshot(`
+    expect(applyEditsToText(doc.getText(), edits)).toMatchInlineSnapshot(`
       "function foo() {
             bar({
                   a,
@@ -383,13 +425,14 @@ function abc(a) {}`
   });
 
   it("provide document range formatting", async () => {
+    const { uri, doc } = await openDoc("unformatted.ts");
     const edits = await service.documentRangeFormatting({
-      ...formatDocParams,
+      textDocument: { uri },
       range: { start: { line: 1, character: 0 }, end: { line: 4, character: 0 } },
       options: { tabSize: 2, insertSpaces: false },
     });
     assert(edits);
-    expect(applyEditsToText(formatDoc.getText(), edits)).toMatchInlineSnapshot(`
+    expect(applyEditsToText(doc.getText(), edits)).toMatchInlineSnapshot(`
       "function foo() {
       	bar({
       		a,
@@ -403,14 +446,15 @@ function abc(a) {}`
   });
 
   it("provide document on type formatting", async () => {
+    const { uri, doc } = await openDoc("unformatted.ts");
     const edits = await service.documentOnTypeFormatting({
-      ...formatDocParams,
+      textDocument: { uri },
       position: { line: 5, character: 6 },
       ch: ";",
       options: { tabSize: 4, insertSpaces: true },
     });
     assert(edits);
-    expect(applyEditsToText(formatDoc.getText(), edits)).toMatchInlineSnapshot(`
+    expect(applyEditsToText(doc.getText(), edits)).toMatchInlineSnapshot(`
       "function foo() {
       bar({
          a,
@@ -423,8 +467,10 @@ function abc(a) {}`
   });
 
   it("provide linked editing range", async () => {
-    const jsxDocUri = URI.file(path.resolve(workspacePath, "linked.jsx")).toString();
-    await openDoc(service, jsxDocUri, "const a = <div></div>", "javascriptreact");
+    const { uri: jsxDocUri } = await openDoc("linked.jsx", {
+      text: "const a = <div></div>",
+      languageId: "javascriptreact",
+    });
     const response = await service.linkedEditingRange({
       textDocument: { uri: jsxDocUri },
       position: { line: 0, character: 11 },
@@ -453,6 +499,95 @@ function abc(a) {}`
         },
       ],
       wordPattern: "[a-zA-Z0-9:\\-\\._$]*",
+    });
+  });
+
+  it("commands - file references", async () => {
+    const { uri } = await openDoc("foo.ts");
+    const response = (await service.executeCommand({
+      command: "typescript.findAllFileReferences",
+      arguments: [uri],
+    })) as any[];
+    expect(response[0]).toMatchObject({
+      range: {
+        end: {
+          character: 14,
+          line: 0,
+        },
+        start: {
+          character: 7,
+          line: 0,
+        },
+      },
+      uri: URI.file(path.resolve(workspacePath, "bar.ts")).toString(),
+    });
+  });
+
+  it("commands - source definition", async () => {
+    const { uri } = await openDoc("index.ts", { text: "const b = 1;\nconst a = b;" });
+    const response = (await service.executeCommand({
+      command: "typescript.goToSourceDefinition",
+      arguments: [uri, { line: 1, character: 11 }],
+    })) as any[];
+    expect(response[0]).toMatchObject({
+      range: {
+        end: {
+          character: 7,
+          line: 0,
+        },
+        start: {
+          character: 6,
+          line: 0,
+        },
+      },
+      uri,
+    });
+  });
+
+  it("commands - organize imports", async () => {
+    const { uri } = await openDoc("foo.ts", { text: "import 'b';\nimport 'a';" });
+    const edit = await new Promise<lsp.WorkspaceEdit>((resolve) => {
+      const disposeHandler = service.onApplyWorkspaceEdit(async (p) => {
+        disposeHandler.dispose();
+        resolve(p.edit);
+        return { applied: true };
+      });
+
+      void service.executeCommand({
+        command: "typescript.organizeImports",
+        arguments: [URI.parse(uri).fsPath],
+      });
+    });
+    expect(edit.changes).toMatchObject({
+      [uri]: [
+        {
+          // On Macos, \r is always added regardless of passed options
+          newText: expect.stringMatching(/import 'a';\r?\nimport 'b';\r?\n/),
+          range: {
+            end: {
+              character: 0,
+              line: 1,
+            },
+            start: {
+              character: 0,
+              line: 0,
+            },
+          },
+        },
+        {
+          newText: "",
+          range: {
+            end: {
+              character: 11,
+              line: 1,
+            },
+            start: {
+              character: 0,
+              line: 1,
+            },
+          },
+        },
+      ],
     });
   });
 });

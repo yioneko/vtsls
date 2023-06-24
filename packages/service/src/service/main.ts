@@ -1,6 +1,7 @@
 import type * as vscode from "vscode";
 import * as lsp from "vscode-languageserver-protocol";
 import { URI } from "vscode-uri";
+import { initializeShareMod } from "../share";
 import { initializeShimServices } from "../shims";
 import * as types from "../shims/types";
 import { Barrier } from "../utils/barrier";
@@ -61,11 +62,12 @@ export function createTSLanguageService(initOptions: TSLanguageServiceOptions) {
   const codeActionFeature = toDispose.add(
     new TSCodeActionFeature(
       providers.$withRegistry(providers.codeActions),
-      shims.commandsService,
       converter,
       initOptions.clientCapabilities
     )
   );
+
+  const { commandsConverter } = initializeShareMod(converter, shims.workspaceService);
 
   function wrapRequestHandler<P, R>(
     handler: (params: P, token: lsp.CancellationToken) => Promise<R>
@@ -159,14 +161,14 @@ export function createTSLanguageService(initOptions: TSLanguageServiceOptions) {
       const { provider } = providers.$getHighestProvider(doc, providers.documentHighlight);
       const result = await provider.provideDocumentHighlights(
         doc,
-        types.Position.of(params.position),
+        converter.convertPositionFromLsp(params.position),
         token
       );
       if (!Array.isArray(result)) {
         return;
       }
       return result.map((r) => ({
-        range: converter.convertRange(r.range),
+        range: converter.convertRangeToLsp(r.range),
         kind: r.kind as lsp.DocumentHighlightKind,
       }));
     }),
@@ -183,7 +185,7 @@ export function createTSLanguageService(initOptions: TSLanguageServiceOptions) {
       }
       const result = await provider.provideSignatureHelp(
         doc,
-        types.Position.of(params.position),
+        converter.convertPositionFromLsp(params.position),
         token,
         ctx as vscode.SignatureHelpContext
       );
@@ -217,7 +219,7 @@ export function createTSLanguageService(initOptions: TSLanguageServiceOptions) {
 
       const result = await provider.provideDefinition(
         doc,
-        types.Position.of(params.position),
+        converter.convertPositionFromLsp(params.position),
         token
       );
       if (result) {
@@ -230,7 +232,7 @@ export function createTSLanguageService(initOptions: TSLanguageServiceOptions) {
 
       const result = await provider.provideReferences(
         doc,
-        types.Position.of(params.position),
+        converter.convertPositionFromLsp(params.position),
         params.context,
         token
       );
@@ -241,7 +243,11 @@ export function createTSLanguageService(initOptions: TSLanguageServiceOptions) {
     hover: wrapRequestHandler(async (params: lsp.HoverParams, token) => {
       const doc = getOpenedDoc(params.textDocument.uri);
       const { provider } = providers.$getHighestProvider(doc, providers.hover);
-      const result = await provider.provideHover(doc, types.Position.of(params.position), token);
+      const result = await provider.provideHover(
+        doc,
+        converter.convertPositionFromLsp(params.position),
+        token
+      );
       if (result) {
         return converter.convertHover(result);
       }
@@ -272,36 +278,26 @@ export function createTSLanguageService(initOptions: TSLanguageServiceOptions) {
       codeActionFeature.codeActionResolve(item, token)
     ),
     executeCommand: wrapRequestHandler(async (params: lsp.ExecuteCommandParams) => {
-      const args = params.arguments || [];
+      let args = params.arguments || [];
 
-      switch (params.command) {
-        case "typescript.goToSourceDefinition": {
-          const uri = args[0] as string;
-          const doc = getOpenedDoc(uri);
-          const locations: vscode.Location[] =
-            (await shims.commandsService.executeCommand(
-              params.command,
-              doc,
-              types.Position.of(args[1])
-            )) || [];
-          return locations.map(converter.convertLocation);
+      const commandId = params.command;
+      if (commandId in commandsConverter) {
+        const cvt = commandsConverter[commandId as keyof typeof commandsConverter];
+        if ("fromArgs" in cvt) {
+          args = cvt.fromArgs(...(args as [any, any, any]));
         }
-        case "typescript.findAllFileReferences": {
-          const uri = args[0];
-          const locations: vscode.Location[] =
-            (await shims.commandsService.executeCommand(params.command, URI.parse(uri))) || [];
-          return locations.map(converter.convertLocation);
-        }
-        default:
-          return await shims.commandsService.executeCommand(params.command, ...args);
+        const result = await shims.commandsService.executeCommand(params.command, ...args);
+        return "toRes" in cvt ? cvt.toRes(result as any) : result;
       }
+
+      return await shims.commandsService.executeCommand(params.command, ...args);
     }),
     implementation: wrapRequestHandler(async (params: lsp.ImplementationParams, token) => {
       const doc = getOpenedDoc(params.textDocument.uri);
       const { provider } = providers.$getHighestProvider(doc, providers.implementation);
       const result = await provider.provideImplementation(
         doc,
-        types.Position.of(params.position),
+        converter.convertPositionFromLsp(params.position),
         token
       );
       if (result) {
@@ -313,7 +309,7 @@ export function createTSLanguageService(initOptions: TSLanguageServiceOptions) {
       const { provider } = providers.$getHighestProvider(doc, providers.typeDefinition);
       const result = await provider.provideTypeDefinition(
         doc,
-        types.Position.of(params.position),
+        converter.convertPositionFromLsp(params.position),
         token
       );
       if (result) {
@@ -346,7 +342,7 @@ export function createTSLanguageService(initOptions: TSLanguageServiceOptions) {
         );
         const result = await provider.provideDocumentRangeFormattingEdits(
           doc,
-          types.Range.of(params.range),
+          converter.convertRangeFromLsp(params.range),
           params.options as vscode.FormattingOptions,
           token
         );
@@ -362,7 +358,7 @@ export function createTSLanguageService(initOptions: TSLanguageServiceOptions) {
 
         const result = await provider.provideOnTypeFormattingEdits(
           doc,
-          types.Position.of(params.position),
+          converter.convertPositionFromLsp(params.position),
           params.ch,
           params.options as vscode.FormattingOptions,
           token
@@ -382,13 +378,17 @@ export function createTSLanguageService(initOptions: TSLanguageServiceOptions) {
         );
       }
 
-      const result = await provider.prepareRename(doc, types.Position.of(params.position), token);
+      const result = await provider.prepareRename(
+        doc,
+        converter.convertPositionFromLsp(params.position),
+        token
+      );
       if (result) {
         if (types.Range.isRange(result)) {
-          return converter.convertRange(result);
+          return converter.convertRangeToLsp(result);
         } else {
           return {
-            range: converter.convertRange(result.range),
+            range: converter.convertRangeToLsp(result.range),
             placeholder: result.placeholder,
           };
         }
@@ -399,7 +399,7 @@ export function createTSLanguageService(initOptions: TSLanguageServiceOptions) {
       const { provider } = providers.$getHighestProvider(doc, providers.rename);
       const result = await provider.provideRenameEdits(
         doc,
-        types.Position.of(params.position),
+        converter.convertPositionFromLsp(params.position),
         params.newName,
         token
       );
@@ -420,7 +420,7 @@ export function createTSLanguageService(initOptions: TSLanguageServiceOptions) {
       const { provider } = providers.$getHighestProvider(doc, providers.selectionRange);
       const result = await provider.provideSelectionRanges(
         doc,
-        params.positions.map((p) => types.Position.of(p)),
+        params.positions.map((p) => converter.convertPositionFromLsp(p)),
         token
       );
       if (result) {
@@ -433,7 +433,7 @@ export function createTSLanguageService(initOptions: TSLanguageServiceOptions) {
         const { id, provider } = providers.$getHighestProvider(doc, providers.callHierarchy);
         const result = await provider.prepareCallHierarchy(
           doc,
-          types.Position.of(params.position),
+          converter.convertPositionFromLsp(params.position),
           token
         );
         if (Array.isArray(result)) {
@@ -490,7 +490,11 @@ export function createTSLanguageService(initOptions: TSLanguageServiceOptions) {
     inlayHint: wrapRequestHandler(async (params: lsp.InlayHintParams, token) => {
       const doc = getOpenedDoc(params.textDocument.uri);
       const { provider } = providers.$getHighestProvider(doc, providers.inlayHints);
-      const result = await provider.provideInlayHints(doc, types.Range.of(params.range), token);
+      const result = await provider.provideInlayHints(
+        doc,
+        converter.convertRangeFromLsp(params.range),
+        token
+      );
       return result ? result.map(converter.convertInlayHint) : null;
     }),
     codeLens: wrapRequestHandler(async (params: lsp.CodeLensParams, token) => {
@@ -543,23 +547,13 @@ export function createTSLanguageService(initOptions: TSLanguageServiceOptions) {
       const refLens = new ReferencesCodeLens(
         URI.parse(item.data.document),
         item.data.file,
-        types.Range.of(item.range)
+        converter.convertRangeFromLsp(item.range)
       );
       const result = await provider.resolveCodeLens(refLens, token);
-      if (result) {
-        if (result.command && result.command.command === "editor.action.showReferences") {
-          // NOTE: from getCommand in languageFeatures/codeLens/implementationsCodeLens.ts
-          const [document, codeLensStart, locations] = result.command.arguments as [
-            URI,
-            vscode.Position,
-            vscode.Location[]
-          ];
-          result.command.arguments = [
-            document.toString(),
-            converter.convertPosition(codeLensStart),
-            locations.map(converter.convertLocation),
-          ];
-        }
+      if (result?.command?.command === "editor.action.showReferences") {
+        result.command.arguments = commandsConverter[result.command.command].toArgs(
+          ...(result.command.arguments as [URI, vscode.Position, vscode.Location[]])
+        );
 
         const converted = converter.convertCodeLens(result, { isResolved: true });
         return converted;
@@ -585,7 +579,7 @@ export function createTSLanguageService(initOptions: TSLanguageServiceOptions) {
         );
         const result = await provider.provideDocumentRangeSemanticTokens(
           doc,
-          types.Range.of(params.range),
+          converter.convertRangeFromLsp(params.range),
           token
         );
         if (result) {
@@ -599,7 +593,7 @@ export function createTSLanguageService(initOptions: TSLanguageServiceOptions) {
       const { provider } = providers.$getHighestProvider(doc, providers.linkedEditingRange);
       const result = await provider.provideLinkedEditingRanges(
         doc,
-        types.Position.of(params.position),
+        converter.convertPositionFromLsp(params.position),
         token
       );
       return result && converter.convertLinkedEditingRanges(result);

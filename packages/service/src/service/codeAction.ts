@@ -1,6 +1,5 @@
 import * as vscode from "vscode";
 import * as lsp from "vscode-languageserver-protocol";
-import { CommandsShimService } from "../shims/commands";
 import { CodeActionRegistryHandle } from "../shims/languageFeatures";
 import * as types from "../shims/types";
 import { RestrictedCache } from "../utils/cache";
@@ -15,35 +14,6 @@ interface CodeActionData {
 }
 
 export class CodeActionCache extends Disposable {
-  static readonly id = "_vtsls.codeActionCacheCommand";
-
-  constructor(commands: CommandsShimService) {
-    super();
-
-    this._register(
-      commands.registerCommand(CodeActionCache.id, (...args) => {
-        const data = this.resolveData(args[0]);
-        if (!data) {
-          throw new lsp.ResponseError(
-            lsp.ErrorCodes.InvalidParams,
-            "code action item data missing"
-          );
-        }
-        const { cacheId, index } = data;
-        const cachedItem = this.codeActionCache.get(cacheId)?.[index];
-        if (cachedItem?.command) {
-          const command =
-            typeof cachedItem.command === "string"
-              ? (cachedItem as lsp.Command)
-              : cachedItem.command;
-          if (command && command.command !== CodeActionCache.id) {
-            return commands.executeCommand(command.command, ...(command.arguments || []));
-          }
-        }
-      })
-    );
-  }
-
   private readonly codeActionCache = this._register(
     new RestrictedCache<(vscode.Command | vscode.CodeAction)[]>(12)
   );
@@ -52,7 +22,7 @@ export class CodeActionCache extends Disposable {
     const cacheId = this.codeActionCache.store(items);
     return items.map((_, index) => {
       const data = this.createData(providerId, index, cacheId);
-      return { data, command: { command: CodeActionCache.id, title: "", arguments: [data] } };
+      return { data };
     });
   }
 
@@ -89,12 +59,11 @@ export class TSCodeActionFeature extends Disposable {
 
   constructor(
     private registry: CodeActionRegistryHandle,
-    commands: CommandsShimService,
     private converter: TSLspConverter,
     private clientCapabilities: lsp.ClientCapabilities
   ) {
     super();
-    this.cache = this._register(new CodeActionCache(commands));
+    this.cache = this._register(new CodeActionCache());
   }
 
   async codeAction(
@@ -167,11 +136,11 @@ export class TSCodeActionFeature extends Disposable {
             )
             .map((action, index) => {
               const converted = this.converter.convertCodeAction(action);
-              const { data, command } = overrideFields[index];
+              const { data } = overrideFields[index];
               if (typeof converted.command === "string") {
-                return command;
+                return converted;
               } else {
-                return { ...(converted as lsp.CodeAction), data, command };
+                return { ...(converted as lsp.CodeAction), data };
               }
             })
         );
@@ -201,7 +170,6 @@ export class TSCodeActionFeature extends Disposable {
       // preserve data and command
       // the codeAction instance is mutated in cache
       const converted = this.converter.convertCodeAction(result, item.data);
-      converted.command = item.command;
       return converted;
     } else {
       return item;
