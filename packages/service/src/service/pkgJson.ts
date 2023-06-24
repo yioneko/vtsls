@@ -1,6 +1,6 @@
 import {
-  activationEvents as pkgJsonEvents,
   contributes as pkgJsonContributes,
+  activationEvents as pkgJsonEvents,
 } from "../typescript-language-features/package.json";
 import * as tsDefaultNls from "../typescript-language-features/package.nls.json";
 
@@ -64,6 +64,18 @@ function collectCommands() {
   for (const { command } of pkgJsonContributes.commands) {
     commandSet.add(command);
   }
+
+  const extraPrivateCommands = [
+    "_typescript.applyCodeActionCommand",
+    "_typescript.applyFixAllCodeAction",
+    "_typescript.selectRefactoring",
+    "_typescript.moveToFileRefactoring",
+    "_typescript.didApplyRefactoring",
+  ];
+  for (const c of extraPrivateCommands) {
+    commandSet.add(c);
+  }
+
   return [...commandSet.values()];
 }
 
