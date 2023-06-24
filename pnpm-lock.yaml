@@ -1,4 +1,4 @@
-lockfileVersion: '6.1'
+lockfileVersion: '6.0'
 
 settings:
   autoInstallPeers: true
@@ -33,7 +33,7 @@ importers:
   packages/server:
     dependencies:
       '@vtsls/language-service':
-        specifier: workspace:0.1.18
+        specifier: workspace:0.1.19
         version: link:../service
       vscode-languageserver:
         specifier: ^8.1.0
