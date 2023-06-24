@@ -70,16 +70,7 @@ describe("language features", async () => {
       [uri]: [
         {
           newText: expect.stringContaining('import { foo } from "./foo";'),
-          range: {
-            end: {
-              character: 0,
-              line: 0,
-            },
-            start: {
-              character: 0,
-              line: 0,
-            },
-          },
+          range: { end: { character: 0, line: 0 }, start: { character: 0, line: 0 } },
         },
       ],
     });
@@ -117,41 +108,15 @@ function abc(a) {}`,
 
     const lens = lenses[0];
     expect(lens).toMatchObject({
-      range: {
-        end: {
-          character: 17,
-          line: 0,
-        },
-        start: {
-          character: 16,
-          line: 0,
-        },
-      },
+      range: { end: { character: 17, line: 0 }, start: { character: 16, line: 0 } },
     });
 
     const resolved = await service.codeLensResolve(lens);
     expect(resolved.command).toMatchObject({
       arguments: [
         uri,
-        {
-          character: 16,
-          line: 0,
-        },
-        [
-          {
-            range: {
-              end: {
-                character: 16,
-                line: 1,
-              },
-              start: {
-                character: 15,
-                line: 1,
-              },
-            },
-            uri,
-          },
-        ],
+        { character: 16, line: 0 },
+        [{ range: { end: { character: 16, line: 1 }, start: { character: 15, line: 1 } }, uri }],
       ],
       command: "editor.action.showReferences",
       title: "1 reference",
@@ -166,38 +131,17 @@ function abc(a) {}`,
 
       const lens = lenses[0];
       expect(lens).toMatchObject({
-        range: {
-          end: {
-            character: 18,
-            line: 0,
-          },
-          start: {
-            character: 17,
-            line: 0,
-          },
-        },
+        range: { end: { character: 18, line: 0 }, start: { character: 17, line: 0 } },
       });
 
       const resolved = await service.codeLensResolve(lens);
       expect(resolved.command).toMatchObject({
         arguments: [
           uri,
-          {
-            character: 17,
-            line: 0,
-          },
+          { character: 17, line: 0 },
           [
             {
-              range: {
-                end: {
-                  character: 7,
-                  line: 1,
-                },
-                start: {
-                  character: 6,
-                  line: 1,
-                },
-              },
+              range: { end: { character: 7, line: 1 }, start: { character: 6, line: 1 } },
               uri: uri,
             },
           ],
@@ -218,51 +162,15 @@ function abc(a) {}`,
       detail: "",
       kind: lsp.SymbolKind.Function,
       name: "a",
-      range: {
-        end: {
-          character: 32,
-          line: 0,
-        },
-        start: {
-          character: 0,
-          line: 0,
-        },
-      },
-      selectionRange: {
-        end: {
-          character: 10,
-          line: 0,
-        },
-        start: {
-          character: 9,
-          line: 0,
-        },
-      },
+      range: { end: { character: 32, line: 0 }, start: { character: 0, line: 0 } },
+      selectionRange: { end: { character: 10, line: 0 }, start: { character: 9, line: 0 } },
       children: [
         {
           children: [],
           kind: lsp.SymbolKind.Function,
           name: "b",
-          range: {
-            end: {
-              character: 30,
-              line: 0,
-            },
-            start: {
-              character: 15,
-              line: 0,
-            },
-          },
-          selectionRange: {
-            end: {
-              character: 25,
-              line: 0,
-            },
-            start: {
-              character: 24,
-              line: 0,
-            },
-          },
+          range: { end: { character: 30, line: 0 }, start: { character: 15, line: 0 } },
+          selectionRange: { end: { character: 25, line: 0 }, start: { character: 24, line: 0 } },
         },
       ],
     });
@@ -282,36 +190,9 @@ function abc(a) {}`,
     assert(response);
     expect(response[0]).toMatchObject({
       targetUri: uri,
-      originSelectionRange: {
-        end: {
-          character: 17,
-          line: 0,
-        },
-        start: {
-          character: 16,
-          line: 0,
-        },
-      },
-      targetRange: {
-        end: {
-          character: 15,
-          line: 0,
-        },
-        start: {
-          character: 0,
-          line: 0,
-        },
-      },
-      targetSelectionRange: {
-        end: {
-          character: 10,
-          line: 0,
-        },
-        start: {
-          character: 9,
-          line: 0,
-        },
-      },
+      originSelectionRange: { end: { character: 17, line: 0 }, start: { character: 16, line: 0 } },
+      targetRange: { end: { character: 15, line: 0 }, start: { character: 0, line: 0 } },
+      targetSelectionRange: { end: { character: 10, line: 0 }, start: { character: 9, line: 0 } },
     });
   });
 
@@ -349,16 +230,7 @@ function abc(a) {}`,
           [uri]: [
             {
               newText: ": any",
-              range: {
-                end: {
-                  character: 7,
-                  line: 0,
-                },
-                start: {
-                  character: 7,
-                  line: 0,
-                },
-              },
+              range: { end: { character: 7, line: 0 }, start: { character: 7, line: 0 } },
             },
           ],
         },
@@ -382,15 +254,7 @@ function abc(a) {}`,
     const action = await service.codeActionResolve(codeActions[1] as lsp.CodeAction);
     expect(action).toMatchObject({
       command: {
-        arguments: [
-          [
-            uri,
-            {
-              character: 10,
-              line: 1,
-            },
-          ],
-        ],
+        arguments: [[uri, { character: 10, line: 1 }]],
         command: "editor.action.rename",
         title: "",
       },
@@ -477,26 +341,8 @@ function abc(a) {}`,
     });
     expect(response).toMatchObject({
       ranges: [
-        {
-          start: {
-            character: 11,
-            line: 0,
-          },
-          end: {
-            character: 14,
-            line: 0,
-          },
-        },
-        {
-          start: {
-            character: 17,
-            line: 0,
-          },
-          end: {
-            character: 20,
-            line: 0,
-          },
-        },
+        { start: { character: 11, line: 0 }, end: { character: 14, line: 0 } },
+        { start: { character: 17, line: 0 }, end: { character: 20, line: 0 } },
       ],
       wordPattern: "[a-zA-Z0-9:\\-\\._$]*",
     });
@@ -509,16 +355,7 @@ function abc(a) {}`,
       arguments: [uri],
     })) as any[];
     expect(response[0]).toMatchObject({
-      range: {
-        end: {
-          character: 14,
-          line: 0,
-        },
-        start: {
-          character: 7,
-          line: 0,
-        },
-      },
+      range: { end: { character: 14, line: 0 }, start: { character: 7, line: 0 } },
       uri: URI.file(path.resolve(workspacePath, "bar.ts")).toString(),
     });
   });
@@ -530,16 +367,7 @@ function abc(a) {}`,
       arguments: [uri, { line: 1, character: 11 }],
     })) as any[];
     expect(response[0]).toMatchObject({
-      range: {
-        end: {
-          character: 7,
-          line: 0,
-        },
-        start: {
-          character: 6,
-          line: 0,
-        },
-      },
+      range: { end: { character: 7, line: 0 }, start: { character: 6, line: 0 } },
       uri,
     });
   });
@@ -563,29 +391,11 @@ function abc(a) {}`,
         {
           // On Macos, \r is always added regardless of passed options
           newText: expect.stringMatching(/import 'a';\r?\nimport 'b';\r?\n/),
-          range: {
-            end: {
-              character: 0,
-              line: 1,
-            },
-            start: {
-              character: 0,
-              line: 0,
-            },
-          },
+          range: { end: { character: 0, line: 1 }, start: { character: 0, line: 0 } },
         },
         {
           newText: "",
-          range: {
-            end: {
-              character: 11,
-              line: 1,
-            },
-            start: {
-              character: 0,
-              line: 1,
-            },
-          },
+          range: { end: { character: 11, line: 1 }, start: { character: 0, line: 1 } },
         },
       ],
     });
