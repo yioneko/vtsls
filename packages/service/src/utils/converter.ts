@@ -75,7 +75,11 @@ export class TSLspConverter extends LspInvariantConverter {
         // file operation
         // create
         if (!entry.from) {
-          if (!resouceOpKinds.includes(lsp.ResourceOperationKind.Create)) {
+          if (
+            // less strict check (some clients don't support this)
+            !entry.options?.ignoreIfExists &&
+            !resouceOpKinds.includes(lsp.ResourceOperationKind.Create)
+          ) {
             throw new Error("client doesn't support create operation");
           }
           if (entry.to) {

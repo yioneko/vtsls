@@ -12,11 +12,6 @@ export async function createTestService(workspacePath: string) {
         documentSymbol: { hierarchicalDocumentSymbolSupport: true },
         definition: { linkSupport: true },
       },
-      workspace: {
-        workspaceEdit: {
-          resourceOperations: [lsp.ResourceOperationKind.Create],
-        },
-      },
     },
     workspaceFolders: [{ name: "test", uri: URI.file(workspacePath).toString() }],
   });
