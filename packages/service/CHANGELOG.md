@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.20](https://github.com/yioneko/vtsls/compare/service-v0.1.19...service-v0.1.20) (2023-06-24)
+
+
+### Bug Fixes
+
+* missing private commands name in capabilities ([e6aeac9](https://github.com/yioneko/vtsls/commit/e6aeac98e91d6fcdb27c37644ca7dab9031ea506))
+
 ## [0.1.19](https://github.com/yioneko/vtsls/compare/service-v0.1.18...service-v0.1.19) (2023-06-24)
 
 
