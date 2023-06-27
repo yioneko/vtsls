@@ -12,7 +12,7 @@ Install by `npm install -g @vtsls/language-server`, then run `vtsls --stdio`. Re
 
 ## LSP Features
 
-See [available server capabilities](./packages/server/src/capabilities.ts).
+See [available server capabilities](./packages/server/src/capabilities.ts). Here are also [references from VSCode](https://code.visualstudio.com/docs/typescript/typescript-editing).
 
 ### Code Lens
 
@@ -104,11 +104,25 @@ Instead of switching client, some server configuration options could also make p
 - `typescript.preferences.includePackageJsonAutoImports = 'off'`
 - `typescript.preferences.autoImportFileExcludePatterns`
 
+### TypeScript plugin not activated
+
+- Plugin should be specified in `tsconfig.json`.
+- Check the place of running tsserver. By default the bundled version is used as in VSCode. Switch to workspace version by command `typescript.restartTsServer` or config option `typescript.tsdk`.
+- `typescript.tsserver.pluginPaths`: use this option without modifying `tsconfig.json`.
+
+### Log
+
+- Set `typescript.tsserver.log` in configuration
+- Execute command `typescript.openTsServerLog`
+
 ## Not Planned
 
+Some not editor-agnostic features in VSCode:
+
 - Read TypeScript plugin from VSCode extensions
-- Web server
-- All the features not supported in upstream
+- Running in browser, the server only targets on Node environment
+
+Plus any features not supported in VSCode.
 
 ## Develop
 
