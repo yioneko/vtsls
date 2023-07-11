@@ -748,7 +748,7 @@ export class WorkspaceEdit {
 				textEdit[1].push(candidate.edit);
 			}
 		}
-		return [...textEdits.values];
+		return [...textEdits.values()];
 	}
 
 	get size(): number {

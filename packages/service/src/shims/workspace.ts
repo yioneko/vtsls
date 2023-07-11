@@ -75,14 +75,14 @@ export class WorkspaceShimService extends Disposable {
 
   get textDocuments(): vscode.TextDocument[] {
     const result = [];
-    for (const doc of this._documents.values) {
+    for (const doc of this._documents.values()) {
       result.push(this.delegate.converter.convertTextDocuemntFromLsp(doc));
     }
     return result;
   }
 
   $getDocumentByLspUri(uri: lsp.URI): TextDocument | undefined {
-    for (const doc of this._documents.values) {
+    for (const doc of this._documents.values()) {
       if (doc.uri == uri) {
         return doc;
       }
@@ -91,7 +91,7 @@ export class WorkspaceShimService extends Disposable {
 
   get workspaceFolders(): vscode.WorkspaceFolder[] {
     const result = [];
-    for (const folder of this._workspaceFolders.values) {
+    for (const folder of this._workspaceFolders.values()) {
       result.push(folder);
     }
     return result;
@@ -191,7 +191,7 @@ export class WorkspaceShimService extends Disposable {
   }
 
   getWorkspaceFolder(uri: vscode.Uri): vscode.WorkspaceFolder | undefined {
-    for (const folder of this._workspaceFolders.values) {
+    for (const folder of this._workspaceFolders.values()) {
       const fUri = folder.uri;
       const fPathWithSlash = fUri.path.endsWith("/") ? fUri.path : fUri.path + "/";
       // ignore query and fragment
