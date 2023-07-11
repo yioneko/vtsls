@@ -215,7 +215,7 @@ export class DiagnosticCollection implements vscode.DiagnosticCollection {
 
   private keys(): URI[] {
     const keys = [];
-    for (const { resource } of this._data.entries) {
+    for (const { resource } of this._data.entries()) {
       keys.push(resource);
     }
     return keys;

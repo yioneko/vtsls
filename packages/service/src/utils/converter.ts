@@ -141,7 +141,7 @@ export class TSLspConverter extends LspInvariantConverter {
       };
     } else {
       const changes: lsp.WorkspaceEdit["changes"] = {};
-      for (const { resource: uri, value: edits } of textEditsByUri.entries) {
+      for (const { resource: uri, value: edits } of textEditsByUri.entries()) {
         changes[uri.toString()] = edits;
       }
       return { changes };
