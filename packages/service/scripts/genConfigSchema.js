@@ -46,6 +46,20 @@ async function genSchema() {
 
   processProperties(properties);
 
+  const unavailableOptions = [
+    "typescript.experimental.aiQuickFix",
+    // needs memento support
+    "typescript.enablePromptUseWorkspaceTsdk",
+    "typescript.tsc.autoDetect",
+    "typescript.autoClosingTags",
+    "javascript.autoClosingTags",
+    "typescript.surveys.enabled",
+  ];
+
+  for (const p of unavailableOptions) {
+    delete properties[p];
+  }
+
   const additionalConfigByLang = (lang) => ({
     [`vtsls.${lang}.format.baseIndentSize`]: {
       type: "number",

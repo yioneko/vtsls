@@ -85,7 +85,7 @@ Require client to send [`workspace/didRenameFiles`](https://microsoft.github.io/
 
 ## Configuration
 
-Almost the same as the original VSCode extension, with a few additional settings excluded for this server.
+Almost the same as the original VSCode extension, with a few additional settings excluded for this server (prefixed with `vtsls.`).
 
 See the configuration schema [here](./packages/service/configuration.schema.json).
 

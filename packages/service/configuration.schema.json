@@ -2,11 +2,6 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "description": "Configuration for Typescript language service",
   "properties": {
-    "typescript.experimental.aiQuickFix": {
-      "type": "boolean",
-      "default": true,
-      "description": "Enable/disable AI-assisted quick fixes. Requires an extension providing AI chat functionality."
-    },
     "typescript.tsdk": {
       "type": "string",
       "markdownDescription": "Specifies the folder path to the tsserver and `lib*.d.ts` files under a TypeScript install to use for IntelliSense, for example: `./node_modules/typescript/lib`.\n\n- When specified as a user setting, the TypeScript version from `typescript.tsdk` automatically replaces the built-in TypeScript version.\n- When specified as a workspace setting, `typescript.tsdk` allows you to switch to use that workspace version of TypeScript for IntelliSense with the `TypeScript: Select TypeScript version` command.\n\nSee the [TypeScript documentation](https://code.visualstudio.com/docs/typescript/typescript-compiling#_using-newer-typescript-versions) for more detail about managing TypeScript versions."
@@ -15,11 +10,6 @@
       "type": "boolean",
       "default": false,
       "markdownDescription": "Disables [automatic type acquisition](https://code.visualstudio.com/docs/nodejs/working-with-javascript#_typings-and-automatic-type-acquisition). Automatic type acquisition fetches `@types` packages from npm to improve IntelliSense for external libraries."
-    },
-    "typescript.enablePromptUseWorkspaceTsdk": {
-      "type": "boolean",
-      "default": false,
-      "description": "Enables prompting of users to use the TypeScript version configured in the workspace for Intellisense."
     },
     "typescript.npm": {
       "type": "string",
@@ -560,23 +550,6 @@
       "default": true,
       "markdownDescription": "Enable/disable including unique names from the file in JavaScript suggestions. Note that name suggestions are always disabled in JavaScript code that is semantically checked using `@ts-check` or `checkJs`."
     },
-    "typescript.tsc.autoDetect": {
-      "type": "string",
-      "default": "on",
-      "enum": [
-        "on",
-        "off",
-        "build",
-        "watch"
-      ],
-      "markdownEnumDescriptions": [
-        "Create both build and watch tasks.",
-        "Disable this feature.",
-        "Only create single run compile tasks.",
-        "Only create compile and watch tasks."
-      ],
-      "description": "Controls auto detection of tsc tasks."
-    },
     "javascript.suggest.paths": {
       "type": "boolean",
       "default": true,
@@ -876,16 +849,6 @@
       "default": "prompt",
       "description": "Enable/disable automatic updating of import paths when you rename or move a file in VS Code."
     },
-    "typescript.autoClosingTags": {
-      "type": "boolean",
-      "default": true,
-      "description": "Enable/disable automatic closing of JSX tags."
-    },
-    "javascript.autoClosingTags": {
-      "type": "boolean",
-      "default": true,
-      "description": "Enable/disable automatic closing of JSX tags."
-    },
     "javascript.suggest.enabled": {
       "type": "boolean",
       "default": true,
@@ -895,11 +858,6 @@
       "type": "boolean",
       "default": true,
       "description": "Enabled/disable autocomplete suggestions."
-    },
-    "typescript.surveys.enabled": {
-      "type": "boolean",
-      "default": true,
-      "description": "Enabled/disable occasional surveys that help us improve VS Code's JavaScript and TypeScript support."
     },
     "typescript.tsserver.useSeparateSyntaxServer": {
       "type": "boolean",
