@@ -1,10 +1,10 @@
 # vtsls
 
-**Notice:** The server has not been well tested, use it at your own risk. Feedback welcome.
-
 This is an LSP wrapper around [TypeScript extension bundled with VSCode](https://github.com/microsoft/vscode/tree/838b48504cd9a2338e2ca9e854da9cec990c4d57/extensions/typescript-language-features). All features and performance are nearly the same.
 
 Unlike other similar projects, this is implemented by filling VSCode APIs and applying **minimal patches** onto the extension to make it possible to **keep up with the upstream updates** and drastically reduce the burden of maintenance.
+
+**Notice:** Though the server is suitable for regular use scenarios at the current stage, there is no absolute guarantee for its robustness as the behavior of the wrapped VSCode extension doesn't always keep 100% clear to me. Users can view this server as a best-effort product but possbily not as reliable as other functionally identical alternatives.
 
 ## Usage
 
@@ -107,13 +107,17 @@ Instead of switching client, some server configuration options could also make p
 ### TypeScript plugin not activated
 
 - Plugin should be specified in `tsconfig.json`.
-- Check the place of running tsserver. By default the bundled version is used as in VSCode. Switch to workspace version by command `typescript.restartTsServer` or config option `typescript.tsdk`.
+- Check the place of running tsserver. By default the bundled version is used as in VSCode. Switch to workspace version by command `typescript.selectTypeScriptVersion` or config option `typescript.tsdk`.
 - `typescript.tsserver.pluginPaths`: use this option without modifying `tsconfig.json`.
 
 ### Log
 
 - Set `typescript.tsserver.log` in configuration
 - Execute command `typescript.openTsServerLog`
+
+## Editor Integration
+
+Neovim | [nvim-lspconfig](https://github.com/neovim/nvim-lspconfig/blob/master/doc/server_configurations.md#vtsls) [nvim-vtsls](https://github.com/yioneko/nvim-vtsls)
 
 ## Not Planned
 
