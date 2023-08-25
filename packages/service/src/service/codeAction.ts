@@ -119,30 +119,26 @@ export class TSCodeActionFeature extends Disposable {
         if (!this.clientCapabilities.textDocument?.codeAction?.disabledSupport) {
           actions = actions?.filter((item) => !("disabled" in item && item.disabled));
         }
+        actions = actions?.filter(
+          (action) =>
+            !("kind" in action && action.kind && UNSUPPORTED_ACTIONS.includes(action.kind.value))
+        );
+
         if (!actions || actions.length === 0) {
           continue;
         }
 
         const overrideFields = this.cache.store(actions, id);
         results.push(
-          actions
-            .filter(
-              (action) =>
-                !(
-                  "kind" in action &&
-                  action.kind &&
-                  UNSUPPORTED_ACTIONS.includes(action.kind.value)
-                )
-            )
-            .map((action, index) => {
-              const converted = this.converter.convertCodeAction(action);
-              const { data } = overrideFields[index];
-              if (typeof converted.command === "string") {
-                return converted;
-              } else {
-                return { ...(converted as lsp.CodeAction), data };
-              }
-            })
+          actions.map((action, index) => {
+            const converted = this.converter.convertCodeAction(action);
+            const { data } = overrideFields[index];
+            if (typeof converted.command === "string") {
+              return converted;
+            } else {
+              return { ...(converted as lsp.CodeAction), data };
+            }
+          })
         );
       }
     }

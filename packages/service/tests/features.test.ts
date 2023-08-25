@@ -251,7 +251,10 @@ function abc(a) {}`,
       textDocument: { uri },
     });
     assert(codeActions);
-    const action = await service.codeActionResolve(codeActions[1] as lsp.CodeAction);
+    const title = "Extract to constant in enclosing scope";
+    const action = await service.codeActionResolve(
+      codeActions.find((c) => (c as lsp.CodeAction).title === title) as lsp.CodeAction
+    );
     expect(action).toMatchObject({
       command: {
         arguments: [[uri, { character: 10, line: 1 }]],
@@ -262,7 +265,7 @@ function abc(a) {}`,
         documentChanges: expect.any(Array),
       },
       kind: "refactor.extract.constant",
-      title: "Extract to constant in enclosing scope",
+      title,
     });
   });
 
