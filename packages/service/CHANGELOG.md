@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.1.21](https://github.com/yioneko/vtsls/compare/service-v0.1.20...service-v0.1.21) (2023-08-26)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @vscode/l10n to ^0.0.15 ([1220a67](https://github.com/yioneko/vtsls/commit/1220a6723a693d904a2b26f2d4990d7bdc2c504c))
+* **deps:** update dependency @vscode/l10n to ^0.0.16 ([a221bc6](https://github.com/yioneko/vtsls/commit/a221bc6bdc5d8c9baeae5e912b3d41bd6f34d22c))
+* **deps:** update dependency typescript to v5.1.6 ([5073548](https://github.com/yioneko/vtsls/commit/50735485c8e8eb00b874a891a9eb385bdaf91aa6))
+* **deps:** update dependency typescript to v5.2.2 ([#97](https://github.com/yioneko/vtsls/issues/97)) ([6e397f1](https://github.com/yioneko/vtsls/commit/6e397f104953dced90c4987c24eca2d1b8d3c754))
+* **deps:** update packages/service/vscode digest to 6243562 ([#88](https://github.com/yioneko/vtsls/issues/88)) ([a44f086](https://github.com/yioneko/vtsls/commit/a44f0869a1089b6f3416347ffff52391a2a321b3))
+* **deps:** update packages/service/vscode digest to 6ea0992 ([0ba9e0b](https://github.com/yioneko/vtsls/commit/0ba9e0bacb5a1f4d2ef2e9fe314d6b29c8cbe95b))
+
 ## [0.1.20](https://github.com/yioneko/vtsls/compare/service-v0.1.19...service-v0.1.20) (2023-06-24)
 
 

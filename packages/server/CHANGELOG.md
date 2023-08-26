@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.1.21](https://github.com/yioneko/vtsls/compare/server-v0.1.20...server-v0.1.21) (2023-08-26)
+
+
+### Miscellaneous Chores
+
+* **server:** Synchronize vtsls versions
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @vtsls/language-service bumped from workspace:0.1.20 to workspace:0.1.21
+
 ## [0.1.20](https://github.com/yioneko/vtsls/compare/server-v0.1.19...server-v0.1.20) (2023-06-24)
 
 
