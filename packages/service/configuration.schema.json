@@ -883,7 +883,7 @@
     "typescript.tsserver.maxTsServerMemory": {
       "type": "number",
       "default": 3072,
-      "description": "The maximum amount of memory (in MB) to allocate to the TypeScript server process."
+      "markdownDescription": "The maximum amount of memory (in MB) to allocate to the TypeScript server process. To use a memory limit greater than 4 GB, use `#typescript.tsserver.nodePath#` to run TS Server with a custom Node installation."
     },
     "typescript.tsserver.experimental.enableProjectDiagnostics": {
       "type": "boolean",
@@ -989,6 +989,15 @@
       "type": "boolean",
       "default": true,
       "description": "Suppresses semantic errors. This is needed when using external packages as these can't be included analyzed on web."
+    },
+    "typescript.tsserver.nodePath": {
+      "type": "string",
+      "description": "Run TS Server on a custom Node installation. This can be a path to a Node executable, or 'node' if you want VS Code to detect a Node installation."
+    },
+    "typescript.experimental.tsserver.web.typeAcquisition.enabled": {
+      "type": "boolean",
+      "default": false,
+      "description": "Enable/disable package acquisition on the web."
     },
     "typescript.preferGoToSourceDefinition": {
       "type": "boolean",
