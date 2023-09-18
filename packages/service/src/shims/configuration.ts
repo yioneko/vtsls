@@ -1,7 +1,7 @@
-import { deepClone } from "src/utils/objects";
 import * as vscode from "vscode";
 import { Emitter } from "vscode-languageserver-protocol";
 import { Disposable } from "../utils/dispose";
+import { deepClone } from "../utils/objects";
 import { isPrimitive } from "../utils/types";
 
 function lookUp<T>(tree: any, key: string | undefined): T | undefined {
@@ -107,5 +107,10 @@ export class ConfigurationShimService extends Disposable {
 
   $changeConfiguration(config: any) {
     recursiveUpdate(this.workspaceConfig, config);
+    this._onDidChangeConfiguration.fire({
+      affectsConfiguration(sec) {
+        return !!lookUp(config, sec);
+      },
+    });
   }
 }
