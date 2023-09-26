@@ -4,7 +4,7 @@
   "automerge": true,
   "schedule": ["after 6pm on Saturday"],
   "git-submodules": {
-    "schedule": ["after 6pm on the 10th day of the month"],
+    "schedule": ["every 3 months starting on the 1th month"],
     "packageRules": [
       {
         "matchPackageNames": ["packages/service/vscode"],
