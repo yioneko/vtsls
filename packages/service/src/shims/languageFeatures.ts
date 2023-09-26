@@ -71,7 +71,7 @@ class LanguageFeaturesRegistryStore extends Disposable {
   readonly documentLink = this._register(
     new LanguageFeatureRegistry<vscode.DocumentLinkProvider>()
   );
-  readonly documentRangeFormattignEdit = this._register(
+  readonly documentRangeFormattingEdit = this._register(
     new LanguageFeatureRegistry<vscode.DocumentRangeFormattingEditProvider>()
   );
   readonly documentRangeSemanticTokens = this._register(
@@ -384,7 +384,7 @@ export class LanguageFeaturesShimService extends Disposable {
     selector: vscode.DocumentSelector,
     provider: vscode.DocumentRangeFormattingEditProvider
   ) {
-    return this.registerProvider(this._registryStore.documentRangeFormattignEdit, {
+    return this.registerProvider(this._registryStore.documentRangeFormattingEdit, {
       selector,
       provider,
     });

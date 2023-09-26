@@ -321,7 +321,7 @@ export function createTSLanguageService(initOptions: TSLanguageServiceOptions) {
       // NOTE: typescript use range format instead
       const { provider } = providers.$getHighestProvider(
         doc,
-        providers.documentRangeFormattignEdit
+        providers.documentRangeFormattingEdit
       );
       const result = await provider.provideDocumentRangeFormattingEdits(
         doc,
@@ -338,7 +338,7 @@ export function createTSLanguageService(initOptions: TSLanguageServiceOptions) {
         const doc = getOpenedDoc(params.textDocument.uri);
         const { provider } = providers.$getHighestProvider(
           doc,
-          providers.documentRangeFormattignEdit
+          providers.documentRangeFormattingEdit
         );
         const result = await provider.provideDocumentRangeFormattingEdits(
           doc,
