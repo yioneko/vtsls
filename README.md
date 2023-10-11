@@ -125,6 +125,7 @@ Some not editor-agnostic features in VSCode:
 
 - Read TypeScript plugin from VSCode extensions
 - Running in browser, the server only targets on Node environment
+- Copilot integration namely AI code actions in VSCode
 
 Plus any features not supported in VSCode.
 

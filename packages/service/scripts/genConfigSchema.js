@@ -47,7 +47,7 @@ async function genSchema() {
   processProperties(properties);
 
   const unavailableOptions = [
-    "typescript.experimental.aiQuickFix",
+    "typescript.experimental.aiCodeActions",
     // needs memento support
     "typescript.enablePromptUseWorkspaceTsdk",
     "typescript.tsc.autoDetect",
