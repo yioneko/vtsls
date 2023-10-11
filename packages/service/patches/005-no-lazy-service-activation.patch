@@ -1,0 +1,50 @@
+diff --git a/src/lazyClientHost.ts b/src/lazyClientHost.ts
+index be832b3..9a92ece 100644
+--- a/src/lazyClientHost.ts
++++ b/src/lazyClientHost.ts
+@@ -57,40 +57,11 @@ export function lazilyActivateClient(
+ 	activeJsTsEditorTracker: ActiveJsTsEditorTracker,
+ 	onActivate: () => Promise<void> = () => Promise.resolve(),
+ ): vscode.Disposable {
+-	const disposables: vscode.Disposable[] = [];
+-
+-	const supportedLanguage = [
+-		...standardLanguageDescriptions.map(x => x.languageIds),
+-		...pluginManager.plugins.map(x => x.languages)
+-	].flat();
+-
+-	let hasActivated = false;
+-	const maybeActivate = (textDocument: vscode.TextDocument): boolean => {
+-		if (!hasActivated && isSupportedDocument(supportedLanguage, textDocument)) {
+-			hasActivated = true;
+-
+-			onActivate().then(() => {
+-				// Force activation
+-				void lazyClientHost.value;
+-
+-				disposables.push(new ManagedFileContextManager(activeJsTsEditorTracker));
+-			});
+-
+-			return true;
+-		}
+-		return false;
+-	};
+-
+-	const didActivate = vscode.workspace.textDocuments.some(maybeActivate);
+-	if (!didActivate) {
+-		const openListener = vscode.workspace.onDidOpenTextDocument(doc => {
+-			if (maybeActivate(doc)) {
+-				openListener.dispose();
+-			}
+-		}, undefined, disposables);
+-	}
+-
+-	return vscode.Disposable.from(...disposables);
++	onActivate().then(() => {
++		// Force activation
++		void lazyClientHost.value;
++	});
++	return vscode.Disposable.from();
+ }
+ 
+ function isSupportedDocument(
