@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.1.22](https://github.com/yioneko/vtsls/compare/service-v0.1.21...service-v0.1.22) (2023-10-17)
+
+
+### Bug Fixes
+
+* configuration update ([519f558](https://github.com/yioneko/vtsls/commit/519f558e564daaeb1228e9919dce4f319eb81e5d))
+* **deps:** update dependency vscode-languageserver-protocol to ^3.17.4 ([454eef4](https://github.com/yioneko/vtsls/commit/454eef48e7a7488648edb0219bed6a6c3dea16d9))
+* **deps:** update packages/service/vscode digest to 257d2bf ([9ccb39d](https://github.com/yioneko/vtsls/commit/9ccb39d1b8fa7789168f50d2170764022ac71af3))
+* **deps:** update packages/service/vscode digest to 686cf78 ([9c6cc03](https://github.com/yioneko/vtsls/commit/9c6cc03d9ec7f440a124515131f5fd102c01ada0))
+* **deps:** update packages/service/vscode digest to e27a7d7 ([67cb08a](https://github.com/yioneko/vtsls/commit/67cb08a29e2e45138a9592458ff5a26a3ebfb96a))
+* missing fields of URI object on the latest `vscode-uri` ([fe01185](https://github.com/yioneko/vtsls/commit/fe01185d881a115691d681eefd7dde55c4e920eb))
+
 ## [0.1.21](https://github.com/yioneko/vtsls/compare/service-v0.1.20...service-v0.1.21) (2023-08-26)
 
 
