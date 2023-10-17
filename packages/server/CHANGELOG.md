@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.1.22](https://github.com/yioneko/vtsls/compare/server-v0.1.21...server-v0.1.22) (2023-10-17)
+
+
+### Bug Fixes
+
+* **deps:** update dependency vscode-languageserver to v9 ([7c369ba](https://github.com/yioneko/vtsls/commit/7c369bad6e4d5c427306b42fdbf38f45721de1dd))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @vtsls/language-service bumped from workspace:0.1.21 to workspace:0.1.22
+
 ## [0.1.21](https://github.com/yioneko/vtsls/compare/server-v0.1.20...server-v0.1.21) (2023-08-26)
 
 
