@@ -27,7 +27,11 @@ export { LogLevel } from "./log";
 export * from "./types";
 export { l10n };
 export const EventEmitter = Emitter;
-export const Uri = Object.assign({}, URI, Utils);
+export const Uri = new Proxy(URI, {
+  get(target, p) {
+    return target[p as keyof typeof URI] ?? Utils[p as keyof typeof Utils];
+  },
+});
 
 export function initializeShimServices(
   initOptions: TSLanguageServiceOptions,
