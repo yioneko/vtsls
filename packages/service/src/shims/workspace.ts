@@ -83,7 +83,7 @@ export class WorkspaceShimService extends Disposable {
 
   $getDocumentByLspUri(uri: lsp.URI): TextDocument | undefined {
     for (const doc of this._documents.values()) {
-      if (doc.uri == uri) {
+      if (decodeURI(doc.uri) == decodeURI(uri)) {
         return doc;
       }
     }
