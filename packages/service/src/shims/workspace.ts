@@ -82,11 +82,7 @@ export class WorkspaceShimService extends Disposable {
   }
 
   $getDocumentByLspUri(uri: lsp.URI) {
-    for (const doc of this._documents.values()) {
-      if (decodeURI(doc.uri) == decodeURI(uri)) {
-        return doc;
-      }
-    }
+    return this._documents.get(URI.parse(uri));
   }
 
   get workspaceFolders(): vscode.WorkspaceFolder[] {
