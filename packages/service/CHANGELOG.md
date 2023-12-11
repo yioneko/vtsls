@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.1.23](https://github.com/yioneko/vtsls/compare/service-v0.1.22...service-v0.1.23) (2023-12-10)
+
+
+### Bug Fixes
+
+* **deps:** update dependency typescript to v5.3.2 ([#117](https://github.com/yioneko/vtsls/issues/117)) ([c09af93](https://github.com/yioneko/vtsls/commit/c09af934bd7d0c39e37ea4d920976f055f0f674e))
+* **deps:** update dependency vscode-languageserver-protocol to ^3.17.5 ([c648f26](https://github.com/yioneko/vtsls/commit/c648f262d743552d4a83735a4974bdd03bd99e17))
+* **deps:** update dependency vscode-languageserver-textdocument to ^1.0.11 ([863f56a](https://github.com/yioneko/vtsls/commit/863f56a410ec77c828570670e87d68c42ed1f06c))
+* **deps:** update dependency vscode-uri to ^3.0.8 ([4e79d6f](https://github.com/yioneko/vtsls/commit/4e79d6ffa412b72d7842a224dfef642aed573d02))
+* Get response with decoded URI ([#121](https://github.com/yioneko/vtsls/issues/121)) ([c684cbe](https://github.com/yioneko/vtsls/commit/c684cbe200de902e990652246c7743bdcc6df33e))
+
 ## [0.1.22](https://github.com/yioneko/vtsls/compare/service-v0.1.21...service-v0.1.22) (2023-10-17)
 
 
