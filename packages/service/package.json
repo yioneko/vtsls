@@ -22,7 +22,7 @@
     }
   },
   "dependencies": {
-    "@vscode/l10n": "^0.0.16",
+    "@vscode/l10n": "^0.0.18",
     "@vtsls/vscode-fuzzy": "workspace:0.0.1",
     "jsonc-parser": "^3.2.0",
     "semver": "7.5.2",
