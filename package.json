@@ -10,7 +10,7 @@
     "eslint": "^8.53.0",
     "lint-staged": "^15.1.0",
     "simple-git-hooks": "^2.9.0",
-    "typescript": "5.3.2"
+    "typescript": "5.3.3"
   },
   "scripts": {
     "build": "pnpm run -r build",
