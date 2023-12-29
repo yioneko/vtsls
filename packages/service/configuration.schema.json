@@ -45,6 +45,11 @@
       "default": false,
       "description": "Enable/disable implementations CodeLens. This CodeLens shows the implementers of an interface."
     },
+    "typescript.implementationsCodeLens.showOnInterfaceMethods": {
+      "type": "boolean",
+      "default": false,
+      "description": "Enable/disable implementations CodeLens on interface methods."
+    },
     "typescript.tsserver.enableTracing": {
       "type": "boolean",
       "default": false,
@@ -606,6 +611,19 @@
         "zh-CN",
         "zh-TW"
       ],
+      "enumDescriptions": [
+        "Use VS Code's configured display language",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
       "markdownDescription": "Sets the locale used to report JavaScript and TypeScript errors. Defaults to use VS Code's locale."
     },
     "javascript.suggestionActions.enabled": {
@@ -786,6 +804,11 @@
         "type": "string"
       },
       "markdownDescription": "Specify glob patterns of files to exclude from auto imports. Relative paths are resolved relative to the workspace root. Patterns are evaluated using tsconfig.json [`exclude`](https://www.typescriptlang.org/tsconfig#exclude) semantics."
+    },
+    "typescript.preferences.preferTypeOnlyAutoImports": {
+      "type": "boolean",
+      "default": false,
+      "markdownDescription": "Include the `type` keyword in auto-imports whenever possible. Requires using TypeScript 5.3+ in the workspace."
     },
     "javascript.preferences.renameShorthandProperties": {
       "type": "boolean",
