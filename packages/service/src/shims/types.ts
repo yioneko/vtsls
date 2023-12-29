@@ -1032,6 +1032,24 @@ export class DocumentHighlight {
 	}
 }
 
+export class MultiDocumentHighlight {
+
+	uri: URI;
+	highlights: DocumentHighlight[];
+
+	constructor(uri: URI, highlights: DocumentHighlight[]) {
+		this.uri = uri;
+		this.highlights = highlights;
+	}
+
+	toJSON(): any {
+		return {
+			uri: this.uri,
+			highlights: this.highlights.map(h => h.toJSON())
+		};
+	}
+}
+
 export enum SymbolKind {
 	File = 0,
 	Module = 1,
@@ -2266,6 +2284,11 @@ export enum DebugConsoleMode {
 	MergeWithParent = 1
 }
 
+export enum QuickPickItemKind {
+	Separator = -1,
+	Default = 0,
+}
+
 //#endregion
 
 export enum ExtensionKind {
@@ -2388,38 +2411,38 @@ export class TypeHierarchyItem {
 
 //#region Tab Inputs
 
-export class TextTabInput {
+export class TabInputText {
 	constructor(readonly uri: URI) { }
 }
 
-export class TextDiffTabInput {
+export class TabInputTextDiff {
 	constructor(readonly original: URI, readonly modified: URI) { }
 }
 
-export class TextMergeTabInput {
+export class TabInputTextMerge {
 	constructor(readonly base: URI, readonly input1: URI, readonly input2: URI, readonly result: URI) { }
 }
 
-export class CustomEditorTabInput {
+export class TabInputCustom {
 	constructor(readonly uri: URI, readonly viewType: string) { }
 }
 
-export class WebviewEditorTabInput {
+export class TabInputWebview {
 	constructor(readonly viewType: string) { }
 }
 
-export class NotebookEditorTabInput {
+export class TabInputNotebook {
 	constructor(readonly uri: URI, readonly notebookType: string) { }
 }
 
-export class NotebookDiffEditorTabInput {
+export class TabInputNotebookDiff {
 	constructor(readonly original: URI, readonly modified: URI, readonly notebookType: string) { }
 }
 
-export class TerminalEditorTabInput {
+export class TabInputTerminal {
 	constructor() { }
 }
-export class InteractiveWindowInput {
+export class TabInputInteractiveWindow {
 	constructor(readonly uri: URI, readonly inputBoxUri: URI) { }
 }
 
