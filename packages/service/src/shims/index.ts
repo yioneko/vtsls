@@ -4,6 +4,7 @@ import { Emitter } from "vscode-languageserver-protocol";
 import { URI, Utils } from "vscode-uri";
 import { TSLanguageServiceDelegate } from "../service/delegate";
 import { TSLanguageServiceConfig, TSLanguageServiceOptions } from "../service/types";
+import { createChatShim } from "./chat";
 import { CommandsShimService } from "./commands";
 import { ConfigurationShimService } from "./configuration";
 import { createContextShim } from "./context";
@@ -21,6 +22,7 @@ export let commands: typeof import("vscode").commands;
 export let window: typeof import("vscode").window;
 export let env: typeof import("vscode").env;
 export let workspace: typeof import("vscode").workspace;
+export let chat: typeof import("vscode").chat;
 export { CancellationTokenSource } from "vscode-languageserver-protocol";
 export { FilePermission, FileStat, FileType } from "./fs";
 export { LogLevel } from "./log";
@@ -73,6 +75,7 @@ export function initializeShimServices(
     openExternal: (uri: import("vscode").Uri) => delegate.openExternal(uri.toString(true)),
     uiKind: UIKind.Desktop,
   } as any;
+  chat = createChatShim() as any;
 
   return {
     configurationService,
@@ -85,6 +88,7 @@ export function initializeShimServices(
     l10n,
     extensions,
     env,
+    chat,
     dispose,
   };
 }

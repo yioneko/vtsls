@@ -328,6 +328,9 @@ export class LanguageFeaturesShimService extends Disposable {
     });
   }
 
+  // TODO: not available in LSP yet
+  registerMultiDocumentHighlightProvider() {}
+
   registerDocumentSymbolProvider(
     selector: vscode.DocumentSelector,
     provider: vscode.DocumentSymbolProvider
