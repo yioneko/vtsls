@@ -1,5 +1,6 @@
 import * as vscode from "vscode";
 import * as lsp from "vscode-languageserver-protocol";
+import { ConfigurationShimService } from "../shims/configuration";
 import { CodeActionRegistryHandle } from "../shims/languageFeatures";
 import * as types from "../shims/types";
 import { RestrictedCache } from "../utils/cache";
@@ -52,18 +53,23 @@ export class CodeActionCache extends Disposable {
   }
 }
 
-const UNSUPPORTED_ACTIONS = ["refactor.move.file"];
-
 export class TSCodeActionFeature extends Disposable {
   private cache: CodeActionCache;
 
   constructor(
     private registry: CodeActionRegistryHandle,
+    private readonly configuration: ConfigurationShimService,
     private converter: TSLspConverter,
     private clientCapabilities: lsp.ClientCapabilities
   ) {
     super();
     this.cache = this._register(new CodeActionCache());
+  }
+
+  private get unsupported_actions(): string[] {
+    return this.configuration.getConfiguration("vtsls").get<boolean>("enableMoveToFileCodeAction")
+      ? []
+      : ["refactor.move.file"];
   }
 
   async codeAction(
@@ -121,7 +127,11 @@ export class TSCodeActionFeature extends Disposable {
         }
         actions = actions?.filter(
           (action) =>
-            !("kind" in action && action.kind && UNSUPPORTED_ACTIONS.includes(action.kind.value))
+            !(
+              "kind" in action &&
+              action.kind &&
+              this.unsupported_actions.includes(action.kind.value)
+            )
         );
 
         if (!actions || actions.length === 0) {

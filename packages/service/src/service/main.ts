@@ -62,8 +62,9 @@ export function createTSLanguageService(initOptions: TSLanguageServiceOptions) {
   const codeActionFeature = toDispose.add(
     new TSCodeActionFeature(
       providers.$withRegistry(providers.codeActions),
+      shims.configurationService,
       converter,
-      initOptions.clientCapabilities
+      initOptions.clientCapabilities,
     )
   );
 
@@ -284,7 +285,7 @@ export function createTSLanguageService(initOptions: TSLanguageServiceOptions) {
       if (commandId in commandsConverter) {
         const cvt = commandsConverter[commandId as keyof typeof commandsConverter];
         if ("fromArgs" in cvt) {
-          args = cvt.fromArgs(...(args as [any, any, any]));
+          args = cvt.fromArgs(...(args as [any, any, any, any]));
         }
         const result = await shims.commandsService.executeCommand(params.command, ...args);
         return "toRes" in cvt ? cvt.toRes(result as any) : result;

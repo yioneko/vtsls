@@ -100,6 +100,12 @@ async function genSchema() {
       description:
         "Maximum number of completion entries to return. Recommend to also toggle `enableServerSideFuzzyMatch` to preserve items with higher accuracy.",
     },
+    "vtsls.enableMoveToFileCodeAction": {
+      default: false,
+      type: "boolean",
+      description:
+        "Enable 'Move to file' code action. This action enables user to move code to existing file, but requires corresponding handling on the client side.",
+    },
   };
 
   return {

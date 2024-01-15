@@ -1,0 +1,35 @@
+diff --git a/src/commands/tsserverRequests.ts b/src/commands/tsserverRequests.ts
+index ba545df..b5c020d 100644
+--- a/src/commands/tsserverRequests.ts
++++ b/src/commands/tsserverRequests.ts
+@@ -33,7 +33,8 @@ export class TSServerRequestCommand implements Command {
+ 			// Introspecting code at a position
+ 			'quickinfo',
+ 			'quickinfo-full',
+-			'completionInfo'
++			'completionInfo',
++			'getMoveToRefactoringFileSuggestions'
+ 		];
+ 
+ 		if (!allowList.includes(requestID)) { return; }
+diff --git a/src/languageFeatures/refactor.ts b/src/languageFeatures/refactor.ts
+index b16a9e1..c5afcf1 100644
+--- a/src/languageFeatures/refactor.ts
++++ b/src/languageFeatures/refactor.ts
+@@ -119,6 +119,7 @@ namespace MoveToFileRefactorCommand {
+ 		readonly document: vscode.TextDocument;
+ 		readonly action: Proto.RefactorActionInfo;
+ 		readonly range: vscode.Range;
++		readonly targetFile?: string;
+ 	}
+ }
+ 
+@@ -137,7 +138,7 @@ class MoveToFileRefactorCommand implements Command {
+ 			return;
+ 		}
+ 
+-		const targetFile = await this.getTargetFile(args.document, file, args.range);
++		const targetFile = args.targetFile;
+ 		if (!targetFile || targetFile.toString() === file.toString()) {
+ 			return;
+ 		}

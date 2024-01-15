@@ -58,11 +58,12 @@ export function createCommandsConverter(
         document: vscode.TextDocument;
         range: vscode.Range;
       }) => [action, document.uri.toString(), converter.convertRangeToLsp(range)],
-      fromArgs: (action: Proto.RefactorActionInfo, uri: lsp.URI, range: lsp.Range) => [
+      fromArgs: (action: Proto.RefactorActionInfo, uri: lsp.URI, range: lsp.Range, targetFile: string) => [
         {
           action,
           document: getOpenedDoc(uri),
           range: converter.convertRangeFromLsp(range),
+          targetFile
         },
       ],
     },
