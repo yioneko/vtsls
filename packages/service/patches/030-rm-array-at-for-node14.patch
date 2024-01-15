@@ -1,0 +1,13 @@
+diff --git a/src/ui/activeJsTsEditorTracker.ts b/src/ui/activeJsTsEditorTracker.ts
+index 3da1f5a..3c71510 100644
+--- a/src/ui/activeJsTsEditorTracker.ts
++++ b/src/ui/activeJsTsEditorTracker.ts
+@@ -43,7 +43,7 @@ export class ActiveJsTsEditorTracker extends Disposable {
+ 		// the active tab.
+ 		const editorCandidates = this.getEditorCandidatesForActiveTab();
+ 		const managedEditors = editorCandidates.filter(editor => this.isManagedFile(editor));
+-		const newActiveJsTsEditor = managedEditors.at(0);
++		const newActiveJsTsEditor = managedEditors[0];
+ 		if (this._activeJsTsEditor !== newActiveJsTsEditor) {
+ 			this._activeJsTsEditor = newActiveJsTsEditor;
+ 			this._onDidChangeActiveJsTsEditor.fire(this._activeJsTsEditor);
