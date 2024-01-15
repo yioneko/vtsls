@@ -14,6 +14,22 @@ export class WindowShimService extends Disposable {
   private _onDidChangeVisibleTextEditors = this._register(new lsp.Emitter<vscode.TextEditor[]>());
   readonly onDidChangeVisibleTextEditors = this._onDidChangeVisibleTextEditors.event;
 
+  private _onDidChangeTabGroups = this._register(new lsp.Emitter<vscode.TabGroupChangeEvent>());
+  private _onDidChangeTabs = this._register(new lsp.Emitter<vscode.TabChangeEvent>());
+  readonly tabGroups = {
+    onDidChangeTabGroups: this._onDidChangeTabGroups.event,
+    onDidChangeTabs: this._onDidChangeTabs.event,
+    get all() {
+      return [this.activeTabGroup];
+    },
+    activeTabGroup: {
+      isActive: false,
+      viewColumn: -1,
+      activeTab: undefined,
+      tabs: [],
+    },
+  };
+
   constructor(private readonly delegate: TSLanguageServiceDelegate) {
     super();
     this._register(
