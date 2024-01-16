@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.1.24](https://github.com/yioneko/vtsls/compare/service-v0.1.23...service-v0.1.24) (2024-01-16)
+
+
+### Features
+
+* initial support for move to file action ([66add99](https://github.com/yioneko/vtsls/commit/66add9918f7511612c214c3ab354d090e61469fa))
+
+
+### Bug Fixes
+
+* **deps:** update dependency @vscode/l10n to ^0.0.18 ([9ceedde](https://github.com/yioneko/vtsls/commit/9ceedde27bd0618cfe8e11253128721b96ce5cae))
+* **deps:** update dependency typescript to v5.3.3 ([2729ea6](https://github.com/yioneko/vtsls/commit/2729ea62788cdf3c55af789605d656f6b117d48c))
+* **deps:** update packages/service/vscode digest to 3ddf196 ([#128](https://github.com/yioneko/vtsls/issues/128)) ([9a18b3e](https://github.com/yioneko/vtsls/commit/9a18b3e13ddfb014264e75a99f0c6dbecbfa45b0))
+* **deps:** update packages/service/vscode digest to 860d670 ([#127](https://github.com/yioneko/vtsls/issues/127)) ([85300e5](https://github.com/yioneko/vtsls/commit/85300e58e44f9af060355a49836897614c1c45a6))
+
 ## [0.1.23](https://github.com/yioneko/vtsls/compare/service-v0.1.22...service-v0.1.23) (2023-12-10)
 
 
