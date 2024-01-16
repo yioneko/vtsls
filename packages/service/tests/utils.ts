@@ -3,7 +3,7 @@ import * as path from "node:path";
 import * as lsp from "vscode-languageserver-protocol";
 import { TextDocument } from "vscode-languageserver-textdocument";
 import { URI } from "vscode-uri";
-import { createTSLanguageService } from "../src/service";
+import { TSLanguageService, createTSLanguageService } from "../src/service";
 
 export async function createTestService(workspacePath: string) {
   const service = createTSLanguageService({
@@ -24,12 +24,6 @@ export async function createTestService(workspacePath: string) {
       preferences: {
         includePackageJsonAutoImports: "off",
       },
-      implementationsCodeLens: {
-        enabled: true,
-      },
-      referencesCodeLens: {
-        enabled: true,
-      },
       tsserver: {
         // log: "verbose",
         useSyntaxServer: "never",
@@ -38,13 +32,17 @@ export async function createTestService(workspacePath: string) {
     vtsls: {
       typescript: {
         format: {
-          newLineCharacter: "\n"
-        }
-      }
-    }
+          newLineCharacter: "\n",
+        },
+      },
+      enableMoveToFileCodeAction: true,
+    },
   });
 
-  const openedDocuments = new Map<string, { uri: string, doc: TextDocument, closeDoc: () => void, changeContent: (text: string) => void }>;
+  const openedDocuments = new Map<
+    string,
+    { uri: string; doc: TextDocument; closeDoc: () => void; changeContent: (text: string) => void }
+  >();
 
   const openDoc = async (docPath: string, opts?: { text?: string; languageId?: string }) => {
     const uri = URI.file(path.resolve(workspacePath, docPath)).toString();
@@ -68,7 +66,10 @@ export async function createTestService(workspacePath: string) {
     const entry = {
       uri,
       doc,
-      closeDoc: () => { service.closeTextDocument({ textDocument: { uri } }); openedDocuments.delete(docPath) },
+      closeDoc: () => {
+        service.closeTextDocument({ textDocument: { uri } });
+        openedDocuments.delete(docPath);
+      },
       changeContent: (text: string) => {
         service.changeTextDocument({
           textDocument: { uri, version: doc.version + 1 },
@@ -98,4 +99,16 @@ async function readFsUriContent(uri: string) {
 export function applyEditsToText(text: string, edits: lsp.TextEdit[]) {
   const doc = TextDocument.create("", "", 0, text);
   return TextDocument.applyEdits(doc, edits);
+}
+
+export async function waitWorkspaceEdit(service: TSLanguageService, triggerEdit: () => unknown) {
+  return new Promise<lsp.WorkspaceEdit>((resolve) => {
+    const disposeHandler = service.onApplyWorkspaceEdit(async (p) => {
+      disposeHandler.dispose();
+      resolve(p.edit);
+      return { applied: true };
+    });
+
+    triggerEdit();
+  });
 }

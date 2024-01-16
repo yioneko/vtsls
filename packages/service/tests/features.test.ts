@@ -2,7 +2,7 @@ import * as path from "node:path";
 import { afterAll, assert, describe, expect, it } from "vitest";
 import * as lsp from "vscode-languageserver-protocol";
 import { URI } from "vscode-uri";
-import { applyEditsToText, createTestService } from "./utils";
+import { applyEditsToText, createTestService, waitWorkspaceEdit } from "./utils";
 
 describe("language features", async () => {
   const workspacePath = path.join(__dirname, "workspace");
@@ -41,7 +41,7 @@ describe("language features", async () => {
   });
 
   it("provide auto-import completion", async () => {
-    // NOTE: the file need to be on disk
+    // NOTE: the file needs to be on disk
     await openDoc("foo.ts", { text: "export function foo() {}" });
     const { uri } = await openDoc("index.ts", { text: "foo" });
     const { items } = await service.completion({
@@ -55,13 +55,7 @@ describe("language features", async () => {
     const resolvedItem = await service.completionItemResolve(item);
     expect(resolvedItem.detail).toContain('Add import from "./foo"');
 
-    const edit = await new Promise<lsp.WorkspaceEdit>((resolve) => {
-      const disposeHandler = service.onApplyWorkspaceEdit(async (p) => {
-        disposeHandler.dispose();
-        resolve(p.edit);
-        return { applied: true };
-      });
-
+    const edit = await waitWorkspaceEdit(service, () => {
       assert(resolvedItem.command);
       void service.executeCommand(resolvedItem.command);
     });
@@ -100,6 +94,14 @@ function abc(a) {}`,
   });
 
   it("provide references code lenses", async () => {
+    service.changeConfiguration({
+      settings: {
+        typescript: {
+          referencesCodeLens: { enabled: true },
+          implementationsCodeLens: { enabled: true },
+        },
+      },
+    });
     const { uri } = await openDoc("index.ts", {
       text: "export function a() {}\nfunction b() { a() }",
     });
@@ -121,34 +123,42 @@ function abc(a) {}`,
       command: "editor.action.showReferences",
       title: "1 reference",
     });
+  });
 
-    it("provide implementations code lenses", async () => {
-      const { uri } = await openDoc("index.ts", {
-        text: "export interface A {}\nclass B implements A {}",
-      });
-      const lenses = await service.codeLens({ textDocument: { uri } });
-      assert(lenses);
+  it("provide implementations code lenses", async () => {
+    service.changeConfiguration({
+      settings: {
+        typescript: {
+          referencesCodeLens: { enabled: false },
+          implementationsCodeLens: { enabled: true },
+        },
+      },
+    });
+    const { uri } = await openDoc("index.ts", {
+      text: "export interface A {}\nclass B implements A {}",
+    });
+    const lenses = await service.codeLens({ textDocument: { uri } });
+    assert(lenses);
 
-      const lens = lenses[0];
-      expect(lens).toMatchObject({
-        range: { end: { character: 18, line: 0 }, start: { character: 17, line: 0 } },
-      });
+    const lens = lenses[0];
+    expect(lens).toMatchObject({
+      range: { end: { character: 18, line: 0 }, start: { character: 17, line: 0 } },
+    });
 
-      const resolved = await service.codeLensResolve(lens);
-      expect(resolved.command).toMatchObject({
-        arguments: [
-          uri,
-          { character: 17, line: 0 },
-          [
-            {
-              range: { end: { character: 7, line: 1 }, start: { character: 6, line: 1 } },
-              uri: uri,
-            },
-          ],
+    const resolved = await service.codeLensResolve(lens);
+    expect(resolved.command).toMatchObject({
+      arguments: [
+        uri,
+        { character: 17, line: 0 },
+        [
+          {
+            range: { end: { character: 7, line: 1 }, start: { character: 6, line: 1 } },
+            uri: uri,
+          },
         ],
-        command: "editor.action.showReferences",
-        title: "1 implementation",
-      });
+      ],
+      command: "editor.action.showReferences",
+      title: "1 implementation",
     });
   });
 
@@ -269,6 +279,70 @@ function abc(a) {}`,
     });
   });
 
+  it("provide move to file refactor", async () => {
+    // NOTE: the file needs to be on disk
+    const { uri } = await openDoc("foo.ts", { text: "const a = 1;" });
+    const REFACTOR_MOVE_FILE = "refactor.move.file";
+    const codeActions = await service.codeAction({
+      context: {
+        diagnostics: [],
+        only: [REFACTOR_MOVE_FILE],
+        triggerKind: lsp.CodeActionTriggerKind.Invoked,
+      },
+      range: { start: { line: 0, character: 0 }, end: { line: 0, character: 12 } },
+      textDocument: { uri },
+    });
+    assert(codeActions);
+    const action = codeActions[0];
+    expect(action).toMatchObject({
+      command: {
+        arguments: [
+          { description: "Move to file", kind: REFACTOR_MOVE_FILE, name: "Move to file" },
+          uri,
+          { end: { character: 12, line: 0 }, start: { character: 0, line: 0 } },
+        ],
+        command: "_typescript.moveToFileRefactoring",
+        title: "Move to file",
+      },
+      kind: REFACTOR_MOVE_FILE,
+      title: "Move to file",
+    });
+
+    const targetFile = path.resolve(workspacePath, "foo2.ts");
+    const targetUri = URI.file(targetFile).toString();
+    const edit = await waitWorkspaceEdit(service, async () => {
+      const command = action.command as lsp.Command;
+      await service.executeCommand({
+        ...command,
+        arguments: [...command.arguments!, targetFile],
+      });
+    });
+    expect(edit).toMatchObject({
+      documentChanges: [
+        { kind: "create", options: { ignoreIfExists: true }, uri },
+        { kind: "create", options: { ignoreIfExists: true }, uri: targetUri },
+        {
+          edits: [
+            {
+              newText: "",
+              range: { end: { character: 12, line: 0 }, start: { character: 0, line: 0 } },
+            },
+          ],
+          textDocument: { uri },
+        },
+        {
+          edits: [
+            {
+              newText: "const a = 1;\n",
+              range: { end: { character: 0, line: 0 }, start: { character: 0, line: 0 } },
+            },
+          ],
+          textDocument: { uri: targetUri },
+        },
+      ],
+    });
+  });
+
   // FIXME: Why is this needed before "it" statements?
   await openDoc("unformatted.ts");
   it("provide document formatting", async () => {
@@ -377,13 +451,7 @@ function abc(a) {}`,
 
   it("commands - organize imports", async () => {
     const { uri } = await openDoc("foo.ts", { text: "import 'b';\nimport 'a';" });
-    const edit = await new Promise<lsp.WorkspaceEdit>((resolve) => {
-      const disposeHandler = service.onApplyWorkspaceEdit(async (p) => {
-        disposeHandler.dispose();
-        resolve(p.edit);
-        return { applied: true };
-      });
-
+    const edit = await waitWorkspaceEdit(service, () => {
       void service.executeCommand({
         command: "typescript.organizeImports",
         arguments: [URI.parse(uri).fsPath],

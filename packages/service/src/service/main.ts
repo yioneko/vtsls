@@ -64,7 +64,7 @@ export function createTSLanguageService(initOptions: TSLanguageServiceOptions) {
       providers.$withRegistry(providers.codeActions),
       shims.configurationService,
       converter,
-      initOptions.clientCapabilities,
+      initOptions.clientCapabilities
     )
   );
 
