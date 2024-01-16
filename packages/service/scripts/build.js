@@ -19,7 +19,7 @@ async function build({ watch }) {
     outfile: path.resolve(outDir, "index.mjs"),
     bundle: true,
     format: "esm",
-    target: "node14",
+    target: "node16",
     platform: "node",
     external: Object.keys(dependencies).flatMap((d) => [d, `${d}/*`]),
   };
