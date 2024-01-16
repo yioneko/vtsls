@@ -68,6 +68,7 @@ Same as VSCode. The list below may be outdated.
 - `refactor.extract.type`
 - `refactor.extract.interface`
 - `refactor.move.newFile`
+- `refactor.move.file`
 - `refactor.rewrite.import`
 - `refactor.rewrite.export`
 - `refactor.rewrite.arrow.braces`
@@ -78,6 +79,24 @@ Inline refactor action can carry an additional `editor.action.rename` command fo
 ```
 [uri: DocumentUri, position: Position][]
 ```
+
+##### Move to file refactor
+
+This action is disabled by default because its correct functioning requires special handling on the client side. Set `vtsls.enableMoveToFileCodeAction` to `true` to let the server expose this code action with a `_typescript.moveToFileRefactoring` command. Command arguments:
+
+
+```
+[action: any, uri: DocumentUri, range: Range]
+```
+
+On the client side, the client should firstly ask user to select a target move file, and append the path of file to the command arguments:
+
+
+```
+[action: any, uri: DocumentUri, range: Range, targetFile: string]
+```
+
+Then send the `workspace/executeCommand` request to server with the original command while the command arguments is modified as above.
 
 ### Update paths on rename
 
@@ -136,9 +155,10 @@ Plus any features not supported in VSCode.
 ```sh
 git submodule update --init
 pnpm install
-pnpm build
-pnpm build:watch # or watch changes by
+pnpm build # or pnpm build:watch
 ```
+
+The server executable is at [packages/server/bin](https://github.com/yioneko/vtsls/blob/main/packages/server/bin/vtsls.js). To test it globally, run `cd packages/server && sudo npm install -g .`, then `vtsls` should be available in `$PATH`.
 
 ## Similar Projects
 
