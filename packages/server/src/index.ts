@@ -106,7 +106,10 @@ function bindServiceHandlers(
   conn.onDidChangeTextDocument(service.changeTextDocument);
   conn.onDidChangeConfiguration(service.changeConfiguration);
   conn.workspace.onDidRenameFiles(service.renameFiles);
-  conn.workspace.onDidChangeWorkspaceFolders((event) => service.changeWorkspaceFolders({ event }));
+  if (clientCapabilities.workspace?.workspaceFolders) {
+    // otherwise this will throw error 😈
+    conn.workspace.onDidChangeWorkspaceFolders((event) => service.changeWorkspaceFolders({ event }));
+  }
   conn.onCompletion(service.completion);
   conn.onCompletionResolve(service.completionItemResolve);
   conn.onDocumentHighlight(service.documentHighlight);
