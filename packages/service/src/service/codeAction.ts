@@ -8,6 +8,10 @@ import { TSLspConverter } from "../utils/converter";
 import { Disposable } from "../utils/dispose";
 import { isNil } from "../utils/types";
 
+function isCodeAction(item: lsp.Command | lsp.CodeAction): item is lsp.CodeAction {
+  return typeof item.command != "string";
+}
+
 interface CodeActionData {
   providerId: number;
   index: number;
@@ -143,18 +147,26 @@ export class TSCodeActionFeature extends Disposable {
           actions.map((action, index) => {
             const converted = this.converter.convertCodeAction(action);
             const { data } = overrideFields[index];
-            if (typeof converted.command === "string") {
-              return converted;
-            } else {
-              return { ...(converted as lsp.CodeAction), data };
-            }
+            return isCodeAction(converted) ? { ...converted, data } : converted;
           })
         );
       }
     }
 
     if (results.length > 0) {
-      return results.flat();
+      const flattedResults = results.flat();
+      if (this.clientCapabilities.textDocument?.codeAction?.resolveSupport) {
+        return flattedResults;
+      } else {
+        // client has no resolve support
+        return await Promise.all(
+          flattedResults.map((item) =>
+            isCodeAction(item) && !item.disabled
+              ? this.codeActionResolve(item, token)
+              : Promise.resolve(item)
+          )
+        );
+      }
     } else {
       return null;
     }
