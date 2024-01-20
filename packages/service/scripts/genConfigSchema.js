@@ -106,6 +106,12 @@ async function genSchema() {
       description:
         "Enable 'Move to file' code action. This action enables user to move code to existing file, but requires corresponding handling on the client side.",
     },
+    "vtsls.autoUseWorkspaceTsdk": {
+      default: false,
+      type: "boolean",
+      description:
+        "Automatically use workspace version of TypeScript lib on startup. By default, the bundled version is used for intelliSense.",
+    },
   };
 
   return {
