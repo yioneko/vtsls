@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.1.25](https://github.com/yioneko/vtsls/compare/service-v0.1.24...service-v0.1.25) (2024-01-25)
+
+
+### Features
+
+* auto use workspace tsdk ([#135](https://github.com/yioneko/vtsls/issues/135)) ([cd76ab3](https://github.com/yioneko/vtsls/commit/cd76ab38f3bdf5577bead3c966678d5804d2977d))
+
+
+### Bug Fixes
+
+* check code action resolve support of client ([7f00332](https://github.com/yioneko/vtsls/commit/7f003323a8f50a392cb848643a7144a49637e9de))
+
 ## [0.1.24](https://github.com/yioneko/vtsls/compare/service-v0.1.23...service-v0.1.24) (2024-01-16)
 
 
