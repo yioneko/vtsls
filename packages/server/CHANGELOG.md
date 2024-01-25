@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.1.25](https://github.com/yioneko/vtsls/compare/server-v0.1.24...server-v0.1.25) (2024-01-25)
+
+
+### Bug Fixes
+
+* `onDidChangeWorkspaceFolders` needs checking client capabilities ([fd4f1f2](https://github.com/yioneko/vtsls/commit/fd4f1f234df15ca5e74bdedd005df4ddeb8f7ee5))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @vtsls/language-service bumped from workspace:0.1.24 to workspace:0.1.25
+
 ## [0.1.24](https://github.com/yioneko/vtsls/compare/server-v0.1.23...server-v0.1.24) (2024-01-16)
 
 
