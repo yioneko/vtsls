@@ -1,0 +1,33 @@
+diff --git a/src/configuration/configuration.ts b/src/configuration/configuration.ts
+index 5fce20d..d7e0247 100644
+--- a/src/configuration/configuration.ts
++++ b/src/configuration/configuration.ts
+@@ -101,6 +101,7 @@ export class ImplicitProjectConfiguration {
+ }
+ 
+ export interface TypeScriptServiceConfiguration {
++	readonly autoUseWorkspaceTsdk: boolean;
+ 	readonly locale: string | null;
+ 	readonly globalTsdk: string | null;
+ 	readonly localTsdk: string | null;
+@@ -138,6 +139,7 @@ export abstract class BaseServiceConfigurationProvider implements ServiceConfigu
+ 	public loadFromWorkspace(): TypeScriptServiceConfiguration {
+ 		const configuration = vscode.workspace.getConfiguration();
+ 		return {
++			autoUseWorkspaceTsdk: !!configuration.get<boolean>("vtsls.autoUseWorkspaceTsdk"),
+ 			locale: this.readLocale(configuration),
+ 			globalTsdk: this.readGlobalTsdk(configuration),
+ 			localTsdk: this.readLocalTsdk(configuration),
+diff --git a/src/tsServer/versionManager.ts b/src/tsServer/versionManager.ts
+index 29e93a1..6171985 100644
+--- a/src/tsServer/versionManager.ts
++++ b/src/tsServer/versionManager.ts
+@@ -173,7 +173,7 @@ export class TypeScriptVersionManager extends Disposable {
+ 	}
+ 
+ 	private get useWorkspaceTsdkSetting(): boolean {
+-		return this.workspaceState.get<boolean>(useWorkspaceTsdkStorageKey, false);
++		return this.workspaceState.get<boolean>(useWorkspaceTsdkStorageKey, this.configuration.autoUseWorkspaceTsdk);
+ 	}
+ 
+ 	private get suppressPromptWorkspaceTsdkSetting(): boolean {

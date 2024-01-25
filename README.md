@@ -10,6 +10,10 @@ Unlike other similar projects, this is implemented by filling VSCode APIs and ap
 
 Install by `npm install -g @vtsls/language-server`, then run `vtsls --stdio`. Requires `node >= 14`.
 
+## TypeScript version
+
+Similar to VSCode, the server is bundled with the latest TypeScript and the bundled version is used by default. To switch to the workspace version, use command `typescript.selectTypeScriptVersion` or set configuration option `vtsls.autoUseWorkspaceTsdk` to `true`.
+
 ## LSP Features
 
 See [available server capabilities](./packages/server/src/capabilities.ts). Here are also [references from VSCode](https://code.visualstudio.com/docs/typescript/typescript-editing).
@@ -126,7 +130,7 @@ Instead of switching client, some server configuration options could also make p
 ### TypeScript plugin not activated
 
 - Plugin should be specified in `tsconfig.json`.
-- Check the place of running tsserver. By default the bundled version is used as in VSCode. Switch to workspace version by command `typescript.selectTypeScriptVersion` or config option `typescript.tsdk`.
+- Check the place of running tsserver. By default the bundled version is used as in VSCode. Switch to workspace version by command `typescript.selectTypeScriptVersion` or config option `vtsls.autoUseWorkspaceTsdk`.
 - `typescript.tsserver.pluginPaths`: use this option without modifying `tsconfig.json`.
 
 ### Log
