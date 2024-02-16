@@ -8,7 +8,7 @@ Unlike other similar projects, this is implemented by filling VSCode APIs and ap
 
 ## Usage
 
-Install by `npm install -g @vtsls/language-server`, then run `vtsls --stdio`. Requires `node >= 14`.
+Install by `npm install -g @vtsls/language-server`, then run `vtsls --stdio`. Requires `node >= 16`.
 
 ## TypeScript version
 

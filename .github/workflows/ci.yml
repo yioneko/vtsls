@@ -31,7 +31,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        node: [14, 16, 18, 20]
+        node: [16, 18, 20]
         os: [ubuntu-latest]
         include:
           - os: macos-latest
@@ -53,9 +53,5 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node }}
-      - if: ${{ matrix.node == 14 }}
-        uses: pnpm/action-setup@v2
-        with:
-          version: 7
       - run: pnpm build
       - run: pnpm test

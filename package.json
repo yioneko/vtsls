@@ -1,7 +1,7 @@
 {
   "private": true,
   "engines": {
-    "node": ">=14"
+    "node": ">=16"
   },
   "devDependencies": {
     "@types/node": "^16.18.71",
