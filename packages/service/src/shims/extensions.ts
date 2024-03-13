@@ -1,8 +1,12 @@
+import * as vscode from "vscode";
 import { Emitter } from "vscode-languageserver-protocol";
 
-export function createExtensionsShim() {
+export function createExtensionsShim(): typeof vscode.extensions {
   return {
-    onDidChange: new Emitter().event,
+    onDidChange: new Emitter<void>().event,
     all: [],
+    getExtension() {
+      return undefined;
+    },
   };
 }

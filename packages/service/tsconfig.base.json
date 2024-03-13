@@ -3,6 +3,7 @@
   "compilerOptions": {
     "baseUrl": "./",
     "resolveJsonModule": true,
+    "esModuleInterop": true,
     "paths": {
       "@vsc-ts/*": ["src/typescript-language-features/src/*"]
     }
