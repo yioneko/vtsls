@@ -1,0 +1,22 @@
+diff --git a/src/tsServer/protocol/protocol.d.ts b/src/tsServer/protocol/protocol.d.ts
+index 45e09d6..5a001ca 100644
+--- a/src/tsServer/protocol/protocol.d.ts
++++ b/src/tsServer/protocol/protocol.d.ts
+@@ -2,7 +2,7 @@
+  *  Copyright (c) Microsoft Corporation. All rights reserved.
+  *  Licensed under the MIT License. See License.txt in the project root for license information.
+  *--------------------------------------------------------------------------------------------*/
+-import type ts from '../../../../node_modules/typescript/lib/typescript';
++import type ts from 'typescript/lib/tsserverlibrary';
+ export = ts.server.protocol;
+ 
+ 
+@@ -11,7 +11,7 @@ declare enum ServerType {
+ 	Semantic = 'semantic',
+ }
+ 
+-declare module '../../../../node_modules/typescript/lib/typescript' {
++declare module 'typescript/lib/tsserverlibrary' {
+ 	namespace server.protocol {
+ 		type TextInsertion = ts.TextInsertion;
+ 		type ScriptElementKind = ts.ScriptElementKind;

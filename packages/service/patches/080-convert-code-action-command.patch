@@ -1,5 +1,5 @@
 diff --git a/src/languageFeatures/quickFix.ts b/src/languageFeatures/quickFix.ts
-index 9f82bc7..c41428f 100644
+index a627670..9df5cf8 100644
 --- a/src/languageFeatures/quickFix.ts
 +++ b/src/languageFeatures/quickFix.ts
 @@ -19,6 +19,7 @@ import FileConfigurationManager from './fileConfigurationManager';
@@ -15,8 +15,8 @@ index 9f82bc7..c41428f 100644
  
  type ApplyFixAllCodeAction_args = {
 -	readonly action: VsCodeFixAllCodeAction;
-+	readonly tsAction: Proto.CodeFixAction;
-+	readonly combinedResponse?: Proto.GetCombinedCodeFixResponse;
++  readonly tsAction: Proto.CodeFixAction;
++  readonly combinedResponse?: Proto.GetCombinedCodeFixResponse;
  };
  
  class ApplyFixAllCodeAction implements Command {
@@ -35,29 +35,37 @@ index 9f82bc7..c41428f 100644
  		}
  	}
  }
-@@ -285,6 +287,11 @@ class TypeScriptQuickFixProvider implements vscode.CodeActionProvider<VsCodeCode
- 		if (response.type === 'response') {
+@@ -289,9 +291,17 @@ class TypeScriptQuickFixProvider implements vscode.CodeActionProvider<VsCodeCode
+ 		};
+ 
+ 		const response = await this.client.execute('getCombinedCodeFix', arg, token);
+-		if (response.type === 'response') {
++		if (response.type === "response") {
  			codeAction.combinedResponse = response;
- 			codeAction.edit = typeConverters.WorkspaceEdit.fromFileCodeEdits(this.client, response.body.changes);
+-			codeAction.edit = typeConverters.WorkspaceEdit.fromFileCodeEdits(this.client, response.body.changes);
++			codeAction.edit = typeConverters.WorkspaceEdit.fromFileCodeEdits(
++				this.client,
++				response.body.changes
++			);
 +			codeAction.command = {
 +				command: ApplyFixAllCodeAction.ID,
-+				arguments: [{ tsAction: codeAction.tsAction, combinedResponse: response } satisfies ApplyFixAllCodeAction_args],
-+				title: ''
++				arguments: [{ tsAction: codeAction.tsAction,combinedResponse: response } satisfies ApplyFixAllCodeAction_args],
++				title: "",
 +			};
  		}
  
  		return codeAction;
-@@ -371,7 +378,7 @@ class TypeScriptQuickFixProvider implements vscode.CodeActionProvider<VsCodeCode
- 		codeAction.diagnostics = [diagnostic];
+@@ -334,7 +344,7 @@ class TypeScriptQuickFixProvider implements vscode.CodeActionProvider<VsCodeCode
+ 		codeAction.ranges = [diagnostic.range];
  		codeAction.command = {
  			command: ApplyCodeActionCommand.ID,
--			arguments: [{ action: action, diagnostic, document } satisfies ApplyCodeActionCommand_args],
+-			arguments: [{ action, diagnostic, document } satisfies ApplyCodeActionCommand_args],
 +			arguments: commandsConverter[ApplyCodeActionCommand.ID].toArgs({ action: action, diagnostic, document } satisfies ApplyCodeActionCommand_args),
  			title: ''
  		};
- 		if (expand && message !== undefined) {
-@@ -425,7 +432,7 @@ class TypeScriptQuickFixProvider implements vscode.CodeActionProvider<VsCodeCode
- 		action.diagnostics = [diagnostic];
+ 		actions.push(codeAction);
+@@ -449,7 +459,7 @@ class TypeScriptQuickFixProvider implements vscode.CodeActionProvider<VsCodeCode
+ 		action.ranges = [diagnostic.range];
  		action.command = {
  			command: ApplyFixAllCodeAction.ID,
 -			arguments: [{ action } satisfies ApplyFixAllCodeAction_args],
@@ -66,26 +74,27 @@ index 9f82bc7..c41428f 100644
  		};
  		results.addFixAllAction(tsAction.fixId, action);
 diff --git a/src/languageFeatures/refactor.ts b/src/languageFeatures/refactor.ts
-index 6e2be78..b16a9e1 100644
+index a61758c..17250d7 100644
 --- a/src/languageFeatures/refactor.ts
 +++ b/src/languageFeatures/refactor.ts
 @@ -23,6 +23,7 @@ import { nulToken } from '../utils/cancellation';
  import FormattingOptionsManager from './fileConfigurationManager';
- import { CompositeCommand, EditorChatFollowUp, EditorChatFollowUp_Args } from './util/copilot';
+ import { CompositeCommand, EditorChatFollowUp } from './util/copilot';
  import { conditionalRegistration, requireSomeCapability } from './util/dependentRegistration';
 +import { commandsConverter } from '../../../share';
  
  function toWorkspaceEdit(client: ITypeScriptServiceClient, edits: readonly Proto.FileCodeEdits[]): vscode.WorkspaceEdit {
  	const workspaceEdit = new vscode.WorkspaceEdit();
-@@ -393,18 +394,12 @@ class InlinedCodeAction extends vscode.CodeAction {
- 					this.command.title = 'Copilot: ' + this.command.title;
- 				}
+@@ -389,18 +391,12 @@ class InlinedCodeAction extends vscode.CodeAction {
+ 			// Disable renames in interactive playground https://github.com/microsoft/vscode/issues/75137
+ 			if (this.document.uri.scheme !== fileSchemes.walkThroughSnippet) {
  				this.command = {
 -					command: CompositeCommand.ID,
- 					title: '',
+-					title: '',
 -					arguments: coalesce([
 -						this.command,
--						this.copilotRename ? this.copilotRename(response.body) : {
+-						{
++							title: '',
  							command: 'editor.action.rename',
 -							arguments: [[
 +							arguments: commandsConverter['editor.action.rename'].toArgs(...[[
@@ -98,7 +107,7 @@ index 6e2be78..b16a9e1 100644
  				};
  			}
  		}
-@@ -434,7 +429,7 @@ class MoveToFileCodeAction extends vscode.CodeAction {
+@@ -430,7 +426,7 @@ class MoveToFileCodeAction extends vscode.CodeAction {
  		this.command = {
  			title: action.description,
  			command: MoveToFileRefactorCommand.ID,
@@ -107,7 +116,7 @@ index 6e2be78..b16a9e1 100644
  		};
  	}
  }
-@@ -449,7 +444,7 @@ class SelectCodeAction extends vscode.CodeAction {
+@@ -445,7 +441,7 @@ class SelectCodeAction extends vscode.CodeAction {
  		this.command = {
  			title: info.description,
  			command: SelectRefactorCommand.ID,

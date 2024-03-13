@@ -1,37 +1,15 @@
 diff --git a/src/tsServer/bufferSyncSupport.ts b/src/tsServer/bufferSyncSupport.ts
-index 608ec60..e766a71 100644
+index 9f5d76f..806d073 100644
 --- a/src/tsServer/bufferSyncSupport.ts
 +++ b/src/tsServer/bufferSyncSupport.ts
-@@ -379,19 +379,7 @@ class TabResourceTracker extends Disposable {
+@@ -756,10 +756,6 @@ export default class BufferSyncSupport extends Disposable {
+ 			return false;
+ 		}
  
- 		this._tabResources = new ResourceMap<{ readonly tabs: Set<vscode.Tab> }>(normalizePath, config);
- 
--		for (const tabGroup of vscode.window.tabGroups.all) {
--			for (const tab of tabGroup.tabs) {
--				this.add(tab);
--			}
--		}
- 
--		this._register(vscode.window.tabGroups.onDidChangeTabs(e => {
--			const closed = e.closed.flatMap(tab => this.delete(tab));
--			const opened = e.opened.flatMap(tab => this.add(tab));
--			if (closed.length || opened.length) {
--				this._onDidChange.fire({ closed, opened });
--			}
--		}));
- 	}
- 
- 	public has(resource: vscode.Uri): boolean {
-@@ -745,9 +733,9 @@ export default class BufferSyncSupport extends Disposable {
- 	}
- 
- 	private shouldValidate(buffer: SyncedBuffer): boolean {
 -		if (!this.client.configuration.enableProjectDiagnostics && !this._tabResources.has(buffer.resource)) { // Only validate resources that are showing to the user
 -			return false;
 -		}
-+		// if (!this.client.configuration.enableProjectDiagnostics && !this._tabResources.has(buffer.resource)) { // Only validate resources that are showing to the user
-+		// 	return false;
-+		// }
- 
+-
  		switch (buffer.languageId) {
  			case languageModeIds.javascript:
+ 			case languageModeIds.javascriptreact:

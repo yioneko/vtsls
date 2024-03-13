@@ -9,8 +9,10 @@
   "include": [
     "src/**/*",
     "vscode/src/vscode-dts/vscode.d.ts",
-    "vscode/src/vscode-dts/vscode.proposed.workspaceTrust.d.ts",
+    "vscode/src/vscode-dts/vscode.proposed.codeActionAI.d.ts",
+    "vscode/src/vscode-dts/vscode.proposed.codeActionRanges.d.ts",
+    "vscode/src/vscode-dts/vscode.proposed.mappedEditsProvider.d.ts",
     "vscode/src/vscode-dts/vscode.proposed.multiDocumentHighlightProvider.d.ts",
-    "vscode/src/vscode-dts/vscode.proposed.mappedEditsProvider.d.ts"
+    "vscode/src/vscode-dts/vscode.proposed.workspaceTrust.d.ts"
   ]
 }
