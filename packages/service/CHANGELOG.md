@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.2.0](https://github.com/yioneko/vtsls/compare/service-v0.1.25...service-v0.2.0) (2024-03-13)
+
+
+### ⚠ BREAKING CHANGES
+
+* deprecate support for node 14 ([#131](https://github.com/yioneko/vtsls/issues/131))
+
+### Bug Fixes
+
+* **deps:** update dependency typescript to v5.4.2 ([1872b8e](https://github.com/yioneko/vtsls/commit/1872b8ebf0855c48e80151a48df394fa4b747807))
+* **deps:** update packages/service/vscode digest to 9fda43d ([#141](https://github.com/yioneko/vtsls/issues/141)) ([983dbe5](https://github.com/yioneko/vtsls/commit/983dbe5f5a3507343db1c60ac0984c12bcc7809a))
+
+
+### Miscellaneous Chores
+
+* deprecate support for node 14 ([#131](https://github.com/yioneko/vtsls/issues/131)) ([a24ea28](https://github.com/yioneko/vtsls/commit/a24ea28d5d288343ff500342371ace73374dac63))
+
 ## [0.1.25](https://github.com/yioneko/vtsls/compare/service-v0.1.24...service-v0.1.25) (2024-01-25)
 
 

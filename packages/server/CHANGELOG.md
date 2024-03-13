@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.2.0](https://github.com/yioneko/vtsls/compare/server-v0.1.25...server-v0.2.0) (2024-03-13)
+
+
+### ⚠ BREAKING CHANGES
+
+* deprecate support for node 14 ([#131](https://github.com/yioneko/vtsls/issues/131))
+
+### Miscellaneous Chores
+
+* deprecate support for node 14 ([#131](https://github.com/yioneko/vtsls/issues/131)) ([a24ea28](https://github.com/yioneko/vtsls/commit/a24ea28d5d288343ff500342371ace73374dac63))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @vtsls/language-service bumped to 0.2.0
+
 ## [0.1.25](https://github.com/yioneko/vtsls/compare/server-v0.1.24...server-v0.1.25) (2024-01-25)
 
 
