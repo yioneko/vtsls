@@ -12,7 +12,7 @@ Install by `npm install -g @vtsls/language-server`, then run `vtsls --stdio`. Re
 
 ## TypeScript version
 
-Similar to VSCode, the server is bundled with the latest TypeScript and the bundled version is used by default. To switch to the workspace version, use command `typescript.selectTypeScriptVersion` or set configuration option `vtsls.autoUseWorkspaceTsdk` to `true`.
+Similar to VSCode, the server is bundled with the latest TypeScript and the bundled version is used by default. To switch to the workspace version, use command `typescript.selectTypeScriptVersion` or set configuration option `vtsls.autoUseWorkspaceTsdk` to `true`. To ignore the bundled version set configuration option `vtsls.typescript.globalTsdk` to the alternative path.
 
 ## LSP Features
 

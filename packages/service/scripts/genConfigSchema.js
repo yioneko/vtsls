@@ -88,6 +88,9 @@ async function genSchema() {
   const additionalConfig = {
     ...additionalConfigByLang("javascript"),
     ...additionalConfigByLang("typescript"),
+    "vtsls.typescript.globalTsdk": {
+      type: "string",
+    },
     "vtsls.experimental.completion.enableServerSideFuzzyMatch": {
       default: false,
       type: "boolean",
