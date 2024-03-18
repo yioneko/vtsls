@@ -1,7 +1,7 @@
 {
   "name": "@vtsls/language-server",
   "description": "LSP wrapper for typescript extension of vscode",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "license": "MIT",
   "engines": {
     "node": ">=14"
@@ -16,7 +16,7 @@
   "dependencies": {
     "vscode-languageserver": "^9.0.1",
     "vscode-uri": "^3.0.8",
-    "@vtsls/language-service": "0.2.0"
+    "@vtsls/language-service": "0.2.1"
   },
   "devDependencies": {
     "esbuild": "^0.20.2"
