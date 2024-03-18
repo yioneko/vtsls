@@ -1081,6 +1081,9 @@
       "type": "number",
       "description": "0: None 1: Block 2: Smart"
     },
+    "vtsls.typescript.globalTsdk": {
+      "type": "string"
+    },
     "vtsls.experimental.completion.enableServerSideFuzzyMatch": {
       "default": false,
       "type": "boolean",

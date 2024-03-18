@@ -1,0 +1,17 @@
+diff --git a/src/configuration/configuration.electron.ts b/src/configuration/configuration.electron.ts
+index 0c2a7ab..d69b9d7 100644
+--- a/src/configuration/configuration.electron.ts
++++ b/src/configuration/configuration.electron.ts
+@@ -24,9 +24,9 @@ export class ElectronServiceConfigurationProvider extends BaseServiceConfigurati
+ 	}
+ 
+ 	protected readGlobalTsdk(configuration: vscode.WorkspaceConfiguration): string | null {
+-		const inspect = configuration.inspect('typescript.tsdk');
+-		if (inspect && typeof inspect.globalValue === 'string') {
+-			return this.fixPathPrefixes(inspect.globalValue);
++		const value = configuration.get<string>('vtsls.typescript.globalTsdk');
++		if (value) {
++			return this.fixPathPrefixes(value);
+ 		}
+ 		return null;
+ 	}
