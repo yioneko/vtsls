@@ -1,7 +1,7 @@
 const esbuild = require("esbuild");
 const path = require("node:path");
-const fs = require("node:fs");
-const { apply } = require("./patch");
+const fs = require("node:fs/promises");
+const { applyPatches } = require("./patch");
 
 const outDir = path.resolve(__dirname, "../dist");
 const srcDir = path.resolve(__dirname, "../src");
@@ -10,7 +10,7 @@ const srcDir = path.resolve(__dirname, "../src");
  * @param args {{ watch: boolean }}
  */
 async function build({ watch }) {
-  const pkgJson = await fs.promises.readFile(path.resolve(__dirname, "../package.json"), "utf8");
+  const pkgJson = await fs.readFile(path.resolve(__dirname, "../package.json"), "utf8");
   const { dependencies = [] } = JSON.parse(pkgJson);
 
   const esmOpts = {
@@ -41,17 +41,7 @@ async function build({ watch }) {
 
 if (require.main === module) {
   const args = process.argv.slice(2);
-
-  // TODO: check overwrite
-  const extPath = path.resolve(__dirname, "../src/typescript-language-features");
-  fs.stat(extPath, async (err, stat) => {
-    await new Promise((resolve) => {
-      if (err || !stat.isDirectory()) {
-        apply().then(resolve);
-      } else {
-        resolve();
-      }
-    });
-    build({ watch: args[0] === "watch" }).catch(console.error);
-  });
+  applyPatches()
+    .then(() => build({ watch: args[0] === "watch" }))
+    .catch(console.error);
 }

@@ -2,11 +2,18 @@ const cp = require("child_process");
 const fs = require("node:fs/promises");
 const readline = require("node:readline");
 const path = require("node:path");
-const { promisify } = require("util");
+const { promisify } = require("node:util");
+const { stdin, stdout } = require("node:process");
 
 const execFile = promisify(cp.execFile);
+const safeFsStat = (path) => fs.stat(path).catch(() => {});
 
-async function getVscodeCommit() {
+const patchMarkFile = ".patchMark.json";
+const patchDir = path.resolve(__dirname, "../patches");
+const vscTsExtPath = path.resolve(__dirname, "../vscode/extensions/typescript-language-features");
+const tsExtPath = path.resolve(__dirname, "../src/typescript-language-features");
+
+async function getVscodeSha() {
   const { stdout } = await execFile("git", ["submodule", "status", "vscode"], {
     cwd: path.resolve(__dirname, "../"),
   });
@@ -14,59 +21,35 @@ async function getVscodeCommit() {
   return commit;
 }
 
-const patchMarkFile = ".patched-commit";
+/**
+ * @typedef PatchMark
+ * @type {object}
+ * @property {string} sha
+ * @property {boolean} patched
+ **/
 
 /**
- * @param patchesPath {string}
- * @return {Promise<string[]>} filenames of patches
+ * @param {string} dir
+ * @returns {Promise<PatchMark|undefined>}
  */
-async function getPatchFiles(patchesPath) {
-  const dir = await fs.readdir(patchesPath);
-  const patchesUnsorted = dir.filter((f) => {
-    return path.extname(f) === ".patch";
-  });
-  const patches = patchesUnsorted.sort();
-  return patches;
-}
-
-async function promptOverwriteExt() {
-  if (process.env.CI === "true") {
-    return true;
-  }
-
-  const rl = readline.createInterface(stdin, stdout);
-  const ans = await promisify(rl.question)(
-    "The VSCode submodule has updated. Overwrite the extension and re-patch? [y/n]"
-  );
-  return ans === "y";
-}
-
-/**
- * @param targetDir {string | undefined}
- * @return {Promise<string>}
- */
-async function checkTsExtDir(targetDir) {
-  const cpTarget = targetDir || path.resolve(__dirname, "../src/typescript-language-features");
-  try {
-    const stat = await fs.stat(cpTarget);
-    if (stat.isDirectory()) {
-      const curCommit = await getVscodeCommit();
-      try {
-        const patched = await fs.readFile(path.resolve(targetDir, patchMarkFile), "utf-8");
-        if (curCommit === patched || !promptOverwriteExt()) {
-          return cpTarget;
-        }
-      } catch {}
+async function readPatchMark(dir) {
+  const stat = await safeFsStat(dir);
+  if (stat && stat.isDirectory()) {
+    try {
+      const content = await fs.readFile(path.resolve(dir, patchMarkFile), "utf-8");
+      return JSON.parse(content);
+    } catch {
+      return;
     }
-
-    await fs.rm(cpTarget, { recursive: true });
-    await fs.mkdir(cpTarget, { recursive: true });
-    await copyTsExtTo(cpTarget);
-  } catch {
-    await fs.mkdir(cpTarget, { recursive: true });
-    await copyTsExtTo(cpTarget);
   }
-  return cpTarget;
+}
+
+/**
+ * @param {string} dir
+ * @param {PatchMark} patchMark
+ */
+async function writePatchMark(dir, patchMark) {
+  return await fs.writeFile(path.resolve(dir, patchMarkFile), JSON.stringify(patchMark));
 }
 
 /**
@@ -97,52 +80,113 @@ async function cpOrRecursive(src, dst) {
  * @param targetDir {string}
  */
 async function copyTsExtTo(targetDir) {
-  const tsExtDir = path.resolve(__dirname, "../vscode/extensions/typescript-language-features");
-  const commit = await getVscodeCommit();
-  for (const entry of await fs.readdir(tsExtDir)) {
+  if (await safeFsStat(targetDir)) {
+    await fs.rm(targetDir, { recursive: true });
+  }
+  await fs.mkdir(targetDir, { recursive: true });
+  const sha = await getVscodeSha();
+  for (const entry of await fs.readdir(vscTsExtPath)) {
     if (entry.match(/(src)|(package.*\.json)/)) {
-      const entryPath = path.resolve(tsExtDir, entry);
+      const entryPath = path.resolve(vscTsExtPath, entry);
       await cpOrRecursive(entryPath, path.join(targetDir, entry));
     }
   }
-  await fs.writeFile(path.resolve(targetDir, patchMarkFile), commit);
+  await writePatchMark(targetDir, { sha, patched: false });
 }
 
-async function apply() {
-  const patchDir = path.resolve(__dirname, "../patches");
-  const patchFiles = await getPatchFiles(patchDir);
-  if (patchDir.length === 0) {
-    throw new Error(`No patches file found under ${patchDir}`);
-  }
-  const patchesResolved = patchFiles.map((f) => path.resolve(patchDir, f));
-
-  const tsExtPath = await checkTsExtDir();
-
-  try {
-    // ensure there is a git repo at there
-    await execFile("git", ["init"], { cwd: tsExtPath });
-  } catch (e) {
-    console.error(e);
+async function promptOverwriteExt(targetDir) {
+  if (process.env.CI === "true") {
+    return true;
   }
 
-  for (const p of patchesResolved) {
+  const rl = readline.createInterface(stdin, stdout);
+  const ans = await new Promise((resolve) => {
+    rl.question(
+      `The VSCode submodule has updated. Overwrite the extension (${targetDir}) and re-patch? [y/n] `,
+      (ans) => {
+        rl.close();
+        resolve(ans);
+      }
+    );
+  });
+
+  return ans === "y";
+}
+
+/**
+ * @param targetDir {string | undefined}
+ * @return {Promise<string>}
+ */
+async function checkTsExtDir(targetDir) {
+  const stat = await safeFsStat(targetDir);
+  if (stat && stat.isDirectory()) {
     try {
-      await execFile("git", ["apply", "--check", p], { cwd: tsExtPath });
+      const patchMark = await readPatchMark(targetDir);
+      const curCommit = await getVscodeSha();
+      if ((!patchMark || curCommit !== patchMark.sha) && (await promptOverwriteExt(targetDir))) {
+        await copyTsExtTo(targetDir);
+        return false;
+      } else {
+        return patchMark.patched;
+      }
     } catch (e) {
-      console.error(`Patch file ${p} failed`);
-      throw e;
+      console.error(e);
+      // fall through
     }
   }
-  for (const p of patchesResolved) {
-    await execFile("git", ["apply", p], { cwd: tsExtPath });
+  await copyTsExtTo(targetDir);
+  return false;
+}
+
+/**
+ * @param patchesPath {string}
+ * @return {Promise<string[]>} filenames of patches
+ */
+async function getPatchFiles(patchesPath) {
+  const dir = await fs.readdir(patchesPath);
+  const patchesUnsorted = dir.filter((f) => {
+    return path.extname(f) === ".patch";
+  });
+  const patches = patchesUnsorted.sort();
+  return patches;
+}
+
+async function applyPatches() {
+  const patched = await checkTsExtDir(tsExtPath);
+
+  if (!patched) {
+    try {
+      // ensure there is a git repo at there
+      await execFile("git", ["init"], { cwd: tsExtPath });
+    } catch (e) {
+      console.error(e);
+    }
+
+    const patchMark = await readPatchMark(tsExtPath);
+    const patchFiles = await getPatchFiles(patchDir);
+    if (patchDir.length === 0) {
+      throw new Error(`No patches file found under ${patchDir}`);
+    }
+    const patchesResolved = patchFiles.map((f) => path.resolve(patchDir, f));
+
+    for (const p of patchesResolved) {
+      try {
+        await execFile("git", ["apply", "--check", p], { cwd: tsExtPath });
+      } catch (e) {
+        console.error(`Patch file ${p} failed`);
+        throw e;
+      }
+    }
+    for (const p of patchesResolved) {
+      await execFile("git", ["apply", p], { cwd: tsExtPath });
+    }
+
+    await writePatchMark(tsExtPath, { ...patchMark, patched: true });
   }
 }
 
-module.exports = {
-  checkTsExtDir,
-  apply,
-};
+module.exports = { applyPatches };
 
 if (require.main === module) {
-  apply().catch(console.error);
+  applyPatches().catch(console.error);
 }
