@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.1](https://github.com/yioneko/vtsls/compare/service-v0.2.0...service-v0.2.1) (2024-03-18)
+
+
+### Features
+
+* configurable global tsdk ([#144](https://github.com/yioneko/vtsls/issues/144)) ([9d7de42](https://github.com/yioneko/vtsls/commit/9d7de42a48bb6d4a8cd1441b7fef2b473be8e652))
+
 ## [0.2.0](https://github.com/yioneko/vtsls/compare/service-v0.1.25...service-v0.2.0) (2024-03-13)
 
 
