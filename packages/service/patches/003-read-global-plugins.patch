@@ -1,0 +1,92 @@
+diff --git a/src/tsServer/plugins.ts b/src/tsServer/plugins.ts
+index 6036e4c..fd0db4c 100644
+--- a/src/tsServer/plugins.ts
++++ b/src/tsServer/plugins.ts
+@@ -6,6 +6,9 @@
+ import * as vscode from 'vscode';
+ import * as arrays from '../utils/arrays';
+ import { Disposable } from '../utils/dispose';
++import { createRequire } from 'node:module';
++import globalDirectory from 'global-directory';
++const req = createRequire(import.meta.url);
+ 
+ export interface TypeScriptServerPlugin {
+ 	readonly extension: vscode.Extension<unknown>;
+@@ -29,11 +32,15 @@ export class PluginManager extends Disposable {
+ 	private readonly _pluginConfigurations = new Map<string, {}>();
+ 
+ 	private _plugins?: Map<string, ReadonlyArray<TypeScriptServerPlugin>>;
++	private logger = vscode.window.createOutputChannel("PluginManager", { log: true });
+ 
+ 	constructor() {
+ 		super();
+ 
+-		vscode.extensions.onDidChange(() => {
++		vscode.workspace.onDidChangeConfiguration((e) => {
++			if (!e.affectsConfiguration("vtsls.tsserver.globalPlugins")) {
++				return;
++			}
+ 			if (!this._plugins) {
+ 				return;
+ 			}
+@@ -66,27 +73,41 @@ export class PluginManager extends Disposable {
+ 		return this._pluginConfigurations.entries();
+ 	}
+ 
++	private resolvePluginPath(name: string) {
++		try {
++			return req.resolve(name, {
++				paths: [globalDirectory.npm.packages, globalDirectory.yarn.packages],
++			});
++		} catch (e) {
++			this.logger.error(`Cannot resolve the path of plugin ${name}`, e);
++		}
++	}
++
+ 	private readPlugins() {
+-		const pluginMap = new Map<string, ReadonlyArray<TypeScriptServerPlugin>>();
+-		for (const extension of vscode.extensions.all) {
+-			const pack = extension.packageJSON;
+-			if (pack.contributes && Array.isArray(pack.contributes.typescriptServerPlugins)) {
+-				const plugins: TypeScriptServerPlugin[] = [];
+-				for (const plugin of pack.contributes.typescriptServerPlugins) {
+-					plugins.push({
+-						extension,
+-						name: plugin.name,
+-						enableForWorkspaceTypeScriptVersions: !!plugin.enableForWorkspaceTypeScriptVersions,
+-						uri: extension.extensionUri,
+-						languages: Array.isArray(plugin.languages) ? plugin.languages : [],
+-						configNamespace: plugin.configNamespace,
+-					});
+-				}
+-				if (plugins.length) {
+-					pluginMap.set(extension.id, plugins);
+-				}
++		const configPlugins =
++			vscode.workspace.getConfiguration("vtsls").get<Array<any>>("tsserver.globalPlugins") || [];
++		const plugins: TypeScriptServerPlugin[] = [];
++		for (const plugin of configPlugins) {
++			const pluginPath = plugin.location || this.resolvePluginPath(plugin.name);
++			if (!pluginPath) {
++				continue;
+ 			}
++			const uri = vscode.Uri.file(pluginPath);
++			const extension = {
++				id: plugin.name,
++				extensionUri: uri,
++				extensionPath: pluginPath,
++				isActive: true,
++			} as any;
++			plugins.push({
++				extension,
++				name: plugin.name,
++				enableForWorkspaceTypeScriptVersions: !!plugin.enableForWorkspaceTypeScriptVersions,
++				uri,
++				languages: Array.isArray(plugin.languages) ? plugin.languages : [],
++				configNamespace: plugin.configNamespace,
++			});
+ 		}
+-		return pluginMap;
++		return new Map([["", plugins]]);
+ 	}
+ }

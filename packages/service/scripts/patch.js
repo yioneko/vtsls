@@ -1,4 +1,4 @@
-const cp = require("child_process");
+const cp = require("node:child_process");
 const fs = require("node:fs/promises");
 const readline = require("node:readline");
 const path = require("node:path");

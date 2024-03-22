@@ -1,6 +1,6 @@
 const esbuild = require("esbuild");
-const fs = require("fs");
-const path = require("path");
+const fs = require("node:fs/promises");
+const path = require("node:path");
 
 const outDir = path.resolve(__dirname, "./dist");
 const srcDir = path.resolve(__dirname, "./src");
@@ -9,7 +9,7 @@ const srcDir = path.resolve(__dirname, "./src");
  * @param args {{ watch: boolean }}
  */
 async function build({ watch }) {
-  const pkgJson = await fs.promises.readFile(path.resolve(__dirname, "./package.json"), "utf8");
+  const pkgJson = await fs.readFile(path.resolve(__dirname, "./package.json"), "utf8");
   const { version, dependencies = [] } = JSON.parse(pkgJson);
   const opts = {
     entryPoints: [srcDir],
