@@ -131,7 +131,25 @@ Instead of switching client, some server configuration options could also make p
 
 - Plugin should be specified in `tsconfig.json`.
 - Check the place of running tsserver. By default the bundled version is used as in VSCode. Switch to workspace version by command `typescript.selectTypeScriptVersion` or config option `vtsls.autoUseWorkspaceTsdk`.
-- `typescript.tsserver.pluginPaths`: use this option without modifying `tsconfig.json`.
+- `typescript.tsserver.pluginPaths` or `vtsls.tsserver.globalPlugins`: use these options without modifying `tsconfig.json`.
+
+### Vue Support via Hybrid Mode of [`volar >= 2.0`](https://github.com/vuejs/language-tools/tree/master/packages/typescript-plugin)
+
+Suppose `@vue/language-server` has been installed through package manager, then set configuration option `vtsls.tsserver.globalPlugins` to:
+
+```json
+[
+  {
+    "name": "@vue/typescript-plugin",
+    "location": "/usr/local/lib/node_modules/@vue/language-server",
+    "languages": ["vue"],
+    "configNamespace": "typescript",
+    "enableForWorkspaceTypeScriptVersions": true,
+  }
+]
+```
+
+`location` field can be omitted if it can be resolved globally through the `Node` used to run the server.
 
 ### Log
 
