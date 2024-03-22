@@ -129,9 +129,29 @@ Instead of switching client, some server configuration options could also make p
 
 ### TypeScript plugin not activated
 
-- Plugin should be specified in `tsconfig.json`.
-- Check the place of running tsserver. By default the bundled version is used as in VSCode. Switch to workspace version by command `typescript.selectTypeScriptVersion` or config option `vtsls.autoUseWorkspaceTsdk`.
-- `typescript.tsserver.pluginPaths`: use this option without modifying `tsconfig.json`.
+If the plugin is specified in project `package.json` and installed locally:
+
+- Ensure the plugin is also specified in `compilerOptions.plugins` field of `tsconfig.json`.
+- Switch to workspace version of tsserver by command `typescript.selectTypeScriptVersion` or config option `vtsls.autoUseWorkspaceTsdk`.
+- Alternatively, set `typescript.tsserver.pluginPaths = ["./node_modules"]` to tell the bundled tsserver to search plugins in project local `node_modules` folder.
+
+Or if the plugin resides elsewhere, typically when you want to test a plugin without locally installing it to your package or modifying `tsconfig.json`: use config option `vtsls.tsserver.globalPlugins`. Refer to the following section for an example.
+
+### Vue Support via Hybrid Mode of [`volar >= 2.0`](https://github.com/vuejs/language-tools/tree/master/packages/typescript-plugin)
+
+Suppose `@vue/language-server` has been installed through package manager, then set configuration option `vtsls.tsserver.globalPlugins` to:
+
+```json
+[
+  {
+    "name": "@vue/typescript-plugin",
+    "location": "/usr/local/lib/node_modules/@vue/language-server",
+    "languages": ["vue"],
+    "configNamespace": "typescript",
+    "enableForWorkspaceTypeScriptVersions": true,
+  }
+]
+```
 
 ### Log
 
