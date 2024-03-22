@@ -16,6 +16,7 @@ function getDefaultConfig() {
     "vtsls.experimental.completion.entriesLimit": null,
     "vtsls.enableMoveToFileCodeAction": false,
     "vtsls.autoUseWorkspaceTsdk": false,
+    "vtsls.tsserver.globalPlugins": [],
   };
 
   const res: TSLanguageServiceConfig = {};

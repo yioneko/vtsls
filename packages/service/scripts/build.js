@@ -29,6 +29,8 @@ async function build({ watch }) {
     format: "cjs",
     define: { "import.meta.url": "importMetaUrl" },
     inject: [path.resolve(__dirname, "cjs_shims.js")],
+    // filter out esm-only packages
+    external: esmOpts.external.filter((d) => !d.startsWith("global-directory")),
   };
   if (!watch) {
     await esbuild.build(esmOpts);
