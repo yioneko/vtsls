@@ -135,19 +135,13 @@ If the plugin is specified in project `package.json` and installed locally:
 - Switch to workspace version of tsserver by command `typescript.selectTypeScriptVersion` or config option `vtsls.autoUseWorkspaceTsdk`.
 - Alternatively, set `typescript.tsserver.pluginPaths = ["./node_modules"]` to tell the bundled tsserver to search plugins in project local `node_modules` folder.
 
-Or if the plugin resides elsewhere, typically when you want to test a plugin without locally installing it to your package or modifying `tsconfig.json`: use config option `vtsls.tsserver.globalPlugins`. Refer to the following section for an example.
-
-### Vue Support via Hybrid Mode of [`volar >= 2.0`](https://github.com/vuejs/language-tools/tree/master/packages/typescript-plugin)
-
-Suppose `@vue/language-server` has been installed through package manager, then set configuration option `vtsls.tsserver.globalPlugins` to:
+Or if the plugin resides elsewhere, typically when you want to test a plugin without locally installing it to your package or modifying `tsconfig.json`: use config option `vtsls.tsserver.globalPlugins`. An example for [`styled-components`](https://github.com/styled-components/typescript-styled-plugin) support:
 
 ```json
 [
   {
-    "name": "@vue/typescript-plugin",
-    "location": "/usr/local/lib/node_modules/@vue/language-server",
-    "languages": ["vue"],
-    "configNamespace": "typescript",
+    "name": "@styled/typescript-styled-plugin",
+    "location": "/usr/local/lib/node_modules",
     "enableForWorkspaceTypeScriptVersions": true,
   }
 ]
