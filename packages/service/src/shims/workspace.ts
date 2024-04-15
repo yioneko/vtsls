@@ -225,6 +225,11 @@ export class WorkspaceShimService extends Disposable {
 
   async openTextDocument(nameOrUri: vscode.Uri | string): Promise<vscode.TextDocument> {
     const uri = typeof nameOrUri === "string" ? URI.file(nameOrUri) : nameOrUri;
+    const maybeOpenedDoc = this._documents.get(uri);
+    if (maybeOpenedDoc) {
+      return this.delegate.converter.convertTextDocuemntFromLsp(maybeOpenedDoc);
+    }
+
     const success = await this.delegate.openTextDocument(uri.toString());
     if (!success) {
       throw new Error(`Cannot open doc ${uri.toString()}`);

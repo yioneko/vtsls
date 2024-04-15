@@ -115,6 +115,34 @@ async function genSchema() {
       description:
         "Automatically use workspace version of TypeScript lib on startup. By default, the bundled version is used for intelliSense.",
     },
+    "vtsls.tsserver.globalPlugins": {
+      default: [],
+      type: "array",
+      items: {
+        type: "object",
+        properties: {
+          name: { type: "string" },
+          location: {
+            type: "string",
+            description:
+              "Location where to resolve the path of plugin. If not provided, the plugin will be resolved from the place of running `tsserver.js` and `typescript.tsserver.pluginPaths`.",
+          },
+          enableForWorkspaceTypeScriptVersions: {
+            type: "boolean",
+            description:
+              "By default, global plugins won't be enabled when workspace version of tsdk is used. Set to `true` to switch this behavior.",
+          },
+          languages: {
+            type: "array",
+            items: { type: "string" },
+            description: "Additional languages except for JS/TS suppported by the plugin.",
+          },
+          configNamespace: { type: "string" },
+        },
+      },
+      description:
+        "TypeScript plugins that are not locally avaiable in the workspace. Usually the plugin configuration can be found in the `contributes.typescriptServerPlugins` field of `package.json` of the corresponding VSCode extension.",
+    },
   };
 
   return {

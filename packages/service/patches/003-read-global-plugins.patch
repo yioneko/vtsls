@@ -1,0 +1,93 @@
+diff --git a/src/tsServer/plugins.ts b/src/tsServer/plugins.ts
+index 6036e4c..1d3efd6 100644
+--- a/src/tsServer/plugins.ts
++++ b/src/tsServer/plugins.ts
+@@ -9,7 +9,7 @@ import { Disposable } from '../utils/dispose';
+ 
+ export interface TypeScriptServerPlugin {
+ 	readonly extension: vscode.Extension<unknown>;
+-	readonly uri: vscode.Uri;
++	readonly uri?: vscode.Uri;
+ 	readonly name: string;
+ 	readonly enableForWorkspaceTypeScriptVersions: boolean;
+ 	readonly languages: ReadonlyArray<string>;
+@@ -18,7 +18,7 @@ export interface TypeScriptServerPlugin {
+ 
+ namespace TypeScriptServerPlugin {
+ 	export function equals(a: TypeScriptServerPlugin, b: TypeScriptServerPlugin): boolean {
+-		return a.uri.toString() === b.uri.toString()
++		return a.uri?.toString() === b.uri?.toString()
+ 			&& a.name === b.name
+ 			&& a.enableForWorkspaceTypeScriptVersions === b.enableForWorkspaceTypeScriptVersions
+ 			&& arrays.equals(a.languages, b.languages);
+@@ -33,7 +33,10 @@ export class PluginManager extends Disposable {
+ 	constructor() {
+ 		super();
+ 
+-		vscode.extensions.onDidChange(() => {
++		vscode.workspace.onDidChangeConfiguration((e) => {
++			if (!e.affectsConfiguration("vtsls.tsserver.globalPlugins")) {
++				return;
++			}
+ 			if (!this._plugins) {
+ 				return;
+ 			}
+@@ -67,26 +70,25 @@ export class PluginManager extends Disposable {
+ 	}
+ 
+ 	private readPlugins() {
+-		const pluginMap = new Map<string, ReadonlyArray<TypeScriptServerPlugin>>();
+-		for (const extension of vscode.extensions.all) {
+-			const pack = extension.packageJSON;
+-			if (pack.contributes && Array.isArray(pack.contributes.typescriptServerPlugins)) {
+-				const plugins: TypeScriptServerPlugin[] = [];
+-				for (const plugin of pack.contributes.typescriptServerPlugins) {
+-					plugins.push({
+-						extension,
+-						name: plugin.name,
+-						enableForWorkspaceTypeScriptVersions: !!plugin.enableForWorkspaceTypeScriptVersions,
+-						uri: extension.extensionUri,
+-						languages: Array.isArray(plugin.languages) ? plugin.languages : [],
+-						configNamespace: plugin.configNamespace,
+-					});
+-				}
+-				if (plugins.length) {
+-					pluginMap.set(extension.id, plugins);
+-				}
+-			}
++		const configPlugins =
++			vscode.workspace.getConfiguration("vtsls").get<Array<any>>("tsserver.globalPlugins") || [];
++		const plugins: TypeScriptServerPlugin[] = [];
++		for (const plugin of configPlugins) {
++			const extension = {
++				id: plugin.name,
++				// extensionUri: uri,
++				// extensionPath: pluginPath,
++				// isActive: true,
++			} as any;
++			plugins.push({
++				extension,
++				name: plugin.name,
++				enableForWorkspaceTypeScriptVersions: !!plugin.enableForWorkspaceTypeScriptVersions,
++				uri: plugin.location ? vscode.Uri.file(plugin.location) : undefined,
++				languages: Array.isArray(plugin.languages) ? plugin.languages : [],
++				configNamespace: plugin.configNamespace,
++			});
+ 		}
+-		return pluginMap;
++		return new Map([["", plugins]]);
+ 	}
+ }
+diff --git a/src/tsServer/spawner.ts b/src/tsServer/spawner.ts
+index 52dcf5b..f280a06 100644
+--- a/src/tsServer/spawner.ts
++++ b/src/tsServer/spawner.ts
+@@ -253,7 +253,7 @@ export class TypeScriptServerSpawner {
+ 
+ 			const isUsingBundledTypeScriptVersion = currentVersion.path === this._versionProvider.defaultVersion.path;
+ 			for (const plugin of pluginManager.plugins) {
+-				if (isUsingBundledTypeScriptVersion || plugin.enableForWorkspaceTypeScriptVersions) {
++				if ((isUsingBundledTypeScriptVersion || plugin.enableForWorkspaceTypeScriptVersions) && plugin.uri) {
+ 					pluginPaths.push(isWeb() ? plugin.uri.toString() : plugin.uri.fsPath);
+ 				}
+ 			}
