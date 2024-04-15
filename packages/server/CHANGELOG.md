@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.2.2](https://github.com/yioneko/vtsls/compare/server-v0.2.1...server-v0.2.2) (2024-04-15)
+
+
+### Features
+
+* custom global typescript plugins ([#149](https://github.com/yioneko/vtsls/issues/149)) ([c8068a8](https://github.com/yioneko/vtsls/commit/c8068a833be759bbb52fc650f6f6549564f64194))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @vtsls/language-service bumped from 0.2.1 to 0.2.2
+
 ## [0.2.1](https://github.com/yioneko/vtsls/compare/server-v0.2.0...server-v0.2.1) (2024-03-18)
 
 

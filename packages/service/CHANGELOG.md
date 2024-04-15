@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.2.2](https://github.com/yioneko/vtsls/compare/service-v0.2.1...service-v0.2.2) (2024-04-15)
+
+
+### Features
+
+* custom global typescript plugins ([#149](https://github.com/yioneko/vtsls/issues/149)) ([c8068a8](https://github.com/yioneko/vtsls/commit/c8068a833be759bbb52fc650f6f6549564f64194))
+
+
+### Bug Fixes
+
+* **deps:** update dependency typescript to v5.4.3 ([41ad8c9](https://github.com/yioneko/vtsls/commit/41ad8c9d3f9dbd122ce3259564f34d020b7d71d9))
+
 ## [0.2.1](https://github.com/yioneko/vtsls/compare/service-v0.2.0...service-v0.2.1) (2024-03-18)
 
 
