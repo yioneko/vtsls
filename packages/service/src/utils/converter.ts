@@ -58,7 +58,7 @@ export class TSLspConverter extends LspInvariantConverter {
 
   convertWorkspaceEdit = (edit: vscode.WorkspaceEdit): lsp.WorkspaceEdit => {
     const resouceOpKinds =
-      this.clientCapabilities.workspace?.workspaceEdit?.resourceOperations || [];
+      this.clientCapabilities.workspace?.workspaceEdit?.resourceOperations ?? [];
 
     const docChanges: (lsp.CreateFile | lsp.RenameFile | lsp.DeleteFile | URI)[] = [];
     let hasResourceOp = false;
@@ -246,7 +246,7 @@ export class TSLspConverter extends LspInvariantConverter {
     const isSnippet = !isStringOrFalsy(item.insertText);
     const insertText = isSnippet
       ? (item.insertText as vscode.SnippetString).value
-      : (item.insertText as string | undefined) || item.textEdit?.newText;
+      : (item.insertText as string | undefined) ?? item.textEdit?.newText;
 
     let textEdit: lsp.TextEdit | lsp.InsertReplaceEdit | undefined = undefined;
     // prefer range to textEdit if provided
@@ -307,7 +307,7 @@ export class TSLspConverter extends LspInvariantConverter {
       targetUri: location.targetUri.toString(),
       targetRange: this.convertRangeToLsp(location.targetRange),
       targetSelectionRange: this.convertRangeToLsp(
-        location.targetSelectionRange || location.targetRange
+        location.targetSelectionRange ?? location.targetRange
       ),
     };
   };
@@ -437,7 +437,7 @@ export class TSLspConverter extends LspInvariantConverter {
         title: ac.title,
         command: ac.command,
         diagnostics: mapOrFalsy(ac.diagnostics, this.convertDiagnosticToLsp),
-        kind: ac.kind?.value as lsp.CodeActionKind,
+        kind: ac.kind?.value,
         edit: convertOrFalsy(ac.edit, this.convertWorkspaceEdit),
         isPreferred: ac.isPreferred,
         data,
@@ -575,7 +575,7 @@ export class TSLspConverter extends LspInvariantConverter {
     return new types.CallHierarchyItem(
       item.kind - 1,
       item.name,
-      item.detail || "",
+      item.detail ?? "",
       URI.parse(item.uri),
       types.Range.of(item.range),
       types.Range.of(item.selectionRange)
@@ -618,7 +618,7 @@ export class TSLspConverter extends LspInvariantConverter {
 
   convertFoldingRange = (range: vscode.FoldingRange): lsp.FoldingRange => {
     let kind: lsp.FoldingRangeKind | undefined;
-    switch (range.kind) {
+    switch (range.kind as types.FoldingRangeKind) {
       case types.FoldingRangeKind.Comment:
         kind = lsp.FoldingRangeKind.Comment;
         break;

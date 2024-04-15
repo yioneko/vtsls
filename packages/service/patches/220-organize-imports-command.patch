@@ -1,0 +1,56 @@
+diff --git a/src/languageFeatures/organizeImports.ts b/src/languageFeatures/organizeImports.ts
+index 8219943..9372b15 100644
+--- a/src/languageFeatures/organizeImports.ts
++++ b/src/languageFeatures/organizeImports.ts
+@@ -26,7 +26,7 @@ interface OrganizeImportsCommandMetadata {
+ }
+ 
+ const organizeImportsCommand: OrganizeImportsCommandMetadata = {
+-	commandIds: [], // We use the generic 'Organize imports' command
++	commandIds: ['typescript.organizeImports'],
+ 	title: vscode.l10n.t("Organize Imports"),
+ 	kind: vscode.CodeActionKind.SourceOrganizeImports,
+ 	mode: OrganizeImportsMode.All,
+@@ -167,19 +167,31 @@ export function register(
+ 				return vscode.Disposable.from(
+ 					vscode.languages.registerCodeActionsProvider(selector.semantic, provider, {
+ 						providedCodeActionKinds: [command.kind]
+-					}));
++					}),
++					...command.commandIds.map(id =>
++						commandManager.register({
++							id,
++							async execute(filePath: string) {
++								const document = await vscode.workspace.openTextDocument(filePath);
++								const importAction = provider.provideCodeActions(
++									document,
++									new vscode.Range(0, 0, 0, 0),
++									{
++										triggerKind: vscode.CodeActionTriggerKind.Invoke,
++										diagnostics: [],
++										only: command.kind,
++									},
++									nulToken
++								)[0];
++								const resolvedImportAction = await provider.resolveCodeAction(importAction, nulToken);
++								if (resolvedImportAction?.edit) {
++									return await vscode.workspace.applyEdit(resolvedImportAction.edit);
++								}
++							}
++						}))
++				);
+ 			}),
+ 			// Always register these commands. We will show a warning if the user tries to run them on an unsupported version
+-			...command.commandIds.map(id =>
+-				commandManager.register({
+-					id,
+-					execute() {
+-						return vscode.commands.executeCommand('editor.action.sourceAction', {
+-							kind: command.kind.value,
+-							apply: 'first',
+-						});
+-					}
+-				}))
+ 		);
+ 	}
+ 

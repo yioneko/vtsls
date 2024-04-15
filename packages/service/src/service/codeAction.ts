@@ -92,7 +92,7 @@ export class TSCodeActionFeature extends Disposable {
 
     const results: (lsp.Command | lsp.CodeAction)[][] = [];
     // if no kinds passed, assume requesting all
-    const kinds = ctx.only?.sort() || [""];
+    const kinds = ctx.only?.sort() ?? [""];
 
     let lastPrefixi = -1;
     for (let i = 0; i < kinds.length; ++i) {

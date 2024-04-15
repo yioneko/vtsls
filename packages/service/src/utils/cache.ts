@@ -39,7 +39,7 @@ export class RestrictedCache<V> implements Disposable {
   private timer: NodeJS.Timeout | undefined;
 
   _clearIfMaxReached() {
-    if (this.timer || this._store.size < this.maxItems) {
+    if (!!this.timer || this._store.size < this.maxItems) {
       return;
     }
     this.timer = setTimeout(() => {

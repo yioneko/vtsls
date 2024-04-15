@@ -18,7 +18,7 @@ export interface WorkDoneProgressReporter {
   done(): void;
 }
 
-export type EventHandlersMapping = {
+export interface EventHandlersMapping {
   showDocument: (params: lsp.ShowDocumentParams) => Promise<boolean>;
   logMessage: (params: lsp.LogMessageParams) => void;
   logTrace: (params: lsp.LogTraceParams) => void;
@@ -28,7 +28,7 @@ export type EventHandlersMapping = {
   ) => Promise<lsp.ApplyWorkspaceEditResult>;
   workDoneProgress: () => Promise<WorkDoneProgressReporter>;
   diagnostics: (params: lsp.PublishDiagnosticsParams) => Promise<void>;
-};
+}
 
 export type EventName = keyof EventHandlersMapping;
 

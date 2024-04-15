@@ -2,8 +2,8 @@ module.exports = {
   root: true,
   extends: [
     "eslint:recommended",
-    "plugin:@typescript-eslint/recommended",
-    "plugin:@typescript-eslint/recommended-requiring-type-checking",
+    "plugin:@typescript-eslint/recommended-type-checked",
+    "plugin:@typescript-eslint/stylistic-type-checked",
   ],
   parser: "@typescript-eslint/parser",
   parserOptions: {
@@ -23,16 +23,17 @@ module.exports = {
     ".eslintrc.*",
   ],
   rules: {
-    "@typescript-eslint/ban-ts-comment": "warn",
+    // "@typescript-eslint/ban-ts-comment": "warn",
     "@typescript-eslint/no-empty-function": "off",
     "@typescript-eslint/no-explicit-any": "off",
     "@typescript-eslint/no-this-alias": "off",
     "@typescript-eslint/no-unsafe-argument": "off",
     "@typescript-eslint/no-unsafe-assignment": "off",
     "@typescript-eslint/no-unsafe-member-access": "off",
-    "@typescript-eslint/no-unsafe-return": "warn",
+    // "@typescript-eslint/no-unsafe-return": "warn",
     "@typescript-eslint/require-await": "off",
-    "@typescript-eslint/unbound-method": "warn",
+    // "@typescript-eslint/unbound-method": "warn",
     "@typescript-eslint/no-non-null-assertion": "off",
+    "@typescript-eslint/array-type": "off",
   },
 };

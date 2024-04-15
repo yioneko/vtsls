@@ -30,7 +30,7 @@ export class CompletionCache extends Disposable {
           throw new lsp.ResponseError(lsp.ErrorCodes.InvalidParams, "completion item data missing");
         }
         if (item.command && item.command.command !== CompletionCache.id) {
-          return commands.executeCommand(item.command.command, ...(item.command.arguments || []));
+          return commands.executeCommand(item.command.command, ...(item.command.arguments ?? []));
         }
       })
     );
@@ -127,7 +127,7 @@ export class TSCompletionFeature extends Disposable {
 
       const ctx = params.context
         ? {
-            triggerKind: params.context.triggerKind - 1,
+            triggerKind: (params.context.triggerKind - 1) as types.CompletionTriggerKind,
             triggerCharacter: params.context.triggerCharacter,
           }
         : {

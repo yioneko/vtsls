@@ -1,0 +1,13 @@
+diff --git a/src/typescriptServiceClient.ts b/src/typescriptServiceClient.ts
+index 0b001b8..4202e83 100644
+--- a/src/typescriptServiceClient.ts
++++ b/src/typescriptServiceClient.ts
+@@ -1040,7 +1040,7 @@ export default class TypeScriptServiceClient extends Disposable implements IType
+ 	private addWatchEvent(id: number, eventType: keyof WatchEvent, path: string) {
+ 		let event = this.watchEvents.get(id);
+ 		const removeEvent = (typeOfEventToRemove: keyof WatchEvent) => {
+-			if (event?.[typeOfEventToRemove]?.delete(path) && event[typeOfEventToRemove].size === 0) {
++			if (event?.[typeOfEventToRemove]?.delete(path) && event[typeOfEventToRemove]?.size === 0) {
+ 				event[typeOfEventToRemove] = undefined;
+ 			}
+ 		};

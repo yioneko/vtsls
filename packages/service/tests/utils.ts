@@ -56,7 +56,7 @@ export async function createTestService(workspacePath: string) {
     service.openTextDocument({
       textDocument: {
         uri,
-        languageId: opts?.languageId || "typescript",
+        languageId: opts?.languageId ?? "typescript",
         version: 0,
         text: resolvedText,
       },

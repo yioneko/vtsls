@@ -83,7 +83,7 @@ export class WindowShimService extends Disposable {
       return await task({ report() {} }, lsp.CancellationToken.None);
     }
 
-    reporter.begin(options.title || "");
+    reporter.begin(options.title ?? "");
     try {
       const result = await task(
         {
@@ -121,7 +121,7 @@ export class WindowShimService extends Disposable {
     });
     const transformedItems = allTitles.filter((i) => !!i) as lsp.MessageActionItem[];
     const selected = await this.delegate.showMessage(type, message, ...transformedItems);
-    if (selected && selected.tsId !== undefined && typeof selected.tsId === "number") {
+    if (selected?.tsId !== undefined && typeof selected.tsId === "number") {
       return items[selected.tsId];
     } else {
       return selected;
