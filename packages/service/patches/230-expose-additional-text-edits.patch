@@ -1,0 +1,52 @@
+diff --git a/src/languageFeatures/completions.ts b/src/languageFeatures/completions.ts
+index 708d7e0..98401e7 100644
+--- a/src/languageFeatures/completions.ts
++++ b/src/languageFeatures/completions.ts
+@@ -201,7 +201,7 @@ class MyCompletionItem extends vscode.CompletionItem {
+ 
+ 			this.documentation = this.getDocumentation(client, detail, this.document.uri);
+ 
+-			const codeAction = this.getCodeActions(detail, filepath);
++			const codeAction = this.getCodeActions(detail, filepath, client);
+ 			const commands: vscode.Command[] = [{
+ 				command: CompletionAcceptedCommand.ID,
+ 				title: '',
+@@ -314,7 +314,8 @@ class MyCompletionItem extends vscode.CompletionItem {
+ 
+ 	private getCodeActions(
+ 		detail: Proto.CompletionEntryDetails,
+-		filepath: string
++		filepath: string,
++		client: ITypeScriptServiceClient,
+ 	): { command?: vscode.Command; additionalTextEdits?: vscode.TextEdit[] } {
+ 		if (!detail.codeActions?.length) {
+ 			return {};
+@@ -333,7 +334,8 @@ class MyCompletionItem extends vscode.CompletionItem {
+ 			// Apply all edits in the current file using `additionalTextEdits`
+ 			if (tsAction.changes) {
+ 				for (const change of tsAction.changes) {
+-					if (change.fileName === filepath) {
++					// On windows, change.fileName is c:/../../
++					if (client.toResource(change.fileName).fsPath === filepath) {
+ 						additionalTextEdits.push(...change.textChanges.map(typeConverters.TextEdit.fromCodeEdit));
+ 					} else {
+ 						hasRemainingCommandsOrEdits = true;
+@@ -586,7 +588,7 @@ class ApplyCompletionCommand implements Command {
+ 
+ 		const { edits, commands } = resolved;
+ 
+-		if (edits) {
++		if (!item.additionalTextEdits && edits) {
+ 			const workspaceEdit = new vscode.WorkspaceEdit();
+ 			for (const edit of edits) {
+ 				workspaceEdit.replace(item.document.uri, edit.range, edit.newText);
+@@ -883,7 +885,8 @@ class TypeScriptCompletionItemProvider implements vscode.CompletionItemProvider<
+ 		item: MyCompletionItem,
+ 		token: vscode.CancellationToken
+ 	): Promise<MyCompletionItem | undefined> {
+-		await item.resolveCompletionItem(this.client, token);
++		const resolved = await item.resolveCompletionItem(this.client, token);
++		item.additionalTextEdits = resolved?.edits as vscode.TextEdit[] | undefined;
+ 		return item;
+ 	}
+ 

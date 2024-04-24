@@ -54,20 +54,12 @@ describe("language features", async () => {
 
     const resolvedItem = await service.completionItemResolve(item);
     expect(resolvedItem.detail).toContain('Add import from "./foo"');
-
-    const edit = await waitWorkspaceEdit(service, () => {
-      assert(resolvedItem.command);
-      void service.executeCommand(resolvedItem.command);
-    });
-
-    expect(edit.changes).toMatchObject({
-      [uri]: [
-        {
-          newText: expect.stringContaining('import { foo } from "./foo";'),
-          range: { end: { character: 0, line: 0 }, start: { character: 0, line: 0 } },
-        },
-      ],
-    });
+    expect(resolvedItem.additionalTextEdits).toMatchObject([
+      {
+        newText: expect.stringContaining('import { foo } from "./foo";'),
+        range: { end: { character: 0, line: 0 }, start: { character: 0, line: 0 } },
+      },
+    ]);
   });
 
   it("provide jsdoc compleion", async () => {
