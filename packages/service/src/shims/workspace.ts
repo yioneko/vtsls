@@ -56,7 +56,7 @@ export class WorkspaceShimService extends Disposable {
       onCaseInsensitiveFileSystem: onCaseInsensitiveFileSystem(),
     });
 
-    for (const f of initWorkspaceFolders || []) {
+    for (const f of initWorkspaceFolders ?? []) {
       const id = this._workspaceFolderIdGen++;
       const uri = URI.parse(f.uri);
       this._workspaceFolders.set(uri, {
@@ -258,10 +258,8 @@ export class WorkspaceShimService extends Disposable {
     return this.delegate.applyWorkspaceEdit(this.delegate.converter.convertWorkspaceEdit(edit));
   }
 
-  get isTrusted() {
-    // TODO: should we handle this?
-    return true;
-  }
+  // TODO: should we handle this?
+  readonly isTrusted = true;
 
   async requestWorkspaceTrust() {
     return true;

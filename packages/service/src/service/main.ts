@@ -91,7 +91,7 @@ export function createTSLanguageService(initOptions: TSLanguageServiceOptions) {
   const tsLanguageService = {
     ...events,
     // wait initial config
-    async initialize(config: TSLanguageServiceConfig | undefined) {
+    async initialize(config: TSLanguageServiceConfig) {
       switch (serviceState.state) {
         case "uninitialized":
           try {
@@ -279,7 +279,7 @@ export function createTSLanguageService(initOptions: TSLanguageServiceOptions) {
       codeActionFeature.codeActionResolve(item, token)
     ),
     executeCommand: wrapRequestHandler(async (params: lsp.ExecuteCommandParams) => {
-      let args = params.arguments || [];
+      let args = params.arguments ?? [];
 
       const commandId = params.command;
       if (commandId in commandsConverter) {

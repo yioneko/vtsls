@@ -24,7 +24,7 @@ export class CommandsShimService extends Disposable {
   async getCommands(filterInternal = false): Promise<string[]> {
     const result = [];
     for (const id of this._commands.keys()) {
-      if (filterInternal && id[0] !== "_") {
+      if (filterInternal && !id.startsWith("_")) {
         result.push(id);
       }
     }
