@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.2.3](https://github.com/yioneko/vtsls/compare/service-v0.2.2...service-v0.2.3) (2024-04-24)
+
+
+### Bug Fixes
+
+* **deps:** update dependency typescript to v5.4.5 ([d4c5ed9](https://github.com/yioneko/vtsls/commit/d4c5ed98fb3cd927ac29ff213f8a0d8e3a28aaac))
+* **deps:** update packages/service/vscode digest to e46e2ab ([#152](https://github.com/yioneko/vtsls/issues/152)) ([ac4eac3](https://github.com/yioneko/vtsls/commit/ac4eac346090735a408ff12f8dc9d18681d7218e))
+* expose `additionalTextEdits` from completion item ([8d68dec](https://github.com/yioneko/vtsls/commit/8d68dec470e3c00a096e2f5d31baa00db94fa2f2)), closes [#156](https://github.com/yioneko/vtsls/issues/156)
+
 ## [0.2.2](https://github.com/yioneko/vtsls/compare/service-v0.2.1...service-v0.2.2) (2024-04-15)
 
 
