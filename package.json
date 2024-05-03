@@ -7,7 +7,7 @@
     "@types/node": "^16.18.89",
     "@typescript-eslint/eslint-plugin": "^6.21.0",
     "@typescript-eslint/parser": "^6.21.0",
-    "eslint": "^8.57.0",
+    "eslint": "^9.2.0",
     "lint-staged": "^15.2.2",
     "simple-git-hooks": "^2.10.0",
     "typescript": "5.4.5"
