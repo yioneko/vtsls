@@ -4,12 +4,12 @@
     "node": ">=16"
   },
   "devDependencies": {
-    "@types/node": "^16.18.89",
+    "@types/node": "^16.18.97",
     "@typescript-eslint/eslint-plugin": "^6.21.0",
     "@typescript-eslint/parser": "^6.21.0",
     "eslint": "^8.57.0",
     "lint-staged": "^15.2.2",
-    "simple-git-hooks": "^2.10.0",
+    "simple-git-hooks": "^2.11.1",
     "typescript": "5.4.5"
   },
   "scripts": {
