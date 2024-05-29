@@ -4,6 +4,7 @@ import {
   ConfigurationRequest,
   Connection,
   createConnection,
+  DidChangeWatchedFilesNotification,
   InitializeParams,
   LogMessageNotification,
   ProposedFeatures,
@@ -96,19 +97,27 @@ function bindServiceHandlers(
   if (clientCapabilities.textDocument?.publishDiagnostics) {
     service.onDiagnostics((params) => conn.sendDiagnostics(params));
   }
+  if (clientCapabilities.workspace?.didChangeWatchedFiles?.dynamicRegistration) {
+    service.onRegisterDidChangeWatchedFiles((params) =>
+      conn.client.register(DidChangeWatchedFilesNotification.type, params)
+    );
+  }
 
   conn.onExit(() => service.dispose());
   conn.onShutdown(() => service.dispose());
 
-  /* eslint-disable @typescript-eslint/no-misused-promises, @typescript-eslint/unbound-method*/
+  /* eslint-disable @typescript-eslint/unbound-method */
   conn.onDidOpenTextDocument(service.openTextDocument);
   conn.onDidCloseTextDocument(service.closeTextDocument);
   conn.onDidChangeTextDocument(service.changeTextDocument);
   conn.onDidChangeConfiguration(service.changeConfiguration);
+  conn.onDidChangeWatchedFiles(service.changeWatchedFiles);
   conn.workspace.onDidRenameFiles(service.renameFiles);
   if (clientCapabilities.workspace?.workspaceFolders) {
     // otherwise this will throw error 😈
-    conn.workspace.onDidChangeWorkspaceFolders((event) => service.changeWorkspaceFolders({ event }));
+    conn.workspace.onDidChangeWorkspaceFolders((event) =>
+      service.changeWorkspaceFolders({ event })
+    );
   }
   conn.onCompletion(service.completion);
   conn.onCompletionResolve(service.completionItemResolve);
@@ -141,7 +150,7 @@ function bindServiceHandlers(
   conn.languages.semanticTokens.on(service.semanticTokensFull);
   conn.languages.semanticTokens.onRange(service.semanticTokensRange);
   conn.languages.onLinkedEditingRange(service.linkedEditingRange);
-  /* eslint-enable @typescript-eslint/no-misused-promises, @typescript-eslint/unbound-method*/
+  /* eslint-enable @typescript-eslint/unbound-method */
 }
 
 createLanguageServer();
