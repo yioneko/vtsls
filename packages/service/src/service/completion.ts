@@ -132,7 +132,7 @@ export class TSCompletionFeature extends Disposable {
           }
         : {
             triggerKind: types.CompletionTriggerKind.Invoke,
-            triggerCharacter: "",
+            triggerCharacter: undefined,
           };
       const inWord = wordRange?.contains(new types.Position(pos.line, pos.character - 1));
 
