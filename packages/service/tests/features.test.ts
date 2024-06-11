@@ -190,7 +190,8 @@ function abc(a) {}`,
       },
     });
     assert(response);
-    expect(response[0]).toMatchObject({
+    const def = Array.isArray(response) ? response[0] : response;
+    expect(def).toMatchObject({
       targetUri: uri,
       originSelectionRange: { end: { character: 17, line: 0 }, start: { character: 16, line: 0 } },
       targetRange: { end: { character: 15, line: 0 }, start: { character: 0, line: 0 } },
