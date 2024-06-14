@@ -12,9 +12,9 @@ export function createCommandsConverter(
   function getOpenedDoc(uri: lsp.URI) {
     const lspDoc = workspaceService.$getDocumentByLspUri(uri);
     if (!lspDoc) {
-      throw new Error(`Cannot find docuemnt ${uri}`);
+      throw new Error(`Cannot find document ${uri}`);
     }
-    return converter.convertTextDocuemntFromLsp(lspDoc);
+    return converter.convertTextDocumentFromLsp(lspDoc);
   }
 
   return {

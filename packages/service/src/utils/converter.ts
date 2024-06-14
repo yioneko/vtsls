@@ -148,7 +148,7 @@ export class TSLspConverter extends LspInvariantConverter {
     }
   };
 
-  convertTextDocuemntFromLsp = (textDocument: TextDocument): vscode.TextDocument => {
+  convertTextDocumentFromLsp = (textDocument: TextDocument): vscode.TextDocument => {
     const uri = URI.parse(textDocument.uri);
     const doc: vscode.TextDocument = {
       uri,
