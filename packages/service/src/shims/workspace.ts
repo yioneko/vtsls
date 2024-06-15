@@ -76,7 +76,7 @@ export class WorkspaceShimService extends Disposable {
   get textDocuments(): vscode.TextDocument[] {
     const result = [];
     for (const doc of this._documents.values()) {
-      result.push(this.delegate.converter.convertTextDocuemntFromLsp(doc));
+      result.push(this.delegate.converter.convertTextDocumentFromLsp(doc));
     }
     return result;
   }
@@ -99,7 +99,7 @@ export class WorkspaceShimService extends Disposable {
     } = params;
     const doc = TextDocument.create(uri, languageId, version, text);
     this._documents.set(URI.parse(uri), doc);
-    this._onDidOpenTextDocument.fire(this.delegate.converter.convertTextDocuemntFromLsp(doc));
+    this._onDidOpenTextDocument.fire(this.delegate.converter.convertTextDocumentFromLsp(doc));
   }
 
   $changeTextDocument(params: lsp.DidChangeTextDocumentParams) {
@@ -114,7 +114,7 @@ export class WorkspaceShimService extends Disposable {
     }
     TextDocument.update(doc, changes, version);
     this._onDidChangeTextDocument.fire({
-      document: this.delegate.converter.convertTextDocuemntFromLsp(doc),
+      document: this.delegate.converter.convertTextDocumentFromLsp(doc),
       contentChanges: changes.map((c) => {
         if ("range" in c) {
           const rangeOffset = doc.offsetAt(c.range.start);
@@ -140,7 +140,7 @@ export class WorkspaceShimService extends Disposable {
     const vsUri = URI.parse(uri);
     const doc = this._documents.get(vsUri);
     if (doc) {
-      this._onDidCloseTextDocument.fire(this.delegate.converter.convertTextDocuemntFromLsp(doc));
+      this._onDidCloseTextDocument.fire(this.delegate.converter.convertTextDocumentFromLsp(doc));
       this._documents.delete(vsUri);
     }
   }
@@ -227,7 +227,7 @@ export class WorkspaceShimService extends Disposable {
     const uri = typeof nameOrUri === "string" ? URI.file(nameOrUri) : nameOrUri;
     const maybeOpenedDoc = this._documents.get(uri);
     if (maybeOpenedDoc) {
-      return this.delegate.converter.convertTextDocuemntFromLsp(maybeOpenedDoc);
+      return this.delegate.converter.convertTextDocumentFromLsp(maybeOpenedDoc);
     }
 
     const success = await this.delegate.openTextDocument(uri.toString());
@@ -251,7 +251,7 @@ export class WorkspaceShimService extends Disposable {
     await pending.wait();
     // HACK: returns a pesudo doc here: the open is success, but client didn't trigger a didOpen notification
     const doc = this._documents.get(uri) ?? TextDocument.create(uri.toString(), "unknown", 0, "");
-    return this.delegate.converter.convertTextDocuemntFromLsp(doc);
+    return this.delegate.converter.convertTextDocumentFromLsp(doc);
   }
 
   applyEdit(edit: vscode.WorkspaceEdit): Promise<boolean> {
