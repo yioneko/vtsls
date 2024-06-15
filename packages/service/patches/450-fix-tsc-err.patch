@@ -11,16 +11,3 @@ index 8fd7ce4..b1d24bc 100644
  import VsCodeTelemetryReporter from '@vscode/extension-telemetry';
  import * as vscode from 'vscode';
  import * as tas from 'vscode-tas-client';
-diff --git a/src/typescriptServiceClient.ts b/src/typescriptServiceClient.ts
-index 25dfca2..01dbf29 100644
---- a/src/typescriptServiceClient.ts
-+++ b/src/typescriptServiceClient.ts
-@@ -1060,7 +1060,7 @@ export default class TypeScriptServiceClient extends Disposable implements IType
- 	private addWatchEvent(id: number, eventType: keyof WatchEvent, path: string) {
- 		let event = this.watchEvents.get(id);
- 		const removeEvent = (typeOfEventToRemove: keyof WatchEvent) => {
--			if (event?.[typeOfEventToRemove]?.delete(path) && event[typeOfEventToRemove].size === 0) {
-+			if (event?.[typeOfEventToRemove]?.delete(path) && event[typeOfEventToRemove]?.size === 0) {
- 				event[typeOfEventToRemove] = undefined;
- 			}
- 		};

@@ -14,6 +14,7 @@ function getDefaultConfig() {
   const excludedDefaults = {
     "vtsls.experimental.completion.enableServerSideFuzzyMatch": false,
     "vtsls.experimental.completion.entriesLimit": null,
+    "vtsls.experimental.maxInlayHintLength": null,
     "vtsls.enableMoveToFileCodeAction": false,
     "vtsls.autoUseWorkspaceTsdk": false,
     "vtsls.tsserver.globalPlugins": [],

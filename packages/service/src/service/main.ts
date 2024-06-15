@@ -12,6 +12,7 @@ import { deepClone } from "../utils/objects";
 import { TSCodeActionFeature } from "./codeAction";
 import { TSCompletionFeature } from "./completion";
 import { createTSLanguageServiceDelegate } from "./delegate";
+import { TSInlayHintFeature } from "./inlayHint";
 import { tsDefaultConfig, tsDefaultNls } from "./pkgJson";
 import { ProviderNotFoundError } from "./protocol";
 import { TSLanguageServiceConfig, TSLanguageServiceOptions } from "./types";
@@ -68,6 +69,11 @@ export function createTSLanguageService(initOptions: TSLanguageServiceOptions) {
       converter,
       initOptions.clientCapabilities
     )
+  );
+  const inlayHintFeature = new TSInlayHintFeature(
+    providers.$withRegistry(providers.inlayHints),
+    shims.configurationService,
+    converter
   );
 
   const { commandsConverter } = initializeShareMod(converter, shims.workspaceService);
@@ -485,14 +491,9 @@ export function createTSLanguageService(initOptions: TSLanguageServiceOptions) {
       }
     ),
     inlayHint: wrapRequestHandler(async (params: lsp.InlayHintParams, token) => {
-      const doc = getOpenedDoc(params.textDocument.uri);
-      const { provider } = providers.$getHighestProvider(doc, providers.inlayHints);
-      const result = await provider.provideInlayHints(
-        doc,
-        converter.convertRangeFromLsp(params.range),
-        token
-      );
-      return result ? result.map(converter.convertInlayHint) : null;
+      const { textDocument, ...rest } = params;
+      const doc = getOpenedDoc(textDocument.uri);
+      return inlayHintFeature.inlayHint(doc, rest, token);
     }),
     codeLens: wrapRequestHandler(async (params: lsp.CodeLensParams, token) => {
       const doc = getOpenedDoc(params.textDocument.uri);
