@@ -1,5 +1,5 @@
 diff --git a/src/typeScriptServiceClientHost.ts b/src/typeScriptServiceClientHost.ts
-index 7009799..116630c 100644
+index c44bfc3..0268e5f 100644
 --- a/src/typeScriptServiceClientHost.ts
 +++ b/src/typeScriptServiceClientHost.ts
 @@ -30,9 +30,7 @@ import * as typeConverters from './typeConverters';

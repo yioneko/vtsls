@@ -1,5 +1,5 @@
 diff --git a/src/configuration/configuration.ts b/src/configuration/configuration.ts
-index 5fce20d..d7e0247 100644
+index 639f3d3..196c6eb 100644
 --- a/src/configuration/configuration.ts
 +++ b/src/configuration/configuration.ts
 @@ -101,6 +101,7 @@ export class ImplicitProjectConfiguration {
@@ -10,7 +10,7 @@ index 5fce20d..d7e0247 100644
  	readonly locale: string | null;
  	readonly globalTsdk: string | null;
  	readonly localTsdk: string | null;
-@@ -138,6 +139,7 @@ export abstract class BaseServiceConfigurationProvider implements ServiceConfigu
+@@ -140,6 +141,7 @@ export abstract class BaseServiceConfigurationProvider implements ServiceConfigu
  	public loadFromWorkspace(): TypeScriptServiceConfiguration {
  		const configuration = vscode.workspace.getConfiguration();
  		return {
@@ -19,10 +19,10 @@ index 5fce20d..d7e0247 100644
  			globalTsdk: this.readGlobalTsdk(configuration),
  			localTsdk: this.readLocalTsdk(configuration),
 diff --git a/src/tsServer/versionManager.ts b/src/tsServer/versionManager.ts
-index 29e93a1..6171985 100644
+index 43a2413..edc7001 100644
 --- a/src/tsServer/versionManager.ts
 +++ b/src/tsServer/versionManager.ts
-@@ -173,7 +173,7 @@ export class TypeScriptVersionManager extends Disposable {
+@@ -163,7 +163,7 @@ export class TypeScriptVersionManager extends Disposable {
  	}
  
  	private get useWorkspaceTsdkSetting(): boolean {

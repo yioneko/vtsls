@@ -18,6 +18,10 @@ function getDefaultConfig() {
     "vtsls.autoUseWorkspaceTsdk": false,
     "vtsls.tsserver.globalPlugins": [],
   };
+  const overrideDefaults = {
+    "typescript.tsserver.enableRegionDiagnostics": false,
+    "typescript.tsserver.experimental.useVsCodeWatcher": false,
+  };
 
   const res: TSLanguageServiceConfig = {};
 
@@ -47,6 +51,9 @@ function getDefaultConfig() {
     updateDottedKey(key, defaultVal);
   }
   for (const [key, val] of Object.entries(excludedDefaults)) {
+    updateDottedKey(key, val);
+  }
+  for (const [key, val] of Object.entries(overrideDefaults)) {
     updateDottedKey(key, val);
   }
 

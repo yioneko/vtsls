@@ -5,6 +5,16 @@ import { URI } from "vscode-uri";
 import { WorkspaceShimService } from "../shims/workspace";
 import { TSLspConverter } from "../utils/converter";
 
+type AnyFunction = (...args: any[]) => any;
+
+export type GenericCommandsConverter = {
+  [key in string]?: {
+    toArgs?: AnyFunction;
+    fromArgs?: AnyFunction;
+    toRes?: AnyFunction;
+  };
+};
+
 export function createCommandsConverter(
   converter: TSLspConverter,
   workspaceService: WorkspaceShimService
@@ -57,13 +67,20 @@ export function createCommandsConverter(
         action: Proto.RefactorActionInfo;
         document: vscode.TextDocument;
         range: vscode.Range;
+        trigger: vscode.CodeActionTriggerKind; // useless
       }) => [action, document.uri.toString(), converter.convertRangeToLsp(range)],
-      fromArgs: (action: Proto.RefactorActionInfo, uri: lsp.URI, range: lsp.Range, targetFile: string) => [
+      fromArgs: (
+        action: Proto.RefactorActionInfo,
+        uri: lsp.URI,
+        range: lsp.Range,
+        targetFile: string
+      ) => [
         {
           action,
           document: getOpenedDoc(uri),
           range: converter.convertRangeFromLsp(range),
-          targetFile
+          targetFile,
+          trigger: lsp.CodeActionTriggerKind.Invoked,
         },
       ],
     },
@@ -72,16 +89,29 @@ export function createCommandsConverter(
         document,
         refactor,
         rangeOrSelection,
+        trigger,
       }: {
         document: vscode.TextDocument;
         refactor: Proto.ApplicableRefactorInfo;
         rangeOrSelection: vscode.Range | vscode.Selection;
-      }) => [document.uri.toString(), refactor, converter.convertRangeToLsp(rangeOrSelection)],
-      fromArgs: (uri: lsp.URI, refactor: Proto.ApplicableRefactorInfo, range: lsp.Range) => [
+        trigger: vscode.CodeActionTriggerKind;
+      }) => [
+        document.uri.toString(),
+        refactor,
+        converter.convertRangeToLsp(rangeOrSelection),
+        trigger,
+      ],
+      fromArgs: (
+        uri: lsp.URI,
+        refactor: Proto.ApplicableRefactorInfo,
+        range: lsp.Range,
+        trigger: vscode.CodeActionTriggerKind
+      ) => [
         {
           document: getOpenedDoc(uri),
           refactor,
           rangeOrSelection: converter.convertRangeFromLsp(range),
+          trigger,
         },
       ],
     },
@@ -103,5 +133,5 @@ export function createCommandsConverter(
         },
       ],
     },
-  };
+  } satisfies GenericCommandsConverter;
 }

@@ -522,7 +522,7 @@
       "type": "boolean",
       "default": false,
       "markdownDescription": "Enable/disable semantic checking of JavaScript files. Existing `jsconfig.json` or `tsconfig.json` files override this setting.",
-      "markdownDeprecationMessage": "%configuration.javascript.checkJs.checkJs.deprecation%"
+      "markdownDeprecationMessage": "This setting has been deprecated in favor of `js/ts.implicitProjectConfig.checkJs`."
     },
     "js/ts.implicitProjectConfig.checkJs": {
       "type": "boolean",
@@ -533,7 +533,7 @@
       "type": "boolean",
       "default": false,
       "markdownDescription": "Enable/disable `experimentalDecorators` in JavaScript files that are not part of a project. Existing `jsconfig.json` or `tsconfig.json` files override this setting.",
-      "markdownDeprecationMessage": "%configuration.javascript.checkJs.experimentalDecorators.deprecation%"
+      "markdownDeprecationMessage": "This setting has been deprecated in favor of `js/ts.implicitProjectConfig.experimentalDecorators`."
     },
     "js/ts.implicitProjectConfig.experimentalDecorators": {
       "type": "boolean",
@@ -712,7 +712,7 @@
         null,
         null,
         null,
-        "%typescript.preferences.importModuleSpecifierEnding.label.js%"
+        ".js / .ts"
       ],
       "markdownEnumDescriptions": [
         "Use project settings to select a default.",
@@ -735,7 +735,7 @@
         null,
         null,
         null,
-        "%typescript.preferences.importModuleSpecifierEnding.label.js%"
+        ".js / .ts"
       ],
       "markdownEnumDescriptions": [
         "Use project settings to select a default.",
@@ -814,13 +814,13 @@
       "type": "boolean",
       "default": true,
       "description": "Enable/disable introducing aliases for object shorthand properties during renames.",
-      "deprecationMessage": "%typescript.preferences.renameShorthandProperties.deprecationMessage%"
+      "deprecationMessage": "The setting 'typescript.preferences.renameShorthandProperties' has been deprecated in favor of 'typescript.preferences.useAliasesForRenames'"
     },
     "typescript.preferences.renameShorthandProperties": {
       "type": "boolean",
       "default": true,
       "description": "Enable/disable introducing aliases for object shorthand properties during renames.",
-      "deprecationMessage": "%typescript.preferences.renameShorthandProperties.deprecationMessage%"
+      "deprecationMessage": "The setting 'typescript.preferences.renameShorthandProperties' has been deprecated in favor of 'typescript.preferences.useAliasesForRenames'"
     },
     "javascript.preferences.useAliasesForRenames": {
       "type": "boolean",
@@ -886,7 +886,7 @@
       "type": "boolean",
       "default": true,
       "description": "Enable/disable spawning a separate TypeScript server that can more quickly respond to syntax related operations, such as calculating folding or computing document symbols.",
-      "markdownDeprecationMessage": "%configuration.tsserver.useSeparateSyntaxServer.deprecation%"
+      "markdownDeprecationMessage": "This setting has been deprecated in favor of `typescript.tsserver.useSyntaxServer`."
     },
     "typescript.tsserver.useSyntaxServer": {
       "type": "string",
@@ -1016,16 +1016,16 @@
     "typescript.tsserver.web.projectWideIntellisense.suppressSemanticErrors": {
       "type": "boolean",
       "default": true,
-      "description": "Suppresses semantic errors. This is needed when using external packages as these can't be included analyzed on web."
+      "description": "Suppresses semantic errors on web even when project wide IntelliSense is enabled. This is always on when project wide IntelliSense is not enabled or available. See `#typescript.tsserver.web.projectWideIntellisense.enabled#`"
+    },
+    "typescript.tsserver.web.typeAcquisition.enabled": {
+      "type": "boolean",
+      "default": false,
+      "description": "Enable/disable package acquisition on the web. This enables IntelliSense for imported packages. Requires `#typescript.tsserver.web.projectWideIntellisense.enabled#`. Currently not supported for Safari."
     },
     "typescript.tsserver.nodePath": {
       "type": "string",
       "description": "Run TS Server on a custom Node installation. This can be a path to a Node executable, or 'node' if you want VS Code to detect a Node installation."
-    },
-    "typescript.experimental.tsserver.web.typeAcquisition.enabled": {
-      "type": "boolean",
-      "default": false,
-      "description": "Enable/disable package acquisition on the web."
     },
     "typescript.preferGoToSourceDefinition": {
       "type": "boolean",
@@ -1041,6 +1041,21 @@
       "type": "boolean",
       "default": true,
       "markdownDescription": "Exclude symbols that come from library files in Go to Symbol in Workspace results. Requires using TypeScript 5.3+ in the workspace."
+    },
+    "typescript.tsserver.enableRegionDiagnostics": {
+      "type": "boolean",
+      "default": false,
+      "description": "Enables region-based diagnostics in TypeScript. Requires using TypeScript 5.6+ in the workspace."
+    },
+    "javascript.experimental.updateImportsOnPaste": {
+      "type": "boolean",
+      "default": false,
+      "description": "Automatically update imports when pasting code. Requires TypeScript 5.6+."
+    },
+    "typescript.experimental.updateImportsOnPaste": {
+      "type": "boolean",
+      "default": false,
+      "description": "Automatically update imports when pasting code. Requires TypeScript 5.6+."
     },
     "vtsls.javascript.format.baseIndentSize": {
       "type": "number"

@@ -1,8 +1,8 @@
 diff --git a/src/languageProvider.ts b/src/languageProvider.ts
-index 321a2c8..f2b20e3 100644
+index 7b95591..eb8fe90 100644
 --- a/src/languageProvider.ts
 +++ b/src/languageProvider.ts
-@@ -87,6 +87,7 @@ export default class LanguageProvider extends Disposable {
+@@ -92,6 +92,7 @@ export default class LanguageProvider extends Disposable {
  			import('./languageFeatures/tagClosing').then(provider => this._register(provider.register(selector, this.description, this.client))),
  			import('./languageFeatures/typeDefinitions').then(provider => this._register(provider.register(selector, this.client))),
  		]);

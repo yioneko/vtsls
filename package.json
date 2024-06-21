@@ -3,6 +3,7 @@
   "engines": {
     "node": ">=16"
   },
+  "packageManager": "pnpm@8.15.8",
   "devDependencies": {
     "@types/node": "^16.18.97",
     "@typescript-eslint/eslint-plugin": "^6.21.0",

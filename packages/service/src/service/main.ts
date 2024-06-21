@@ -13,6 +13,7 @@ import { TSCompletionFeature } from "./completion";
 import { createTSLanguageServiceDelegate } from "./delegate";
 import { tsDefaultConfig, tsDefaultNls } from "./pkgJson";
 import { TSLanguageServiceConfig, TSLanguageServiceOptions } from "./types";
+import { GenericCommandsConverter } from "../share/commandsConverter";
 
 async function startVsTsExtension(context: vscode.ExtensionContext) {
   const tsExtension = await import("@vsc-ts/extension");
@@ -282,16 +283,13 @@ export function createTSLanguageService(initOptions: TSLanguageServiceOptions) {
       let args = params.arguments ?? [];
 
       const commandId = params.command;
-      if (commandId in commandsConverter) {
-        const cvt = commandsConverter[commandId as keyof typeof commandsConverter];
-        if ("fromArgs" in cvt) {
-          args = cvt.fromArgs(...(args as [any, any, any, any]));
-        }
-        const result = await shims.commandsService.executeCommand(params.command, ...args);
-        return "toRes" in cvt ? cvt.toRes(result as any) : result;
+      const cvt = (commandsConverter as GenericCommandsConverter)[commandId];
+      if (cvt?.fromArgs) {
+        args = cvt.fromArgs(...args);
       }
-
-      return await shims.commandsService.executeCommand(params.command, ...args);
+      const result = await shims.commandsService.executeCommand(params.command, ...args);
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+      return cvt?.toRes ? cvt?.toRes(result) : result;
     }),
     implementation: wrapRequestHandler(async (params: lsp.ImplementationParams, token) => {
       const doc = getOpenedDoc(params.textDocument.uri);

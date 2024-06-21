@@ -13,18 +13,18 @@ index ba545df..b5c020d 100644
  
  		if (!allowList.includes(requestID)) { return; }
 diff --git a/src/languageFeatures/refactor.ts b/src/languageFeatures/refactor.ts
-index b16a9e1..c5afcf1 100644
+index 1317cda..3e28248 100644
 --- a/src/languageFeatures/refactor.ts
 +++ b/src/languageFeatures/refactor.ts
-@@ -119,6 +119,7 @@ namespace MoveToFileRefactorCommand {
- 		readonly document: vscode.TextDocument;
+@@ -124,6 +124,7 @@ namespace MoveToFileRefactorCommand {
  		readonly action: Proto.RefactorActionInfo;
  		readonly range: vscode.Range;
+ 		readonly trigger: vscode.CodeActionTriggerKind;
 +		readonly targetFile?: string;
  	}
  }
  
-@@ -137,7 +138,7 @@ class MoveToFileRefactorCommand implements Command {
+@@ -142,7 +143,7 @@ class MoveToFileRefactorCommand implements Command {
  			return;
  		}
  
