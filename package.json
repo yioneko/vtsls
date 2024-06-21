@@ -11,7 +11,7 @@
     "eslint": "^8.57.0",
     "lint-staged": "^15.2.2",
     "simple-git-hooks": "^2.11.1",
-    "typescript": "5.4.5"
+    "typescript": "5.5.2"
   },
   "scripts": {
     "build": "pnpm run -r build",
