@@ -65,19 +65,12 @@ async function genSchema() {
     "typescript.surveys.enabled",
     "typescript.tsserver.enableRegionDiagnostics",
     "typescript.tsserver.experimental.useVsCodeWatcher",
+    "javascript.experimental.updateImportsOnPaste",
+    "typescript.experimental.updateImportsOnPaste",
   ];
 
   for (const p of unavailableOptions) {
     delete properties[p];
-  }
-
-  const overrideDefaults = {
-    "typescript.tsserver.enableRegionDiagnostics": false,
-    "typescript.tsserver.experimental.useVsCodeWatcher": false,
-  };
-
-  for (const [key, val] of Object.entries(overrideDefaults)) {
-    properties[key].default = val;
   }
 
   const additionalConfigByLang = (lang) => ({

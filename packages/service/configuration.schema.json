@@ -913,11 +913,6 @@
       "default": false,
       "description": "(Experimental) Enables project wide error reporting."
     },
-    "typescript.tsserver.experimental.useVsCodeWatcher": {
-      "type": "boolean",
-      "description": "Use VS Code's file watchers instead of TypeScript's. Requires using TypeScript 5.4+ in the workspace.",
-      "default": false
-    },
     "typescript.tsserver.watchOptions": {
       "type": "object",
       "description": "Configure which watching strategies should be used to keep track of files and directories.",
@@ -1041,21 +1036,6 @@
       "type": "boolean",
       "default": true,
       "markdownDescription": "Exclude symbols that come from library files in Go to Symbol in Workspace results. Requires using TypeScript 5.3+ in the workspace."
-    },
-    "typescript.tsserver.enableRegionDiagnostics": {
-      "type": "boolean",
-      "default": false,
-      "description": "Enables region-based diagnostics in TypeScript. Requires using TypeScript 5.6+ in the workspace."
-    },
-    "javascript.experimental.updateImportsOnPaste": {
-      "type": "boolean",
-      "default": false,
-      "description": "Automatically update imports when pasting code. Requires TypeScript 5.6+."
-    },
-    "typescript.experimental.updateImportsOnPaste": {
-      "type": "boolean",
-      "default": false,
-      "description": "Automatically update imports when pasting code. Requires TypeScript 5.6+."
     },
     "vtsls.javascript.format.baseIndentSize": {
       "type": "number"
