@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.2.4](https://github.com/yioneko/vtsls/compare/server-v0.2.3...server-v0.2.4) (2024-06-21)
+
+
+### Bug Fixes
+
+* **deps:** update packages/service/vscode digest to 4bbebd8 ([#176](https://github.com/yioneko/vtsls/issues/176)) ([ed837d5](https://github.com/yioneko/vtsls/commit/ed837d5621c832704ee357f8bb45adfc15f2ab57))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @vtsls/language-service bumped from 0.2.3 to 0.2.4
+
 ## [0.2.3](https://github.com/yioneko/vtsls/compare/server-v0.2.2...server-v0.2.3) (2024-04-24)
 
 
