@@ -1,5 +1,5 @@
 diff --git a/src/languageFeatures/semanticTokens.ts b/src/languageFeatures/semanticTokens.ts
-index e8c41e3..b6711ee 100644
+index 48c9af7..cfba213 100644
 --- a/src/languageFeatures/semanticTokens.ts
 +++ b/src/languageFeatures/semanticTokens.ts
 @@ -22,7 +22,10 @@ export function register(

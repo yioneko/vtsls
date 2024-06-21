@@ -1876,6 +1876,66 @@ export class DataTransfer implements vscode.DataTransfer {
 	}
 }
 
+export class DocumentDropEdit {
+	title?: string;
+
+	id: string | undefined;
+
+	insertText: string | SnippetString;
+
+	additionalEdit?: WorkspaceEdit;
+
+	kind?: DocumentDropOrPasteEditKind;
+
+	constructor(insertText: string | SnippetString, title?: string, kind?: DocumentDropOrPasteEditKind) {
+		this.insertText = insertText;
+		this.title = title;
+		this.kind = kind;
+	}
+}
+
+export enum DocumentPasteTriggerKind {
+	Automatic = 0,
+	PasteAs = 1,
+}
+
+export class DocumentDropOrPasteEditKind {
+	static Empty: DocumentDropOrPasteEditKind;
+
+	private static sep = '.';
+
+	constructor(
+		public readonly value: string
+	) { }
+
+	public append(...parts: string[]): DocumentDropOrPasteEditKind {
+		return new DocumentDropOrPasteEditKind((this.value ? [this.value, ...parts] : parts).join(DocumentDropOrPasteEditKind.sep));
+	}
+
+	public intersects(other: DocumentDropOrPasteEditKind): boolean {
+		return this.contains(other) || other.contains(this);
+	}
+
+	public contains(other: DocumentDropOrPasteEditKind): boolean {
+		return this.value === other.value || other.value.startsWith(this.value + DocumentDropOrPasteEditKind.sep);
+	}
+}
+DocumentDropOrPasteEditKind.Empty = new DocumentDropOrPasteEditKind('');
+
+export class DocumentPasteEdit {
+
+	title: string;
+	insertText: string | SnippetString;
+	additionalEdit?: WorkspaceEdit;
+	kind: DocumentDropOrPasteEditKind;
+
+	constructor(insertText: string | SnippetString, title: string, kind: DocumentDropOrPasteEditKind) {
+		this.title = title;
+		this.insertText = insertText;
+		this.kind = kind;
+	}
+}
+
 export enum ConfigurationTarget {
 	Global = 1,
 

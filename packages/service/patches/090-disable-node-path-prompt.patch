@@ -1,0 +1,17 @@
+diff --git a/src/tsServer/nodeManager.ts b/src/tsServer/nodeManager.ts
+index 037fc18..59a2ee9 100644
+--- a/src/tsServer/nodeManager.ts
++++ b/src/tsServer/nodeManager.ts
+@@ -97,11 +97,7 @@ export class NodeVersionManager extends Disposable {
+ 		const disallow = vscode.l10n.t("No");
+ 		const dismiss = vscode.l10n.t("Not now");
+ 
+-		const result = await vscode.window.showInformationMessage(vscode.l10n.t("This workspace wants to use the Node installation at '{0}' to run TS Server. Would you like to use it?", workspaceVersion),
+-			allow,
+-			disallow,
+-			dismiss,
+-		);
++		const result = allow;
+ 
+ 		let version = undefined;
+ 		switch (result) {

@@ -4,7 +4,7 @@
   "version": "0.2.3",
   "license": "MIT",
   "engines": {
-    "node": ">=14"
+    "node": ">=16"
   },
   "main": "./dist/main.js",
   "bin": {

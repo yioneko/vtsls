@@ -1,8 +1,8 @@
 diff --git a/src/typescriptServiceClient.ts b/src/typescriptServiceClient.ts
-index 89aeb3f..7a0e100 100644
+index da6408b..25dfca2 100644
 --- a/src/typescriptServiceClient.ts
 +++ b/src/typescriptServiceClient.ts
-@@ -1083,7 +1083,7 @@ function getDignosticsKind(event: Proto.Event) {
+@@ -1272,7 +1272,7 @@ function getDiagnosticsKind(event: Proto.Event) {
  
  class ServerInitializingIndicator extends Disposable {
  
@@ -11,7 +11,7 @@ index 89aeb3f..7a0e100 100644
  
  	public reset(): void {
  		if (this._task) {
-@@ -1096,16 +1096,27 @@ class ServerInitializingIndicator extends Disposable {
+@@ -1285,16 +1285,27 @@ class ServerInitializingIndicator extends Disposable {
  	 * Signal that a project has started loading.
  	 */
  	public startedLoadingProject(projectName: string | undefined): void {

@@ -1,5 +1,5 @@
 diff --git a/src/tsServer/protocol/protocol.d.ts b/src/tsServer/protocol/protocol.d.ts
-index 45e09d6..5a001ca 100644
+index 747e7c2..0d3c484 100644
 --- a/src/tsServer/protocol/protocol.d.ts
 +++ b/src/tsServer/protocol/protocol.d.ts
 @@ -2,7 +2,7 @@

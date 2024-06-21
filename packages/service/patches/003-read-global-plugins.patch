@@ -79,7 +79,7 @@ index 6036e4c..1d3efd6 100644
  	}
  }
 diff --git a/src/tsServer/spawner.ts b/src/tsServer/spawner.ts
-index 52dcf5b..f280a06 100644
+index 364c0f0..0088fff 100644
 --- a/src/tsServer/spawner.ts
 +++ b/src/tsServer/spawner.ts
 @@ -253,7 +253,7 @@ export class TypeScriptServerSpawner {

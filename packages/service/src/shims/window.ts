@@ -40,6 +40,10 @@ export class WindowShimService extends Disposable {
     );
   }
 
+  get visibleTextEditors(): vscode.TextEditor[] {
+    return [];
+  }
+
   createOutputChannel(name: string, options: string | { log: true } | undefined) {
     const log = typeof options === "object" && options.log;
     const newChannel = this._register(

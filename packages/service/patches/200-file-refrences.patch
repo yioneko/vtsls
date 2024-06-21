@@ -1,5 +1,5 @@
 diff --git a/src/languageFeatures/fileReferences.ts b/src/languageFeatures/fileReferences.ts
-index fcc2bbc..66f5bfa 100644
+index 3a475ac..aa602c2 100644
 --- a/src/languageFeatures/fileReferences.ts
 +++ b/src/languageFeatures/fileReferences.ts
 @@ -46,7 +46,7 @@ class FileReferencesCommand implements Command {

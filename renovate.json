@@ -7,7 +7,7 @@
     "schedule": ["every 3 months starting on the 1th month on the 10th day of the month"],
     "packageRules": [
       {
-        "matchPackageNames": ["packages/service/vscode"],
+        "matchDepNames": ["packages/service/vscode"],
         "semanticCommitType": "fix"
       }
     ],

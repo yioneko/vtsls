@@ -1,5 +1,5 @@
 diff --git a/src/tsServer/versionManager.ts b/src/tsServer/versionManager.ts
-index 68d44a7..09880e9 100644
+index edc7001..6171985 100644
 --- a/src/tsServer/versionManager.ts
 +++ b/src/tsServer/versionManager.ts
 @@ -76,19 +76,29 @@ export class TypeScriptVersionManager extends Disposable {

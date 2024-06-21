@@ -16,7 +16,7 @@ async function genSchema() {
    */
   function lookUpDescription(key) {
     // key: %xxx%
-    return nls[key.slice(1, key.length - 1)] ?? nls[key];
+    return (key && (nls[key.slice(1, key.length - 1)] ?? nls[key])) ?? null;
   }
 
   function processProperties(ps) {
@@ -36,6 +36,15 @@ async function genSchema() {
       if (p.markdownEnumDescriptions) {
         p.markdownEnumDescriptions = p.markdownEnumDescriptions.map(lookUpDescription);
       }
+      if (p.deprecationMessage) {
+        p.deprecationMessage = lookUpDescription(p.deprecationMessage);
+      }
+      if (p.markdownDeprecationMessage) {
+        p.markdownDeprecationMessage = lookUpDescription(p.markdownDeprecationMessage);
+      }
+      if (p.enumItemLabels) {
+        p.enumItemLabels = p.enumItemLabels.map(lookUpDescription);
+      }
       delete p.scope;
       delete p.tags;
       if (p.properties) {
@@ -54,10 +63,16 @@ async function genSchema() {
     "typescript.autoClosingTags",
     "javascript.autoClosingTags",
     "typescript.surveys.enabled",
+    "typescript.tsserver.enableRegionDiagnostics",
+    "typescript.tsserver.experimental.useVsCodeWatcher",
   ];
 
   for (const p of unavailableOptions) {
     delete properties[p];
+  }
+
+  for (const [key, val] of Object.entries(overrideDefaults)) {
+    properties[key].default = val;
   }
 
   const additionalConfigByLang = (lang) => ({
@@ -84,7 +99,6 @@ async function genSchema() {
       description: "0: None 1: Block 2: Smart",
     },
   });
-
   const additionalConfig = {
     ...additionalConfigByLang("javascript"),
     ...additionalConfigByLang("typescript"),

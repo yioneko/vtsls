@@ -151,13 +151,17 @@ async function getPatchFiles(patchesPath) {
   return patches;
 }
 
-async function applyPatches() {
+/**
+ * @param {boolean} refresh
+ */
+async function applyPatches(refresh) {
   const patched = await checkTsExtDir(tsExtPath);
 
   if (!patched) {
     try {
       // ensure there is a git repo at there
       await execFile("git", ["init"], { cwd: tsExtPath });
+      await execFile("git", ["add", "--all"], { cwd: tsExtPath });
     } catch (e) {
       console.error(e);
     }
@@ -179,6 +183,11 @@ async function applyPatches() {
     }
     for (const p of patchesResolved) {
       await execFile("git", ["apply", p], { cwd: tsExtPath });
+      if (refresh) {
+        const { stdout } = await execFile("git", ["--no-pager", "diff"], { cwd: tsExtPath });
+        await fs.writeFile(p, stdout);
+        await execFile("git", ["add", "--all"], { cwd: tsExtPath });
+      }
     }
 
     await writePatchMark(tsExtPath, { ...patchMark, patched: true });
@@ -188,5 +197,5 @@ async function applyPatches() {
 module.exports = { applyPatches };
 
 if (require.main === module) {
-  applyPatches().catch(console.error);
+  applyPatches(!!process.env.REFRESH_PATCHES).catch(console.error);
 }
