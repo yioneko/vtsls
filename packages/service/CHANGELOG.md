@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.2.4](https://github.com/yioneko/vtsls/compare/service-v0.2.3...service-v0.2.4) (2024-06-21)
+
+
+### Bug Fixes
+
+* correct default triggerCharacter if context not provided ([f0beac0](https://github.com/yioneko/vtsls/commit/f0beac03e90531ea17d37a134d4af83c94132b2c))
+* **deps:** update dependency typescript to v5.5.2 ([#175](https://github.com/yioneko/vtsls/issues/175)) ([6ac192f](https://github.com/yioneko/vtsls/commit/6ac192f92e21e19336a2436b0fdc9866808ca7ac))
+* **deps:** update packages/service/vscode digest to 4bbebd8 ([#176](https://github.com/yioneko/vtsls/issues/176)) ([ed837d5](https://github.com/yioneko/vtsls/commit/ed837d5621c832704ee357f8bb45adfc15f2ab57))
+* docuemnt document typo ([#171](https://github.com/yioneko/vtsls/issues/171)) ([1adbcf3](https://github.com/yioneko/vtsls/commit/1adbcf3488769fdebd07455d3246877a62491de8))
+
 ## [0.2.3](https://github.com/yioneko/vtsls/compare/service-v0.2.2...service-v0.2.3) (2024-04-24)
 
 
