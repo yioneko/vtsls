@@ -24,29 +24,3 @@ index 25dfca2..01dbf29 100644
  				event[typeOfEventToRemove] = undefined;
  			}
  		};
-diff --git a/src/languageFeatures/fileConfigurationManager.ts b/src/languageFeatures/fileConfigurationManager.ts
-index 1556037..19a1571 100644
---- a/src/languageFeatures/fileConfigurationManager.ts
-+++ b/src/languageFeatures/fileConfigurationManager.ts
-@@ -198,6 +198,7 @@ export default class FileConfigurationManager extends Disposable {
- 			includeCompletionsWithClassMemberSnippets: config.get<boolean>('suggest.classMemberSnippets.enabled', true),
- 			includeCompletionsWithObjectLiteralMethodSnippets: config.get<boolean>('suggest.objectLiteralMethodSnippets.enabled', true),
- 			autoImportFileExcludePatterns: this.getAutoImportFileExcludePatternsPreference(preferencesConfig, vscode.workspace.getWorkspaceFolder(document.uri)?.uri),
-+			// @ts-expect-error
- 			preferTypeOnlyAutoImports: preferencesConfig.get<boolean>('preferTypeOnlyAutoImports', false),
- 			useLabelDetailsInCompletionEntries: true,
- 			allowIncompleteCompletions: true,
-diff --git a/src/typescriptService.ts b/src/typescriptService.ts
-index 931b287..d028411 100644
---- a/src/typescriptService.ts
-+++ b/src/typescriptService.ts
-@@ -76,7 +76,9 @@ interface StandardTsServerRequests {
- 	'findSourceDefinition': [Proto.FileLocationRequestArgs, Proto.DefinitionResponse];
- 	'getMoveToRefactoringFileSuggestions': [Proto.GetMoveToRefactoringFileSuggestionsRequestArgs, Proto.GetMoveToRefactoringFileSuggestions];
- 	'linkedEditingRange': [Proto.FileLocationRequestArgs, Proto.LinkedEditingRangeResponse];
-+	// @ts-expect-error
- 	'mapCode': [Proto.MapCodeRequestArgs, Proto.MapCodeResponse];
-+	// @ts-expect-error
- 	'getPasteEdits': [Proto.GetPasteEditsRequestArgs, Proto.GetPasteEditsResponse];
- }
- 

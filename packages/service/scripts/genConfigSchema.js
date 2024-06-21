@@ -71,6 +71,11 @@ async function genSchema() {
     delete properties[p];
   }
 
+  const overrideDefaults = {
+    "typescript.tsserver.enableRegionDiagnostics": false,
+    "typescript.tsserver.experimental.useVsCodeWatcher": false,
+  };
+
   for (const [key, val] of Object.entries(overrideDefaults)) {
     properties[key].default = val;
   }
