@@ -1,0 +1,48 @@
+diff --git a/src/typescriptServiceClient.ts b/src/typescriptServiceClient.ts
+index 25dfca2..a235fb3 100644
+--- a/src/typescriptServiceClient.ts
++++ b/src/typescriptServiceClient.ts
+@@ -944,6 +944,20 @@ export default class TypeScriptServiceClient extends Disposable implements IType
+ 		}
+ 	}
+ 
++	private rebasePatternOnWorkspaceRoot(basePath: string, pattern?: string) {
++		const baseUri = vscode.Uri.file(basePath);
++		const rebasedUri =
++			this.getWorkspaceRootForResource(baseUri) ||
++			vscode.Uri.file(pattern ? basePath : path.dirname(basePath)); // use dirname as basePath to ensure pattern non-empty
++		const rebasedPrePattern = baseUri.path.substring(rebasedUri.path.length + 1);
++		const rebasedPattern = pattern
++			? rebasedPrePattern
++				? `${rebasedPrePattern}/${pattern}`
++				: pattern
++			: rebasedPrePattern;
++		return new vscode.RelativePattern(rebasedUri, rebasedPattern);
++	}
++
+ 	private dispatchEvent(event: Proto.Event) {
+ 		switch (event.event) {
+ 			case EventName.syntaxDiag:
+@@ -1017,8 +1031,8 @@ export default class TypeScriptServiceClient extends Disposable implements IType
+ 			case EventName.createDirectoryWatcher:
+ 				this.createFileSystemWatcher(
+ 					(event.body as Proto.CreateDirectoryWatcherEventBody).id,
+-					new vscode.RelativePattern(
+-						vscode.Uri.file((event.body as Proto.CreateDirectoryWatcherEventBody).path),
++					this.rebasePatternOnWorkspaceRoot(
++						(event.body as Proto.CreateDirectoryWatcherEventBody).path,
+ 						(event.body as Proto.CreateDirectoryWatcherEventBody).recursive ? '**' : '*'
+ 					),
+ 					(event.body as Proto.CreateDirectoryWatcherEventBody).ignoreUpdate
+@@ -1028,10 +1042,7 @@ export default class TypeScriptServiceClient extends Disposable implements IType
+ 			case EventName.createFileWatcher:
+ 				this.createFileSystemWatcher(
+ 					(event.body as Proto.CreateFileWatcherEventBody).id,
+-					new vscode.RelativePattern(
+-						vscode.Uri.file((event.body as Proto.CreateFileWatcherEventBody).path),
+-						'*'
+-					)
++					this.rebasePatternOnWorkspaceRoot((event.body as Proto.CreateFileWatcherEventBody).path)
+ 				);
+ 				break;
+ 
