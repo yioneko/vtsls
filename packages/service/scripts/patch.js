@@ -1,11 +1,10 @@
 const cp = require("node:child_process");
 const fs = require("node:fs/promises");
-const readline = require("node:readline");
 const path = require("node:path");
 const { promisify } = require("node:util");
 const { stdin, stdout } = require("node:process");
 
-const execFile = promisify(cp.execFile);
+const exec = promisify(cp.execFile);
 const safeFsStat = (path) => fs.stat(path).catch(() => {});
 
 const patchMarkFile = ".patchMark.json";
@@ -14,7 +13,7 @@ const vscTsExtPath = path.resolve(__dirname, "../vscode/extensions/typescript-la
 const tsExtPath = path.resolve(__dirname, "../src/typescript-language-features");
 
 async function getVscodeSha() {
-  const { stdout } = await execFile("git", ["submodule", "status", "vscode"], {
+  const { stdout } = await exec("git", ["submodule", "status", "vscode"], {
     cwd: path.resolve(__dirname, "../"),
   });
   const commit = stdout.match(/^\s*([^\s]+)\s/)[1];
@@ -91,26 +90,42 @@ async function copyTsExtTo(targetDir) {
       await cpOrRecursive(entryPath, path.join(targetDir, entry));
     }
   }
+  // ignore patch mark file
+  await fs.writeFile(path.resolve(tsExtPath, ".gitignore"), patchMarkFile);
+  // ensure there is a git repo at there
+  await exec("git", ["init"], { cwd: tsExtPath });
+  await exec("git", ["add", "--all"], { cwd: tsExtPath });
+  if (process.env.CI !== "true") {
+    await exec("git", ["commit", "-q", "-m", "initial synced"], {
+      cwd: tsExtPath,
+    });
+  }
   await writePatchMark(targetDir, { sha, patched: false });
+}
+
+async function pressAnyKey() {
+  stdin.setRawMode(true);
+  /**
+   * @type {Buffer}
+   */
+  const buffer = await new Promise((resolve) => {
+    stdin.once("data", (buffer) => process.nextTick(() => resolve(buffer)));
+  });
+  stdin.setRawMode(false);
+  stdin.pause();
+  const bytes = Array.from(buffer);
+  return bytes[0];
 }
 
 async function promptOverwriteExt(targetDir) {
   if (process.env.CI === "true") {
     return true;
   }
-
-  const rl = readline.createInterface(stdin, stdout);
-  const ans = await new Promise((resolve) => {
-    rl.question(
-      `The VSCode submodule has updated. Overwrite the extension (${targetDir}) and re-patch? [y/n] `,
-      (ans) => {
-        rl.close();
-        resolve(ans);
-      }
-    );
-  });
-
-  return ans === "y";
+  stdout.write(
+    `The VSCode submodule has updated. Overwrite the extension (${targetDir}) and re-patch? [y/n] `
+  );
+  const key = await pressAnyKey();
+  return key === "y".charCodeAt(0);
 }
 
 /**
@@ -157,41 +172,50 @@ async function getPatchFiles(patchesPath) {
 async function applyPatches(refresh) {
   const patched = await checkTsExtDir(tsExtPath);
 
-  if (!patched) {
-    try {
-      // ensure there is a git repo at there
-      await execFile("git", ["init"], { cwd: tsExtPath });
-      await execFile("git", ["add", "--all"], { cwd: tsExtPath });
-    } catch (e) {
-      console.error(e);
-    }
+  if (patched && !refresh) {
+    return;
+  }
 
-    const patchMark = await readPatchMark(tsExtPath);
-    const patchFiles = await getPatchFiles(patchDir);
-    if (patchDir.length === 0) {
-      throw new Error(`No patches file found under ${patchDir}`);
-    }
-    const patchesResolved = patchFiles.map((f) => path.resolve(patchDir, f));
+  const patchMark = await readPatchMark(tsExtPath);
+  const patchFiles = await getPatchFiles(patchDir);
+  const patchesResolved = patchFiles.map((f) => path.resolve(patchDir, f));
 
+  if (!refresh) {
     for (const p of patchesResolved) {
       try {
-        await execFile("git", ["apply", "--check", p], { cwd: tsExtPath });
+        await exec("git", ["apply", "--check", p], { cwd: tsExtPath });
       } catch (e) {
         console.error(`Patch file ${p} failed`);
         throw e;
       }
     }
     for (const p of patchesResolved) {
-      await execFile("git", ["apply", p], { cwd: tsExtPath });
-      if (refresh) {
-        const { stdout } = await execFile("git", ["--no-pager", "diff"], { cwd: tsExtPath });
-        await fs.writeFile(p, stdout);
-        await execFile("git", ["add", "--all"], { cwd: tsExtPath });
-      }
+      await exec("git", ["apply", p], { cwd: tsExtPath });
     }
-
-    await writePatchMark(tsExtPath, { ...patchMark, patched: true });
+  } else {
+    // reset to initial state first
+    await exec("git", ["reset", "-q", "--hard", "HEAD"], { cwd: tsExtPath });
+    for (const p of patchesResolved) {
+      try {
+        await exec("git", ["apply", p], { cwd: tsExtPath });
+      } catch {
+        await exec("git", ["apply", "--reject", p], { cwd: tsExtPath }).catch((e) =>
+          console.error(e.message)
+        );
+        stdout.write(
+          `Patch file ${p} failed, press any key when the conflict has been resolved...`
+        );
+        await pressAnyKey();
+      }
+      const { stdout: newPatchContent } = await exec("git", ["diff", "-U"], {
+        cwd: tsExtPath,
+      });
+      await fs.writeFile(p, newPatchContent);
+      await exec("git", ["add", "--all"], { cwd: tsExtPath });
+    }
   }
+
+  await writePatchMark(tsExtPath, { ...patchMark, patched: true });
 }
 
 module.exports = { applyPatches };
