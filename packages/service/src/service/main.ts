@@ -2,6 +2,7 @@ import type * as vscode from "vscode";
 import * as lsp from "vscode-languageserver-protocol";
 import { URI } from "vscode-uri";
 import { initializeShareMod } from "../share";
+import { GenericCommandsConverter } from "../share/commandsConverter";
 import { initializeShimServices } from "../shims";
 import * as types from "../shims/types";
 import { Barrier } from "../utils/barrier";
@@ -12,8 +13,8 @@ import { TSCodeActionFeature } from "./codeAction";
 import { TSCompletionFeature } from "./completion";
 import { createTSLanguageServiceDelegate } from "./delegate";
 import { tsDefaultConfig, tsDefaultNls } from "./pkgJson";
+import { ProviderNotFoundError } from "./protocol";
 import { TSLanguageServiceConfig, TSLanguageServiceOptions } from "./types";
-import { GenericCommandsConverter } from "../share/commandsConverter";
 
 async function startVsTsExtension(context: vscode.ExtensionContext) {
   const tsExtension = await import("@vsc-ts/extension");
@@ -371,10 +372,7 @@ export function createTSLanguageService(initOptions: TSLanguageServiceOptions) {
       const doc = getOpenedDoc(params.textDocument.uri);
       const { provider } = providers.$getHighestProvider(doc, providers.rename);
       if (!provider.prepareRename) {
-        throw new lsp.ResponseError(
-          lsp.ErrorCodes.MethodNotFound,
-          "cannot find provider for prepareRename"
-        );
+        throw new ProviderNotFoundError("prepareRename");
       }
 
       const result = await provider.prepareRename(

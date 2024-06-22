@@ -47,3 +47,5 @@ export const commands = [...tsCommands, CompletionCache.id];
 
 export const onTypeFormatFirstTriggerCharacter = ";";
 export const onTypeFormatMoreTriggerCharacter = ["}", "\n"];
+
+export { ProviderNotFoundError } from "../shims/languageFeatures";

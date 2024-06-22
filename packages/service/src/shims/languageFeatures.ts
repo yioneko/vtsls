@@ -15,6 +15,10 @@ export type ProviderEntry<T, Args = unknown> = {
 class LanguageFeatureRegistry<T, Args = unknown> extends Disposable {
   private entries = new Map<number, ProviderEntry<T, Args>>();
 
+  constructor(public featureId: string) {
+    super();
+  }
+
   register(id: number, registry: ProviderEntry<T, Args>) {
     this.entries.set(id, registry);
     return this._register(lsp.Disposable.create(() => this.entries.delete(id)));
@@ -28,12 +32,20 @@ class LanguageFeatureRegistry<T, Args = unknown> extends Disposable {
 export class CodeActionProviderRegistry extends LanguageFeatureRegistry<
   vscode.CodeActionProvider,
   { metadata?: vscode.CodeActionProviderMetadata }
-> {}
+> {
+  constructor() {
+    super("codeAction");
+  }
+}
 
 export class CompletionProviderRegistry extends LanguageFeatureRegistry<
   vscode.CompletionItemProvider,
   { triggerCharacters: string[] }
-> {}
+> {
+  constructor() {
+    super("completion");
+  }
+}
 
 interface ProviderWithScore<T, Args> {
   id: number;
@@ -44,7 +56,7 @@ interface ProviderWithScore<T, Args> {
 
 export interface LanguageFeatureRegistryHandle<T, Args> {
   getProviders(doc: vscode.TextDocument): ProviderWithScore<T, Args>[];
-  getProviderById(id: number): ProviderEntry<T, Args>;
+  getProviderById(id: number): ProviderEntry<T, Args> | undefined;
 }
 
 type InferRegistryHandle<R extends LanguageFeatureRegistry<any>> =
@@ -53,72 +65,93 @@ type InferRegistryHandle<R extends LanguageFeatureRegistry<any>> =
 export type CodeActionRegistryHandle = InferRegistryHandle<CodeActionProviderRegistry>;
 export type CompletionRegistryHandle = InferRegistryHandle<CompletionProviderRegistry>;
 
+export class ProviderNotFoundError extends Error {
+  constructor(public providerFeature: string) {
+    super(
+      `Cannot find provider for ${providerFeature}, the feature is possibly not supported by the current TypeScript version or disabled by settings.`
+    );
+  }
+}
+
 class LanguageFeaturesRegistryStore extends Disposable {
   readonly callHierarchy = this._register(
-    new LanguageFeatureRegistry<vscode.CallHierarchyProvider>()
+    new LanguageFeatureRegistry<vscode.CallHierarchyProvider>("callHierarchy")
   );
   readonly codeActions = this._register(new CodeActionProviderRegistry());
-  readonly codeLens = this._register(new LanguageFeatureRegistry<vscode.CodeLensProvider>());
+  readonly codeLens = this._register(
+    new LanguageFeatureRegistry<vscode.CodeLensProvider>("codeLens")
+  );
   readonly completionItem = this._register(new CompletionProviderRegistry());
-  readonly declaration = this._register(new LanguageFeatureRegistry<vscode.DeclarationProvider>());
-  readonly definition = this._register(new LanguageFeatureRegistry<vscode.DefinitionProvider>());
+  readonly declaration = this._register(
+    new LanguageFeatureRegistry<vscode.DeclarationProvider>("declaration")
+  );
+  readonly definition = this._register(
+    new LanguageFeatureRegistry<vscode.DefinitionProvider>("definition")
+  );
   readonly documentFormattingEdit = this._register(
-    new LanguageFeatureRegistry<vscode.DocumentFormattingEditProvider>()
+    new LanguageFeatureRegistry<vscode.DocumentFormattingEditProvider>("documentFormatting")
   );
   readonly documentHighlight = this._register(
-    new LanguageFeatureRegistry<vscode.DocumentHighlightProvider>()
+    new LanguageFeatureRegistry<vscode.DocumentHighlightProvider>("documentHighlight")
   );
   readonly documentLink = this._register(
-    new LanguageFeatureRegistry<vscode.DocumentLinkProvider>()
+    new LanguageFeatureRegistry<vscode.DocumentLinkProvider>("documentLink")
   );
   readonly documentRangeFormattingEdit = this._register(
-    new LanguageFeatureRegistry<vscode.DocumentRangeFormattingEditProvider>()
+    new LanguageFeatureRegistry<vscode.DocumentRangeFormattingEditProvider>(
+      "documentRangeFormatting"
+    )
   );
   readonly documentRangeSemanticTokens = this._register(
-    new LanguageFeatureRegistry<vscode.DocumentRangeSemanticTokensProvider>()
+    new LanguageFeatureRegistry<vscode.DocumentRangeSemanticTokensProvider>(
+      "documentRangeSemanticTokens"
+    )
   );
   readonly documentSymbol = this._register(
-    new LanguageFeatureRegistry<vscode.DocumentSymbolProvider>()
+    new LanguageFeatureRegistry<vscode.DocumentSymbolProvider>("documentSymbol")
   );
   readonly documentSemanticTokens = this._register(
-    new LanguageFeatureRegistry<vscode.DocumentSemanticTokensProvider>()
+    new LanguageFeatureRegistry<vscode.DocumentSemanticTokensProvider>("documentSemanticTokens")
   );
   readonly foldingRange = this._register(
-    new LanguageFeatureRegistry<vscode.FoldingRangeProvider>()
+    new LanguageFeatureRegistry<vscode.FoldingRangeProvider>("foldingRange")
   );
-  readonly hover = this._register(new LanguageFeatureRegistry<vscode.HoverProvider>());
+  readonly hover = this._register(new LanguageFeatureRegistry<vscode.HoverProvider>("hover"));
   readonly implementation = this._register(
-    new LanguageFeatureRegistry<vscode.ImplementationProvider>()
+    new LanguageFeatureRegistry<vscode.ImplementationProvider>("implementation")
   );
-  readonly inlayHints = this._register(new LanguageFeatureRegistry<vscode.InlayHintsProvider>());
+  readonly inlayHints = this._register(
+    new LanguageFeatureRegistry<vscode.InlayHintsProvider>("inlayHints")
+  );
   readonly onTypeFormatting = this._register(
     new LanguageFeatureRegistry<
       vscode.OnTypeFormattingEditProvider,
       { firstTriggerCharacter: string; moreTriggerCharacter: string[] }
-    >()
+    >("onTypeFormatting")
   );
   readonly linkedEditingRange = this._register(
-    new LanguageFeatureRegistry<vscode.LinkedEditingRangeProvider>()
+    new LanguageFeatureRegistry<vscode.LinkedEditingRangeProvider>("linkedEditingRange")
   );
-  readonly reference = this._register(new LanguageFeatureRegistry<vscode.ReferenceProvider>());
-  readonly rename = this._register(new LanguageFeatureRegistry<vscode.RenameProvider>());
+  readonly reference = this._register(
+    new LanguageFeatureRegistry<vscode.ReferenceProvider>("reference")
+  );
+  readonly rename = this._register(new LanguageFeatureRegistry<vscode.RenameProvider>("rename"));
   readonly selectionRange = this._register(
-    new LanguageFeatureRegistry<vscode.SelectionRangeProvider>()
+    new LanguageFeatureRegistry<vscode.SelectionRangeProvider>("selectionRange")
   );
   readonly signatureHelp = this._register(
-    new LanguageFeatureRegistry<
-      vscode.SignatureHelpProvider,
-      vscode.SignatureHelpProviderMetadata
-    >()
+    new LanguageFeatureRegistry<vscode.SignatureHelpProvider, vscode.SignatureHelpProviderMetadata>(
+      "signatureHelp"
+    )
   );
   readonly typeDefinition = this._register(
-    new LanguageFeatureRegistry<vscode.TypeDefinitionProvider>()
+    new LanguageFeatureRegistry<vscode.TypeDefinitionProvider>("typeDefinition")
   );
   readonly typeHierarchy = this._register(
-    new LanguageFeatureRegistry<vscode.TypeHierarchyProvider>()
+    new LanguageFeatureRegistry<vscode.TypeHierarchyProvider>("typeHierarchy")
   );
   readonly workspaceSymbol = this._register(
-    new LanguageFeatureRegistry<vscode.WorkspaceSymbolProvider>()
+    new LanguageFeatureRegistry<vscode.WorkspaceSymbolProvider>("workspaceSymbol")
   );
 
   $getProviders<T, Args = unknown>(
@@ -146,12 +179,8 @@ class LanguageFeaturesRegistryStore extends Disposable {
   ) {
     const all = this.$getProviders(doc, providers);
     if (!Array.isArray(all) || all.length === 0) {
-      throw new lsp.ResponseError(
-        lsp.ErrorCodes.InternalError,
-        "Cannot find provider for the feature"
-      );
+      throw new ProviderNotFoundError(providers.featureId);
     }
-
     return all[0];
   }
 
@@ -163,17 +192,14 @@ class LanguageFeaturesRegistryStore extends Disposable {
           : never;
       }
     }
-    throw new lsp.ResponseError(lsp.ErrorCodes.InvalidRequest, `Provider with id ${id} not found`);
+    throw new ProviderNotFoundError(providers.featureId);
   }
 
   $getProviderWithoutSelector<T, Args = unknown>(providers: LanguageFeatureRegistry<T, Args>) {
     for (const [id, entry] of providers) {
       return { id, ...entry };
     }
-    throw new lsp.ResponseError(
-      lsp.ErrorCodes.InternalError,
-      "Cannot find provider for the feature"
-    );
+    throw new ProviderNotFoundError(providers.featureId);
   }
 
   $withRegistry<T, Args = unknown>(

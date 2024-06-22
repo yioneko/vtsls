@@ -1,4 +1,8 @@
-import { createTSLanguageService, TSLanguageService } from "@vtsls/language-service";
+import {
+  createTSLanguageService,
+  ProviderNotFoundError,
+  TSLanguageService,
+} from "@vtsls/language-service";
 import {
   ClientCapabilities,
   ConfigurationRequest,
@@ -78,6 +82,7 @@ function bindServiceHandlers(
   clientCapabilities: ClientCapabilities
 ) {
   service.onLogMessage((params) => void conn.sendNotification(LogMessageNotification.type, params));
+
   service.onLogTrace((params) => void conn.tracer.log(params.message));
   if (clientCapabilities.window?.showMessage) {
     service.onShowMessage((params) => conn.sendRequest(ShowMessageRequest.type, params));
@@ -100,7 +105,25 @@ function bindServiceHandlers(
   conn.onExit(() => service.dispose());
   conn.onShutdown(() => service.dispose());
 
-  /* eslint-disable @typescript-eslint/no-misused-promises, @typescript-eslint/unbound-method*/
+  // some features are missing on older version of ts, supress error for them
+  function catchProviderNotFound<A extends any[], R>(
+    handler: (...args: A) => Promise<R>,
+    fallback: R
+  ) {
+    return async (...args: A) => {
+      try {
+        return await handler(...args);
+      } catch (e) {
+        if (e instanceof ProviderNotFoundError) {
+          conn.console.warn(e.message);
+          return fallback;
+        }
+        throw e;
+      }
+    };
+  }
+
+  /* eslint-disable @typescript-eslint/unbound-method*/
   conn.onDidOpenTextDocument(service.openTextDocument);
   conn.onDidCloseTextDocument(service.closeTextDocument);
   conn.onDidChangeTextDocument(service.changeTextDocument);
@@ -108,7 +131,9 @@ function bindServiceHandlers(
   conn.workspace.onDidRenameFiles(service.renameFiles);
   if (clientCapabilities.workspace?.workspaceFolders) {
     // otherwise this will throw error 😈
-    conn.workspace.onDidChangeWorkspaceFolders((event) => service.changeWorkspaceFolders({ event }));
+    conn.workspace.onDidChangeWorkspaceFolders((event) =>
+      service.changeWorkspaceFolders({ event })
+    );
   }
   conn.onCompletion(service.completion);
   conn.onCompletionResolve(service.completionItemResolve);
@@ -131,17 +156,23 @@ function bindServiceHandlers(
   conn.onPrepareRename(service.prepareRename);
   conn.onRenameRequest(service.rename);
   conn.onFoldingRanges(service.foldingRanges);
-  conn.onSelectionRanges(service.selectionRanges);
+  conn.onSelectionRanges(catchProviderNotFound(service.selectionRanges, null));
   conn.onCodeLens(service.codeLens);
   conn.onCodeLensResolve(service.codeLensResolve);
-  conn.languages.callHierarchy.onPrepare(service.prepareCallHierarchy);
-  conn.languages.callHierarchy.onIncomingCalls(service.incomingCalls);
-  conn.languages.callHierarchy.onOutgoingCalls(service.outgoingCalls);
-  conn.languages.inlayHint.on(service.inlayHint);
-  conn.languages.semanticTokens.on(service.semanticTokensFull);
-  conn.languages.semanticTokens.onRange(service.semanticTokensRange);
-  conn.languages.onLinkedEditingRange(service.linkedEditingRange);
-  /* eslint-enable @typescript-eslint/no-misused-promises, @typescript-eslint/unbound-method*/
+  conn.languages.callHierarchy.onPrepare(catchProviderNotFound(service.prepareCallHierarchy, null));
+  conn.languages.callHierarchy.onIncomingCalls(catchProviderNotFound(service.incomingCalls, null));
+  conn.languages.callHierarchy.onOutgoingCalls(catchProviderNotFound(service.outgoingCalls, null));
+  conn.languages.inlayHint.on(catchProviderNotFound(service.inlayHint, null));
+  conn.languages.onLinkedEditingRange(catchProviderNotFound(service.linkedEditingRange, null));
+
+  const nullSemanticTokens = { data: [] };
+  conn.languages.semanticTokens.on(
+    catchProviderNotFound(service.semanticTokensFull, nullSemanticTokens)
+  );
+  conn.languages.semanticTokens.onRange(
+    catchProviderNotFound(service.semanticTokensRange, nullSemanticTokens)
+  );
+  /* eslint-enable @typescript-eslint/unbound-method*/
 }
 
 createLanguageServer();
