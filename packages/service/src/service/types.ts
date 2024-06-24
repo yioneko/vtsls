@@ -4,6 +4,7 @@ export interface TSLanguageServiceOptions {
   locale?: string;
   workspaceFolders?: lsp.WorkspaceFolder[];
   clientCapabilities: lsp.ClientCapabilities;
+  hostInfo?: string;
   tsExtLogPath?: string;
 }
 
