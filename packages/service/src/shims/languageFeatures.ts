@@ -56,7 +56,8 @@ interface ProviderWithScore<T, Args> {
 
 export interface LanguageFeatureRegistryHandle<T, Args> {
   getProviders(doc: vscode.TextDocument): ProviderWithScore<T, Args>[];
-  getProviderById(id: number): ProviderEntry<T, Args> | undefined;
+  getProviderById(id: number): ProviderEntry<T, Args>;
+  getHighestProvider(doc: vscode.TextDocument): ProviderWithScore<T, Args>;
 }
 
 type InferRegistryHandle<R extends LanguageFeatureRegistry<any>> =
@@ -212,6 +213,9 @@ class LanguageFeaturesRegistryStore extends Disposable {
       },
       getProviderById(id: number) {
         return store.$getProviderById(id, registry);
+      },
+      getHighestProvider(doc: vscode.TextDocument) {
+        return store.$getHighestProvider(doc, registry);
       },
     };
   }

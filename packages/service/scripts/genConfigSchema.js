@@ -115,6 +115,12 @@ async function genSchema() {
       description:
         "Maximum number of completion entries to return. Recommend to also toggle `enableServerSideFuzzyMatch` to preserve items with higher accuracy.",
     },
+    "vtsls.experimental.maxInlayHintLength": {
+      default: null,
+      type: ["number", "null"],
+      description:
+        "Maximum length of single inlay hint. Note that hint is simply truncated if the limit is exceeded. Do not set this if your client already handles overly long hints gracefully.",
+    },
     "vtsls.enableMoveToFileCodeAction": {
       default: false,
       type: "boolean",
