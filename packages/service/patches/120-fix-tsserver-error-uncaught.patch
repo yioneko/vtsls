@@ -1,0 +1,13 @@
+diff --git a/src/typescriptServiceClient.ts b/src/typescriptServiceClient.ts
+index 25dfca2..bdc0ab1 100644
+--- a/src/typescriptServiceClient.ts
++++ b/src/typescriptServiceClient.ts
+@@ -857,7 +857,7 @@ export default class TypeScriptServiceClient extends Disposable implements IType
+ 					expectsResult: true,
+ 					...config,
+ 				});
+-				executions[0]!.finally(() => {
++				executions[0] = executions[0]!.finally(() => {
+ 					runningServerState.toCancelOnResourceChange.delete(inFlight);
+ 					source.dispose();
+ 				});
