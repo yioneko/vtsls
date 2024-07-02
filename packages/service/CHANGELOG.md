@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.2.5](https://github.com/yioneko/vtsls/compare/service-v0.2.4...service-v0.2.5) (2024-07-02)
+
+
+### Features
+
+* truncate inlay hint by setting ([#173](https://github.com/yioneko/vtsls/issues/173)) ([95b51bd](https://github.com/yioneko/vtsls/commit/95b51bde14b098ffb4760630821027c6a2fe84da))
+
+
+### Bug Fixes
+
+* suppress provider not found error for some features ([9dff5e3](https://github.com/yioneko/vtsls/commit/9dff5e3ee5268720648033d661994ac4d160c0cf))
+* uncaught tsserver error makes server crashed ([00f766e](https://github.com/yioneko/vtsls/commit/00f766e9bbefb9ee6dfcb7d62ba3befaf0b32b4a))
+
 ## [0.2.4](https://github.com/yioneko/vtsls/compare/service-v0.2.3...service-v0.2.4) (2024-06-21)
 
 
