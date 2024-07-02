@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.2.5](https://github.com/yioneko/vtsls/compare/server-v0.2.4...server-v0.2.5) (2024-07-02)
+
+
+### Bug Fixes
+
+* suppress provider not found error for some features ([9dff5e3](https://github.com/yioneko/vtsls/commit/9dff5e3ee5268720648033d661994ac4d160c0cf))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @vtsls/language-service bumped from 0.2.4 to 0.2.5
+
 ## [0.2.4](https://github.com/yioneko/vtsls/compare/server-v0.2.3...server-v0.2.4) (2024-06-21)
 
 
