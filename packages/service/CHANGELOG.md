@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.2.5](https://github.com/yioneko/vtsls/compare/service-v0.2.4...service-v0.2.5) (2024-07-03)
+
+
+### Features
+
+* truncate inlay hint by setting ([#173](https://github.com/yioneko/vtsls/issues/173)) ([95b51bd](https://github.com/yioneko/vtsls/commit/95b51bde14b098ffb4760630821027c6a2fe84da))
+
+
+### Bug Fixes
+
+* handle zipfile uri with yarn pnp and neovim ([#179](https://github.com/yioneko/vtsls/issues/179)) ([a6bb7f7](https://github.com/yioneko/vtsls/commit/a6bb7f7a0507254da6c40e9a6900aa73a2aaa073))
+* suppress provider not found error for some features ([9dff5e3](https://github.com/yioneko/vtsls/commit/9dff5e3ee5268720648033d661994ac4d160c0cf))
+* uncaught tsserver error makes server crashed ([00f766e](https://github.com/yioneko/vtsls/commit/00f766e9bbefb9ee6dfcb7d62ba3befaf0b32b4a))
+
 ## [0.2.4](https://github.com/yioneko/vtsls/compare/service-v0.2.3...service-v0.2.4) (2024-06-21)
 
 
