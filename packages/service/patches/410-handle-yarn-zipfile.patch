@@ -1,0 +1,62 @@
+diff --git a/src/configuration/fileSchemes.ts b/src/configuration/fileSchemes.ts
+index ca268e2..96c9f0b 100644
+--- a/src/configuration/fileSchemes.ts
++++ b/src/configuration/fileSchemes.ts
+@@ -23,6 +23,7 @@ export const chatCodeBlock = 'vscode-chat-code-block';
+ 
+ /** Used for code blocks in chat by copilot. */
+ export const chatBackingCodeBlock = 'vscode-copilot-chat-code-block';
++export const zipfile = 'zipfile';
+ 
+ export function getSemanticSupportedSchemes() {
+ 	if (isWeb() && vscode.workspace.workspaceFolders) {
+@@ -36,6 +37,7 @@ export function getSemanticSupportedSchemes() {
+ 		vscodeNotebookCell,
+ 		chatCodeBlock,
+ 		chatBackingCodeBlock,
++		zipfile
+ 	];
+ }
+ 
+diff --git a/src/typescriptServiceClient.ts b/src/typescriptServiceClient.ts
+index 25dfca2..6330dd8 100644
+--- a/src/typescriptServiceClient.ts
++++ b/src/typescriptServiceClient.ts
+@@ -572,7 +572,7 @@ export default class TypeScriptServiceClient extends Disposable implements IType
+ 			: undefined;
+ 
+ 		const configureOptions: Proto.ConfigureRequestArguments = {
+-			hostInfo: 'vscode',
++			hostInfo: (this.context as any).hostInfo || 'vscode',
+ 			preferences: {
+ 				providePrefixAndSuffixTextForRename: true,
+ 				allowRenameOfImportPath: true,
+@@ -748,6 +748,10 @@ export default class TypeScriptServiceClient extends Disposable implements IType
+ 			return resource.fsPath;
+ 		}
+ 
++		if (resource.scheme === fileSchemes.zipfile) {
++			return resource.scheme + "://" + (resource.path.startsWith('/') ? resource.path : '/' + resource.path);
++		}
++
+ 		return (this.isProjectWideIntellisenseOnWebEnabled() ? '' : inMemoryResourcePrefix)
+ 			+ '/' + resource.scheme
+ 			+ '/' + (resource.authority || emptyAuthority)
+@@ -796,6 +800,17 @@ export default class TypeScriptServiceClient extends Disposable implements IType
+ 				return this.bufferSyncSupport.toVsCodeResource(resource);
+ 			}
+ 		}
++		if (filepath.startsWith(fileSchemes.zipfile)) {
++			const uri = vscode.Uri.parse(filepath, false)
++			return new Proxy(uri, {
++				get(target, p) {
++					if (p === 'toString') {
++						return () => filepath;
++					}
++					return target[p as keyof vscode.Uri];
++				}
++			})
++		}
+ 
+ 		if (filepath.startsWith(inMemoryResourcePrefix)) {
+ 			const parts = filepath.match(/^\^\/([^\/]+)\/([^\/]*)\/(.+)$/);
