@@ -116,6 +116,12 @@ See the configuration schema [here](./packages/service/configuration.schema.json
 
 Please see [Known issues](https://github.com/yioneko/vtsls/issues/26) first.
 
+### Server stuck or crashed on large repo
+
+If any typescript plugins have been activated, try to disable all of them first. The plugins could be specified in either `tsconfig.json` or `vtsls.tsserver.globalPlugins` setting.
+
+Set `typescript.tsserver.maxTsServerMemory` to a higher value, such as 8192. The memory usage of `tsserver` increases in propotion to the scale of project it handles. To prevent `tsserver` from quickly exhausting the host RAM and making everything unusable, there is a default setting `typescript.tsserver.maxTsServerMemory` which is passed as `--max-old-space-size` to the `tsserver` node process. VSCode defaults the limit to 3072 (3GB), which may be insufficient for some really large projects. In such cases, frequent GC might be triggered, and `tsserver` could become stuck or crash due to memory allocation failures.
+
 ### Bad performance of completion
 
 `tsserver` could throw out plenty of completion entries, most of them are globally accessible variables, modules or namespaces. Some LSP clients have poor performance for fuzzy matching or filtering, and cause noticeable delay of completion.
