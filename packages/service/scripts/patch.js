@@ -109,12 +109,17 @@ async function pressAnyKey() {
    * @type {Buffer}
    */
   const buffer = await new Promise((resolve) => {
-    stdin.once("data", (buffer) => process.nextTick(() => resolve(buffer)));
+    const timeout = setTimeout(() => resolve, 60 * 1000); // 60s
+    stdin.once("data", (buffer) =>
+      process.nextTick(() => {
+        clearTimeout(timeout);
+        return resolve(buffer);
+      })
+    );
   });
   stdin.setRawMode(false);
   stdin.pause();
-  const bytes = Array.from(buffer);
-  return bytes[0];
+  return buffer && Array.from(buffer)[0];
 }
 
 async function promptOverwriteExt(targetDir) {
@@ -124,8 +129,13 @@ async function promptOverwriteExt(targetDir) {
   stdout.write(
     `The VSCode submodule has updated. Overwrite the extension (${targetDir}) and re-patch? [y/n] `
   );
-  const key = await pressAnyKey();
-  return key === "y".charCodeAt(0);
+  try {
+    const key = await pressAnyKey();
+    return key === "y".charCodeAt(0);
+  } catch (e) {
+    console.error(e);
+    return false;
+  }
 }
 
 /**

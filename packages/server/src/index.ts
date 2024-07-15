@@ -1,5 +1,6 @@
 import {
   createTSLanguageService,
+  DocumentNotOpenedError,
   ProviderNotFoundError,
   TSLanguageService,
 } from "@vtsls/language-service";
@@ -106,17 +107,22 @@ function bindServiceHandlers(
   conn.onExit(() => service.dispose());
   conn.onShutdown(() => service.dispose());
 
-  // some features are missing on older version of ts, supress error for them
-  function catchProviderNotFound<A extends any[], R>(
+  function safeRun<A extends any[], R, F>(
     handler: (...args: A) => Promise<R>,
-    fallback: R
+    fallback: F,
+    catchProviderNotFound = false
   ) {
     return async (...args: A) => {
       try {
         return await handler(...args);
       } catch (e) {
-        if (e instanceof ProviderNotFoundError) {
+        if (catchProviderNotFound && e instanceof ProviderNotFoundError) {
+          // some features are missing on older version of ts, supress error for them
           conn.console.warn(e.message);
+          return fallback;
+        } else if (e instanceof DocumentNotOpenedError) {
+          // https://github.com/microsoft/language-server-protocol/issues/1912
+          // The discussion has not been settled, just ignore the error for now
           return fallback;
         }
         throw e;
@@ -130,50 +136,48 @@ function bindServiceHandlers(
   conn.onDidChangeTextDocument(service.changeTextDocument);
   conn.onDidChangeConfiguration(service.changeConfiguration);
   conn.workspace.onDidRenameFiles(service.renameFiles);
+  /* eslint-enable @typescript-eslint/unbound-method*/
   if (clientCapabilities.workspace?.workspaceFolders) {
     // otherwise this will throw error 😈
     conn.workspace.onDidChangeWorkspaceFolders((event) =>
       service.changeWorkspaceFolders({ event })
     );
   }
-  conn.onCompletion(service.completion);
+  conn.onCompletion(safeRun(service.completion, null));
   conn.onCompletionResolve(service.completionItemResolve);
-  conn.onDocumentHighlight(service.documentHighlight);
-  conn.onSignatureHelp(service.signatureHelp);
+  conn.onDocumentHighlight(safeRun(service.documentHighlight, null));
+  conn.onSignatureHelp(safeRun(service.signatureHelp, null));
   // conn.onDocumentLinks(service.documentLinks);
-  conn.onDefinition(service.definition);
-  conn.onReferences(service.references);
-  conn.onHover(service.hover);
-  conn.onDocumentSymbol(service.documentSymbol);
-  conn.onWorkspaceSymbol(service.workspaceSymbol);
-  conn.onCodeAction(service.codeAction);
+  conn.onDefinition(safeRun(service.definition, null));
+  conn.onReferences(safeRun(service.references, null));
+  conn.onHover(safeRun(service.hover, null));
+  conn.onDocumentSymbol(safeRun(service.documentSymbol, null));
+  conn.onWorkspaceSymbol(safeRun(service.workspaceSymbol, null));
+  conn.onCodeAction(safeRun(service.codeAction, null));
   conn.onCodeActionResolve(service.codeActionResolve);
-  conn.onExecuteCommand(service.executeCommand);
-  conn.onImplementation(service.implementation);
-  conn.onTypeDefinition(service.typeDefinition);
-  conn.onDocumentFormatting(service.documentFormatting);
-  conn.onDocumentRangeFormatting(service.documentRangeFormatting);
-  conn.onDocumentOnTypeFormatting(service.documentOnTypeFormatting);
-  conn.onPrepareRename(service.prepareRename);
-  conn.onRenameRequest(service.rename);
-  conn.onFoldingRanges(service.foldingRanges);
-  conn.onSelectionRanges(catchProviderNotFound(service.selectionRanges, null));
-  conn.onCodeLens(service.codeLens);
+  conn.onExecuteCommand(safeRun(service.executeCommand, null));
+  conn.onImplementation(safeRun(service.implementation, null));
+  conn.onTypeDefinition(safeRun(service.typeDefinition, null));
+  conn.onDocumentFormatting(safeRun(service.documentFormatting, null));
+  conn.onDocumentRangeFormatting(safeRun(service.documentRangeFormatting, null));
+  conn.onDocumentOnTypeFormatting(safeRun(service.documentOnTypeFormatting, null));
+  conn.onPrepareRename(safeRun(service.prepareRename, null));
+  conn.onRenameRequest(safeRun(service.rename, null));
+  conn.onFoldingRanges(safeRun(service.foldingRanges, null));
+  conn.onSelectionRanges(safeRun(service.selectionRanges, null, true));
+  conn.onCodeLens(safeRun(service.codeLens, null));
   conn.onCodeLensResolve(service.codeLensResolve);
-  conn.languages.callHierarchy.onPrepare(catchProviderNotFound(service.prepareCallHierarchy, null));
-  conn.languages.callHierarchy.onIncomingCalls(catchProviderNotFound(service.incomingCalls, null));
-  conn.languages.callHierarchy.onOutgoingCalls(catchProviderNotFound(service.outgoingCalls, null));
-  conn.languages.inlayHint.on(catchProviderNotFound(service.inlayHint, null));
-  conn.languages.onLinkedEditingRange(catchProviderNotFound(service.linkedEditingRange, null));
+  conn.languages.callHierarchy.onPrepare(safeRun(service.prepareCallHierarchy, null, true));
+  conn.languages.callHierarchy.onIncomingCalls(safeRun(service.incomingCalls, null, true));
+  conn.languages.callHierarchy.onOutgoingCalls(safeRun(service.outgoingCalls, null, true));
+  conn.languages.inlayHint.on(safeRun(service.inlayHint, null, true));
+  conn.languages.onLinkedEditingRange(safeRun(service.linkedEditingRange, null, true));
 
   const nullSemanticTokens = { data: [] };
-  conn.languages.semanticTokens.on(
-    catchProviderNotFound(service.semanticTokensFull, nullSemanticTokens)
-  );
+  conn.languages.semanticTokens.on(safeRun(service.semanticTokensFull, nullSemanticTokens, true));
   conn.languages.semanticTokens.onRange(
-    catchProviderNotFound(service.semanticTokensRange, nullSemanticTokens)
+    safeRun(service.semanticTokensRange, nullSemanticTokens, true)
   );
-  /* eslint-enable @typescript-eslint/unbound-method*/
 }
 
 createLanguageServer();

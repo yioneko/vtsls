@@ -49,3 +49,4 @@ export const onTypeFormatFirstTriggerCharacter = ";";
 export const onTypeFormatMoreTriggerCharacter = ["}", "\n"];
 
 export { ProviderNotFoundError } from "../shims/languageFeatures";
+export { DocumentNotOpenedError } from "../shims/workspace";

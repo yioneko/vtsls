@@ -1,12 +1,10 @@
-import * as vscode from "vscode";
+import type * as vscode from "vscode";
 import * as lsp from "vscode-languageserver-protocol";
-import { TextDocument } from "vscode-languageserver-textdocument";
 import { URI } from "vscode-uri";
 import * as types from "../shims/types";
 import { onCaseInsensitiveFileSystem } from "../utils/fs";
 import { ResourceMap } from "../utils/resourceMap";
 import { deepClone } from "./objects";
-import { getWordAtText } from "./word";
 
 function isStringOrFalsy(val: unknown): val is string | undefined | null {
   return typeof val === "string" || val === undefined || val === null;
@@ -148,98 +146,6 @@ export class TSLspConverter extends LspInvariantConverter {
     }
   };
 
-  convertTextDocumentFromLsp = (textDocument: TextDocument): vscode.TextDocument => {
-    const uri = URI.parse(textDocument.uri);
-    const doc: vscode.TextDocument = {
-      uri,
-      get version() {
-        return textDocument.version;
-      },
-      get languageId() {
-        return textDocument.languageId;
-      },
-      get lineCount() {
-        return textDocument.lineCount;
-      },
-      getText: textDocument.getText.bind(textDocument),
-      offsetAt: textDocument.offsetAt.bind(textDocument),
-      positionAt(offset) {
-        const pos = textDocument.positionAt(offset);
-        return new types.Position(pos.line, pos.character);
-      },
-      get eol() {
-        return types.EndOfLine.LF;
-        // return that.config.$getVtslsDocConfig(this).get("newLineCharacter") === "\r\n"
-        //   ? types.EndOfLine.LF
-        //   : types.EndOfLine.CRLF;
-      },
-      getWordRangeAtPosition(position) {
-        const line = this.getText(
-          new types.Range(position.line, 0, position.line, Number.MAX_VALUE)
-        );
-        const wordAtText = getWordAtText(position.character + 1, line);
-        if (wordAtText) {
-          return new types.Range(
-            position.line,
-            wordAtText.startColumn - 1,
-            position.line,
-            wordAtText.endColumn - 1
-          );
-        }
-      },
-      get fileName() {
-        return doc.uri.fsPath;
-      },
-      get isUntitled() {
-        return doc.uri.scheme == "untitled";
-      },
-      // not synced if removed from documents
-      get isClosed() {
-        // return that.workspace.$getDocumentByLspUri(textDocument.uri) !== undefined;
-        return false;
-      },
-      // assume always dirty
-      isDirty: true,
-      save(): Thenable<boolean> {
-        throw new Error("Function not implemented.");
-      },
-      lineAt(lineOrPosition: number | vscode.Position): vscode.TextLine {
-        let line = 0;
-        if (lineOrPosition instanceof vscode.Position) {
-          line = lineOrPosition.line;
-        } else if (typeof lineOrPosition === "number") {
-          line = lineOrPosition;
-        } else {
-          throw new Error("invalid params");
-        }
-
-        const lineText = textDocument.getText(
-          lsp.Range.create(
-            lsp.Position.create(line, 0),
-            lsp.Position.create(line, Number.MAX_VALUE)
-          )
-        );
-
-        // TODO: fill api
-        return {
-          lineNumber: line,
-          text: lineText,
-        } as vscode.TextLine;
-      },
-      validateRange(range) {
-        // TODO?
-        return range;
-      },
-      validatePosition(position) {
-        // TODO?
-        return position;
-      },
-    };
-    // This is required for inherit method to work as is
-    Object.setPrototypeOf(doc, textDocument);
-    return doc;
-  };
-
   convertCompletionItem = (item: vscode.CompletionItem, data?: any): lsp.CompletionItem => {
     const { label, ...details } = isStringOrFalsy(item.label) ? { label: item.label } : item.label;
 
@@ -266,7 +172,7 @@ export class TSLspConverter extends LspInvariantConverter {
         };
       } else {
         textEdit = {
-          // TODO:: use item.range.replacing?
+          // TODO: use item.range.replacing?
           range: this.convertRangeToLsp(item.range.inserting),
           newText: insertText ?? label,
         };

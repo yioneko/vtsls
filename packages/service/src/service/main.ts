@@ -89,11 +89,7 @@ export function createTSLanguageService(initOptions: TSLanguageServiceOptions) {
   }
 
   function getOpenedDoc(uri: lsp.URI) {
-    const lspDoc = shims.workspaceService.$getDocumentByLspUri(uri);
-    if (!lspDoc) {
-      throw new Error(`Cannot find document ${uri}`);
-    }
-    return converter.convertTextDocumentFromLsp(lspDoc);
+    return shims.workspaceService.$getOpenedDocThrow(uri);
   }
 
   const tsLanguageService = {

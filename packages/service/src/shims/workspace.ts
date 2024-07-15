@@ -1,7 +1,6 @@
 import * as path from "path";
-import * as vscode from "vscode";
+import type * as vscode from "vscode";
 import * as lsp from "vscode-languageserver-protocol";
-import { TextDocument } from "vscode-languageserver-textdocument";
 import { URI, Utils as uriUtils } from "vscode-uri";
 import { TSLanguageServiceDelegate } from "../service/delegate";
 import { Barrier } from "../utils/barrier";
@@ -10,7 +9,14 @@ import { onCaseInsensitiveFileSystem } from "../utils/fs";
 import { ResourceMap } from "../utils/resourceMap";
 import { ConfigurationShimService } from "./configuration";
 import { createFileSystemShim } from "./fs";
+import { IsomorphicTextDocument as TextDocument } from "./textdocument";
 import * as types from "./types";
+
+export class DocumentNotOpenedError extends Error {
+  constructor(uri: string) {
+    super(`Cannot find document ${uri}. It should be opened before requesting features for it.`);
+  }
+}
 
 export class WorkspaceShimService extends Disposable {
   private _onDidOpenTextDocument = this._register(new lsp.Emitter<vscode.TextDocument>());
@@ -74,15 +80,7 @@ export class WorkspaceShimService extends Disposable {
   }
 
   get textDocuments(): vscode.TextDocument[] {
-    const result = [];
-    for (const doc of this._documents.values()) {
-      result.push(this.delegate.converter.convertTextDocumentFromLsp(doc));
-    }
-    return result;
-  }
-
-  $getDocumentByLspUri(uri: lsp.URI) {
-    return this._documents.get(URI.parse(uri));
+    return Array.from(this._documents.values());
   }
 
   get workspaceFolders(): vscode.WorkspaceFolder[] {
@@ -93,13 +91,25 @@ export class WorkspaceShimService extends Disposable {
     return result;
   }
 
+  $getOpenedDoc(uri: lsp.URI) {
+    return this._documents.get(URI.parse(uri));
+  }
+
+  $getOpenedDocThrow(uri: lsp.URI) {
+    const doc = this.$getOpenedDoc(uri);
+    if (!doc) {
+      throw new DocumentNotOpenedError(uri);
+    }
+    return doc;
+  }
+
   $openTextDocument(params: lsp.DidOpenTextDocumentParams) {
     const {
       textDocument: { uri, languageId, version, text },
     } = params;
     const doc = TextDocument.create(uri, languageId, version, text);
     this._documents.set(URI.parse(uri), doc);
-    this._onDidOpenTextDocument.fire(this.delegate.converter.convertTextDocumentFromLsp(doc));
+    this._onDidOpenTextDocument.fire(doc);
   }
 
   $changeTextDocument(params: lsp.DidChangeTextDocumentParams) {
@@ -114,7 +124,7 @@ export class WorkspaceShimService extends Disposable {
     }
     TextDocument.update(doc, changes, version);
     this._onDidChangeTextDocument.fire({
-      document: this.delegate.converter.convertTextDocumentFromLsp(doc),
+      document: doc,
       contentChanges: changes.map((c) => {
         if ("range" in c) {
           const rangeOffset = doc.offsetAt(c.range.start);
@@ -140,7 +150,7 @@ export class WorkspaceShimService extends Disposable {
     const vsUri = URI.parse(uri);
     const doc = this._documents.get(vsUri);
     if (doc) {
-      this._onDidCloseTextDocument.fire(this.delegate.converter.convertTextDocumentFromLsp(doc));
+      this._onDidCloseTextDocument.fire(doc);
       this._documents.delete(vsUri);
     }
   }
@@ -227,7 +237,7 @@ export class WorkspaceShimService extends Disposable {
     const uri = typeof nameOrUri === "string" ? URI.file(nameOrUri) : nameOrUri;
     const maybeOpenedDoc = this._documents.get(uri);
     if (maybeOpenedDoc) {
-      return this.delegate.converter.convertTextDocumentFromLsp(maybeOpenedDoc);
+      return maybeOpenedDoc;
     }
 
     const success = await this.delegate.openTextDocument(uri.toString());
@@ -251,7 +261,7 @@ export class WorkspaceShimService extends Disposable {
     await pending.wait();
     // HACK: returns a pesudo doc here: the open is success, but client didn't trigger a didOpen notification
     const doc = this._documents.get(uri) ?? TextDocument.create(uri.toString(), "unknown", 0, "");
-    return this.delegate.converter.convertTextDocumentFromLsp(doc);
+    return doc;
   }
 
   applyEdit(edit: vscode.WorkspaceEdit): Promise<boolean> {
