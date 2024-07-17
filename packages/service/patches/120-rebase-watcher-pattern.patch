@@ -1,8 +1,8 @@
 diff --git a/src/typescriptServiceClient.ts b/src/typescriptServiceClient.ts
-index 25dfca2..a235fb3 100644
+index 41d3419..9850de4 100644
 --- a/src/typescriptServiceClient.ts
 +++ b/src/typescriptServiceClient.ts
-@@ -944,6 +944,20 @@ export default class TypeScriptServiceClient extends Disposable implements IType
+@@ -973,6 +973,20 @@ export default class TypeScriptServiceClient extends Disposable implements IType
  		}
  	}
  
@@ -23,26 +23,26 @@ index 25dfca2..a235fb3 100644
  	private dispatchEvent(event: Proto.Event) {
  		switch (event.event) {
  			case EventName.syntaxDiag:
-@@ -1017,8 +1031,8 @@ export default class TypeScriptServiceClient extends Disposable implements IType
- 			case EventName.createDirectoryWatcher:
+@@ -1055,8 +1069,8 @@ export default class TypeScriptServiceClient extends Disposable implements IType
+ 
  				this.createFileSystemWatcher(
  					(event.body as Proto.CreateDirectoryWatcherEventBody).id,
 -					new vscode.RelativePattern(
--						vscode.Uri.file((event.body as Proto.CreateDirectoryWatcherEventBody).path),
+-						vscode.Uri.file(fpath),
 +					this.rebasePatternOnWorkspaceRoot(
-+						(event.body as Proto.CreateDirectoryWatcherEventBody).path,
++						fpath,
  						(event.body as Proto.CreateDirectoryWatcherEventBody).recursive ? '**' : '*'
  					),
  					(event.body as Proto.CreateDirectoryWatcherEventBody).ignoreUpdate
-@@ -1028,10 +1042,7 @@ export default class TypeScriptServiceClient extends Disposable implements IType
- 			case EventName.createFileWatcher:
+@@ -1071,10 +1085,7 @@ export default class TypeScriptServiceClient extends Disposable implements IType
+ 
  				this.createFileSystemWatcher(
  					(event.body as Proto.CreateFileWatcherEventBody).id,
 -					new vscode.RelativePattern(
--						vscode.Uri.file((event.body as Proto.CreateFileWatcherEventBody).path),
+-						vscode.Uri.file(path),
 -						'*'
 -					)
-+					this.rebasePatternOnWorkspaceRoot((event.body as Proto.CreateFileWatcherEventBody).path)
++					this.rebasePatternOnWorkspaceRoot(path)
  				);
- 				break;
- 
+ 				return;
+ 			}

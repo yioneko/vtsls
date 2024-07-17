@@ -1,12 +1,17 @@
+import { Delayer } from "@vsc-ts/utils/async";
 import { ResourceMap } from "@vsc-ts/utils/resourceMap";
-import * as fs from "node:fs";
 import pm from "picomatch";
 import type * as vscode from "vscode";
 import * as lsp from "vscode-languageserver-protocol";
 import { URI } from "vscode-uri";
 import { TSLanguageServiceDelegate } from "../service/delegate";
-import { Disposable, IDisposable } from "../utils/dispose";
+import { Disposable, IDisposable, MutableDisposable } from "../utils/dispose";
 import { isEqualOrParent, onCaseInsensitiveFileSystem, relativeParent } from "../utils/fs";
+
+interface FileEvent {
+  uri: URI;
+  type: lsp.FileChangeType;
+}
 
 class FileSystemWatcher extends Disposable implements vscode.FileSystemWatcher {
   private _onDidCreate = new lsp.Emitter<vscode.Uri>();
@@ -32,7 +37,7 @@ class FileSystemWatcher extends Disposable implements vscode.FileSystemWatcher {
 
   constructor(
     public pattern: vscode.RelativePattern,
-    dispatcher: lsp.Event<lsp.FileEvent>,
+    dispatcher: lsp.Event<FileEvent>,
     registered: IDisposable,
     options?: vscode.FileSystemWatcherOptions
   ) {
@@ -54,7 +59,7 @@ class FileSystemWatcher extends Disposable implements vscode.FileSystemWatcher {
     this._register(registered);
     this._register(
       dispatcher((e) => {
-        const eUri = URI.parse(e.uri);
+        const eUri = e.uri;
         if (
           eUri.scheme !== pattern.baseUri.scheme ||
           !isEqualOrParent(eUri.path, pattern.baseUri.path)
@@ -98,8 +103,15 @@ interface RegisteredWatcherRef {
   } & IDisposable;
 }
 
+function isRecurisveGlobPattern(pattern: string) {
+  return pattern.includes("**") || pattern.includes("/");
+}
+
 export class RegisteredWatcherCollection {
   private registeredWatchers = new ResourceMap<RegisteredWatcherRef>(undefined, {
+    onCaseInsensitiveFileSystem: onCaseInsensitiveFileSystem(),
+  });
+  private registeredNonRecursiveWatchers = new ResourceMap<RegisteredWatcherRef>(undefined, {
     onCaseInsensitiveFileSystem: onCaseInsensitiveFileSystem(),
   });
 
@@ -107,45 +119,28 @@ export class RegisteredWatcherCollection {
 
   add(
     pattern: vscode.RelativePattern,
-    dispatcher: lsp.Event<lsp.FileEvent>,
+    dispatcher: lsp.Event<FileEvent>,
     options?: vscode.FileSystemWatcherOptions
   ) {
-    const shouldTransfer = [];
-    let candidateBaseUri = pattern.baseUri;
-
-    for (const entry of this.registeredWatchers.entries()) {
-      if (entry.resource.scheme === pattern.baseUri.scheme) {
-        if (isEqualOrParent(pattern.baseUri.path, entry.resource.path)) {
-          candidateBaseUri = entry.resource;
-          break;
-        } else if (isEqualOrParent(entry.resource.path, pattern.baseUri.path)) {
-          // watcher dedup
-          shouldTransfer.push(entry);
-        }
-      }
-    }
-
-    let watcherRef = this.registeredWatchers.get(candidateBaseUri);
+    const { recursive, baseUri, shouldTransfer } = this.dedupPattern(pattern);
+    const watchersSet = recursive ? this.registeredWatchers : this.registeredNonRecursiveWatchers;
+    let watcherRef = watchersSet.get(baseUri);
     if (!watcherRef) {
-      // NOTE: only register recursive watchers
-      const recursive = true;
-      const registered = this.registerWatcher(candidateBaseUri, recursive);
-
+      const registered = this.registerWatcher(baseUri, recursive);
       watcherRef = {
         value: {
           counter: 0,
           dispose: () => {
-            this.registeredWatchers.delete(candidateBaseUri);
+            watchersSet.delete(baseUri);
             registered.dispose();
           },
         },
       };
-      this.registeredWatchers.set(candidateBaseUri, watcherRef);
+      watchersSet.set(baseUri, watcherRef);
     }
     ++watcherRef.value.counter;
 
-    for (const { resource, value: ref } of shouldTransfer) {
-      this.registeredWatchers.delete(resource);
+    for (const ref of shouldTransfer) {
       watcherRef.value.counter += ref.value.counter;
       ref.value.dispose();
       ref.value = watcherRef.value;
@@ -163,34 +158,68 @@ export class RegisteredWatcherCollection {
       options
     );
   }
+
+  private dedupPattern(pattern: vscode.RelativePattern) {
+    const shouldTransfer = [];
+    let candidateBaseUri = pattern.baseUri;
+    let recursive = isRecurisveGlobPattern(pattern.pattern);
+
+    for (const entry of this.registeredWatchers.entries()) {
+      if (entry.resource.scheme === pattern.baseUri.scheme) {
+        if (isEqualOrParent(pattern.baseUri.path, entry.resource.path)) {
+          candidateBaseUri = entry.resource;
+          recursive = true;
+          break;
+        } else if (recursive && isEqualOrParent(entry.resource.path, pattern.baseUri.path)) {
+          // watcher dedup
+          shouldTransfer.push(entry.value);
+        }
+      }
+    }
+
+    if (recursive) {
+      for (const entry of this.registeredNonRecursiveWatchers.entries()) {
+        if (
+          entry.resource.scheme === pattern.baseUri.scheme &&
+          isEqualOrParent(entry.resource.path, pattern.baseUri.path)
+        ) {
+          // transfer non-recursive watcher to recursive watcher
+          shouldTransfer.push(entry.value);
+        }
+      }
+    }
+    return { recursive, baseUri: candidateBaseUri, shouldTransfer };
+  }
+}
+
+class WatcherInstance extends MutableDisposable<IDisposable> {
+  constructor(public baseUri: URI, public recursive: boolean) {
+    super();
+  }
+  isValid() {
+    return !this.isDisposed && this.baseUri.scheme === "file";
+  }
+  setRegistered(registered: IDisposable) {
+    if (this.isDisposed) {
+      registered.dispose();
+    } else {
+      this.value = registered;
+    }
+  }
 }
 
 export class FileSystemWatcherShimService extends Disposable {
-  private toRegisterBuffer: {
-    baseUri: URI;
-    recursive: boolean;
-    disposeRef: IDisposable & { isDisposed: boolean; replace(other: IDisposable): void };
-  }[] = [];
-  private static registerBufferDelay = 5000;
-  private registerTask: NodeJS.Timeout | undefined;
+  private toRegisterBuffer: WatcherInstance[] = [];
+  private registerWatcherDelayer = new Delayer(5000);
 
   private registeredWatcherCollection = new RegisteredWatcherCollection((baseUri, recursive) => {
-    const disposeRef = {
-      isDisposed: false,
-      // mutated after watcher regsitered through lsp
-      dispose() {
-        this.isDisposed = true;
-      },
-      replace(other: IDisposable) {
-        this.dispose = other.dispose.bind(other);
-      },
-    };
-    this.toRegisterBuffer.push({ baseUri, recursive, disposeRef });
+    const instance = new WatcherInstance(baseUri, recursive);
+    this.toRegisterBuffer.push(instance);
     this.triggerRegisterWatchers();
-    return disposeRef;
+    return instance;
   });
 
-  private onDidChangeWatchedFiles = new lsp.Emitter<lsp.FileEvent>();
+  private onDidChangeWatchedFiles = new lsp.Emitter<FileEvent>();
 
   constructor(
     private readonly delegate: TSLanguageServiceDelegate,
@@ -205,7 +234,10 @@ export class FileSystemWatcherShimService extends Disposable {
 
   $changeWatchedFiles(params: lsp.DidChangeWatchedFilesParams) {
     for (const e of params.changes) {
-      this.onDidChangeWatchedFiles.fire(e);
+      this.onDidChangeWatchedFiles.fire({
+        uri: URI.parse(e.uri),
+        type: e.type,
+      });
     }
   }
 
@@ -226,33 +258,30 @@ export class FileSystemWatcherShimService extends Disposable {
   }
 
   private triggerRegisterWatchers() {
-    if (this.registerTask) {
-      clearTimeout(this.registerTask);
-    }
-    this.registerTask = setTimeout(() => {
+    void this.registerWatcherDelayer.trigger(() => {
       if (this.isDisposed) {
         return;
       }
       this.doRegisterWatchers();
-    }, FileSystemWatcherShimService.registerBufferDelay);
+    });
   }
 
   private doRegisterWatchers() {
     const toRegister = this.toRegisterBuffer;
     this.toRegisterBuffer = [];
 
-    for (const { baseUri, recursive, disposeRef } of toRegister) {
-      if (!disposeRef.isDisposed && baseUri.scheme === "file" && fs.existsSync(baseUri.fsPath)) {
+    for (const w of toRegister) {
+      if (w.isValid()) {
         void this.delegate
           .registerDidChangeWatchedFiles([
             {
               globPattern: this.clientRelativePatternSupport
-                ? { baseUri: baseUri.toString(), pattern: recursive ? "**" : "*" }
-                : `${baseUri.path}/${recursive ? "**" : "*"}`,
+                ? { baseUri: w.baseUri.toString(), pattern: w.recursive ? "**" : "*" }
+                : `${w.baseUri.path}/${w.recursive ? "**" : "*"}`,
               kind: lsp.WatchKind.Create | lsp.WatchKind.Change | lsp.WatchKind.Delete, // listen to all kinds
             },
           ])
-          .then((d) => disposeRef.replace(d));
+          .then((d) => w.setRegistered(d));
       }
     }
   }
