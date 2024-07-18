@@ -5,7 +5,7 @@
 
 import * as fs from "fs";
 import { promises as fsPromises } from "fs";
-import * as vscode from "vscode";
+import type * as vscode from "vscode";
 
 export enum FileType {
   /**

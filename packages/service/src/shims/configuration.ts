@@ -1,4 +1,4 @@
-import * as vscode from "vscode";
+import type * as vscode from "vscode";
 import { Emitter } from "vscode-languageserver-protocol";
 import { Disposable } from "../utils/dispose";
 import { deepClone } from "../utils/objects";

@@ -1,10 +1,10 @@
-import * as vscode from "vscode";
+import type * as vscode from "vscode";
 import * as lsp from "vscode-languageserver-protocol";
 import { TSLanguageServiceDelegate } from "../service/delegate";
 import { Disposable } from "../utils/dispose";
 
 function format(args: any): string {
-  let result = '';
+  let result = "";
 
   for (let i = 0; i < args.length; i++) {
     let a = args[i];
@@ -13,13 +13,15 @@ function format(args: any): string {
       a = a.stack ? `${a.message}: ${a.stack}` : a.message;
     }
 
-    if (typeof a === 'object') {
+    if (typeof a === "object") {
       try {
         a = JSON.stringify(a);
-      } catch (e) { /* empty */ }
+      } catch (e) {
+        /* empty */
+      }
     }
 
-    result += (i > 0 ? ' ' : '') + (a as string);
+    result += (i > 0 ? " " : "") + (a as string);
   }
 
   return result;
@@ -56,7 +58,7 @@ export class OutputChannel extends Disposable implements vscode.OutputChannel {
 export class LogOutputChannel extends OutputChannel implements vscode.LogOutputChannel {
   readonly logLevel = LogLevel.Trace;
 
-  private _onDidChangeLogLevel = new lsp.Emitter<vscode.LogLevel>; 
+  private _onDidChangeLogLevel = new lsp.Emitter<vscode.LogLevel>();
   readonly onDidChangeLogLevel = this._onDidChangeLogLevel.event;
 
   trace(message: string, ...args: any[]): void {
