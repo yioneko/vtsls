@@ -3,7 +3,7 @@ import * as lsp from "vscode-languageserver-protocol";
 import { URI } from "vscode-uri";
 import { RegisteredWatcherCollection } from "../src/shims/watcher";
 
-describe("watcher collection", async () => {
+describe("watcher collection", () => {
   const mockRegister = vi.fn();
   const mockUnregister = vi.fn();
   const registerWatcher = (baseUri: URI, recursive: boolean) => {
@@ -30,7 +30,7 @@ describe("watcher collection", async () => {
     mockUnregister.mockClear();
   });
 
-  it("should dedup based on path", async () => {
+  it("should dedup based on path", () => {
     const collection = new RegisteredWatcherCollection(registerWatcher);
     collection.add(...createWatcherArgs("/a/b", "**"));
     collection.add(...createWatcherArgs("/a/c", "**"));
@@ -44,7 +44,7 @@ describe("watcher collection", async () => {
     expect(mockRegister).not.toBeCalled();
   });
 
-  it("should unregister watcher if unused", async () => {
+  it("should unregister watcher if unused", () => {
     const collection = new RegisteredWatcherCollection(registerWatcher);
     const watchers = [
       collection.add(...createWatcherArgs("/a", "**")),
@@ -59,7 +59,7 @@ describe("watcher collection", async () => {
     expect(mockUnregister).toBeCalledWith("/a", true);
   });
 
-  it("should correctly handle transferred watcher", async () => {
+  it("should correctly handle transferred watcher", () => {
     const collection = new RegisteredWatcherCollection(registerWatcher);
     const subWatcher = collection.add(...createWatcherArgs("/a/b", "**"));
     const watcher = collection.add(...createWatcherArgs("/a", "**"));
@@ -77,7 +77,7 @@ describe("watcher collection", async () => {
     expect(mockUnregister).toBeCalledWith("/a", true);
   });
 
-  it("should handle non-recursive watchers", async () => {
+  it("should handle non-recursive watchers", () => {
     const collection = new RegisteredWatcherCollection(registerWatcher);
     const watchers = [
       collection.add(...createWatcherArgs("/a", "*")),
@@ -98,7 +98,7 @@ describe("watcher collection", async () => {
     expect(mockUnregister).toBeCalledWith("/a/b", false);
   });
 
-  it("should unregister non-recursive watchers on recursive watcher registered", async () => {
+  it("should unregister non-recursive watchers on recursive watcher registered", () => {
     const collection = new RegisteredWatcherCollection(registerWatcher);
     const nonRecursiveWatchers = [
       collection.add(...createWatcherArgs("/a", "*")),

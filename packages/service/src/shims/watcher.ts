@@ -1,12 +1,12 @@
-import { Delayer } from "@vsc-ts/utils/async";
-import { ResourceMap } from "@vsc-ts/utils/resourceMap";
 import pm from "picomatch";
 import type * as vscode from "vscode";
 import * as lsp from "vscode-languageserver-protocol";
 import { URI } from "vscode-uri";
 import { TSLanguageServiceDelegate } from "../service/delegate";
+import { Delayer } from "../utils/async";
 import { Disposable, IDisposable, MutableDisposable } from "../utils/dispose";
 import { isEqualOrParent, onCaseInsensitiveFileSystem, relativeParent } from "../utils/fs";
+import { ResourceMap } from "../utils/resourceMap";
 
 interface FileEvent {
   uri: URI;
@@ -197,7 +197,7 @@ class WatcherInstance extends MutableDisposable<IDisposable> {
     super();
   }
   isValid() {
-    return !this.isDisposed && this.baseUri.scheme === "file";
+    return !this.isDisposed;
   }
   setRegistered(registered: IDisposable) {
     if (this.isDisposed) {
@@ -210,7 +210,7 @@ class WatcherInstance extends MutableDisposable<IDisposable> {
 
 export class FileSystemWatcherShimService extends Disposable {
   private toRegisterBuffer: WatcherInstance[] = [];
-  private registerWatcherDelayer = new Delayer(5000);
+  private registerWatcherDelayer = new Delayer(200);
 
   private registeredWatcherCollection = new RegisteredWatcherCollection((baseUri, recursive) => {
     const instance = new WatcherInstance(baseUri, recursive);
