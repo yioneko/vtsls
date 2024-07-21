@@ -5,12 +5,13 @@ import { URI, Utils as uriUtils } from "vscode-uri";
 import { TSLanguageServiceDelegate } from "../service/delegate";
 import { Barrier } from "../utils/barrier";
 import { Disposable } from "../utils/dispose";
-import { onCaseInsensitiveFileSystem } from "../utils/fs";
+import { isEqualOrParent, onCaseInsensitiveFileSystem } from "../utils/fs";
 import { ResourceMap } from "../utils/resourceMap";
 import { ConfigurationShimService } from "./configuration";
 import { createFileSystemShim } from "./fs";
 import { IsomorphicTextDocument as TextDocument } from "./textdocument";
 import * as types from "./types";
+import { FileSystemWatcherShimService } from "./watcher";
 
 export class DocumentNotOpenedError extends Error {
   constructor(uri: string) {
@@ -51,6 +52,7 @@ export class WorkspaceShimService extends Disposable {
   constructor(
     private readonly delegate: TSLanguageServiceDelegate,
     private readonly configurationShim: ConfigurationShimService,
+    private readonly clientCapabilities: lsp.ClientCapabilities,
     initWorkspaceFolders?: lsp.WorkspaceFolder[]
   ) {
     super();
@@ -199,13 +201,11 @@ export class WorkspaceShimService extends Disposable {
   getWorkspaceFolder(uri: vscode.Uri): vscode.WorkspaceFolder | undefined {
     for (const folder of this._workspaceFolders.values()) {
       const fUri = folder.uri;
-      const fPathWithSlash = fUri.path.endsWith("/") ? fUri.path : fUri.path + "/";
       // ignore query and fragment
       if (
         fUri.scheme === uri.scheme &&
         fUri.authority === uri.authority &&
-        uri.path > fPathWithSlash &&
-        uri.path.startsWith(fPathWithSlash)
+        isEqualOrParent(uri.path, fUri.path)
       ) {
         return folder;
       }
@@ -273,5 +273,21 @@ export class WorkspaceShimService extends Disposable {
 
   async requestWorkspaceTrust() {
     return true;
+  }
+
+  private readonly fileSystemWatcherService = new FileSystemWatcherShimService(
+    this.delegate,
+    this.clientCapabilities
+  );
+
+  createFileSystemWatcher(
+    pattern: vscode.RelativePattern,
+    options?: vscode.FileSystemWatcherOptions
+  ): vscode.FileSystemWatcher {
+    return this.fileSystemWatcherService.createFileSystemWatcher(pattern, options);
+  }
+
+  $changeWatchedFiles(params: lsp.DidChangeWatchedFilesParams) {
+    return this.fileSystemWatcherService.$changeWatchedFiles(params);
   }
 }
