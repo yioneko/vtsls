@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.2.6](https://github.com/yioneko/vtsls/compare/service-v0.2.5...service-v0.2.6) (2024-07-21)
+
+
+### Bug Fixes
+
+* **deps:** update dependency typescript to v5.5.3 ([9d2f275](https://github.com/yioneko/vtsls/commit/9d2f2755e0e8d741929eddae9311b7c20e8c9e44))
+* **deps:** update packages/service/vscode digest to cf08702 ([d180d88](https://github.com/yioneko/vtsls/commit/d180d88c7a85b7d6aa53b11c278ecb736e186167))
+* suppress document not found error ([23f922e](https://github.com/yioneko/vtsls/commit/23f922ee2840d2a42588e77cc2167d4d1916b59a))
+
 ## [0.2.5](https://github.com/yioneko/vtsls/compare/service-v0.2.4...service-v0.2.5) (2024-07-03)
 
 

@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.2.6](https://github.com/yioneko/vtsls/compare/server-v0.2.5...server-v0.2.6) (2024-07-21)
+
+
+### Bug Fixes
+
+* suppress document not found error ([23f922e](https://github.com/yioneko/vtsls/commit/23f922ee2840d2a42588e77cc2167d4d1916b59a))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @vtsls/language-service bumped from 0.2.5 to 0.2.6
+
 ## [0.2.5](https://github.com/yioneko/vtsls/compare/server-v0.2.4...server-v0.2.5) (2024-07-03)
 
 
