@@ -97,15 +97,14 @@ export class IsomorphicTextDocument implements vscode.TextDocument {
       throw new Error("invalid params");
     }
 
-    const lineText = this.$documentModel.getText(
-      lsp.Range.create(lsp.Position.create(line, 0), lsp.Position.create(line, Number.MAX_VALUE))
-    );
+    const lineText = this.$documentModel
+      .getText(
+        lsp.Range.create(lsp.Position.create(line, 0), lsp.Position.create(line, Number.MAX_VALUE))
+      )
+      // trim eol
+      .replace(/[\r\n]+$/, "");
 
-    // TODO: fill api
-    return {
-      lineNumber: line,
-      text: lineText,
-    } as vscode.TextLine;
+    return new DocumentLine(line, lineText, line === this.lineCount - 1);
   };
 
   // TODO: following unimplemented methods
@@ -117,5 +116,44 @@ export class IsomorphicTextDocument implements vscode.TextDocument {
   }
   validatePosition(position: vscode.Position) {
     return position;
+  }
+}
+
+class DocumentLine implements vscode.TextLine {
+  private readonly _line: number;
+  private readonly _text: string;
+  private readonly _isLastLine: boolean;
+
+  constructor(line: number, text: string, isLastLine: boolean) {
+    this._line = line;
+    this._text = text;
+    this._isLastLine = isLastLine;
+  }
+
+  public get lineNumber(): number {
+    return this._line;
+  }
+
+  public get text(): string {
+    return this._text;
+  }
+
+  public get range(): vscode.Range {
+    return new types.Range(this._line, 0, this._line, this._text.length);
+  }
+
+  public get rangeIncludingLineBreak(): vscode.Range {
+    if (this._isLastLine) {
+      return this.range;
+    }
+    return new types.Range(this._line, 0, this._line + 1, 0);
+  }
+
+  public get firstNonWhitespaceCharacterIndex(): number {
+    return /^(\s*)/.exec(this._text)![1].length;
+  }
+
+  public get isEmptyOrWhitespace(): boolean {
+    return this.firstNonWhitespaceCharacterIndex === this._text.length;
   }
 }
