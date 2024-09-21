@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.2.6](https://github.com/yioneko/vtsls/compare/service-v0.2.5...service-v0.2.6) (2024-09-21)
+
+
+### Bug Fixes
+
+* correct line text shim ([2a508d3](https://github.com/yioneko/vtsls/commit/2a508d35fb57690d2e91de310769ceba48bf13ec))
+* **deps:** update dependency typescript to v5.5.3 ([9d2f275](https://github.com/yioneko/vtsls/commit/9d2f2755e0e8d741929eddae9311b7c20e8c9e44))
+* **deps:** update dependency typescript to v5.5.4 ([f26c8a4](https://github.com/yioneko/vtsls/commit/f26c8a4ae3691bc5dbaad10a0ec3531bc626bc44))
+* **deps:** update dependency typescript to v5.6.2 ([#203](https://github.com/yioneko/vtsls/issues/203)) ([51b2b6d](https://github.com/yioneko/vtsls/commit/51b2b6daa23f255716f83241b18d8e218e933d2d))
+* **deps:** update dependency vscode-languageserver-textdocument to ^1.0.12 ([bbe6d6f](https://github.com/yioneko/vtsls/commit/bbe6d6f3b50a3ae9d929a65bbb5e9db07e25ce49))
+* **deps:** update packages/service/vscode digest to 65d85f4 ([#204](https://github.com/yioneko/vtsls/issues/204)) ([88b9d36](https://github.com/yioneko/vtsls/commit/88b9d36e5cc650a8ae97ca9c332aaca3060edfc9))
+* **deps:** update packages/service/vscode digest to cf08702 ([d180d88](https://github.com/yioneko/vtsls/commit/d180d88c7a85b7d6aa53b11c278ecb736e186167))
+* disable language mode check in ts extension ([0834c3b](https://github.com/yioneko/vtsls/commit/0834c3bf9350542ffbce2cca382ee2befb40e9ba))
+* suppress document not found error ([23f922e](https://github.com/yioneko/vtsls/commit/23f922ee2840d2a42588e77cc2167d4d1916b59a))
+
 ## [0.2.5](https://github.com/yioneko/vtsls/compare/service-v0.2.4...service-v0.2.5) (2024-07-03)
 
 

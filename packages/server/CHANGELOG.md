@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.2.6](https://github.com/yioneko/vtsls/compare/server-v0.2.5...server-v0.2.6) (2024-09-21)
+
+
+### Bug Fixes
+
+* **deps:** update packages/service/vscode digest to 65d85f4 ([#204](https://github.com/yioneko/vtsls/issues/204)) ([88b9d36](https://github.com/yioneko/vtsls/commit/88b9d36e5cc650a8ae97ca9c332aaca3060edfc9))
+* suppress document not found error ([23f922e](https://github.com/yioneko/vtsls/commit/23f922ee2840d2a42588e77cc2167d4d1916b59a))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @vtsls/language-service bumped from 0.2.5 to 0.2.6
+
 ## [0.2.5](https://github.com/yioneko/vtsls/compare/server-v0.2.4...server-v0.2.5) (2024-07-03)
 
 
