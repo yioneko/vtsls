@@ -1,8 +1,8 @@
 diff --git a/src/languageFeatures/semanticTokens.ts b/src/languageFeatures/semanticTokens.ts
-index 48c9af7..cfba213 100644
+index 7f8d60d..0d9014a 100644
 --- a/src/languageFeatures/semanticTokens.ts
 +++ b/src/languageFeatures/semanticTokens.ts
-@@ -22,7 +22,10 @@ export function register(
+@@ -20,7 +20,10 @@ export function register(
  		requireSomeCapability(client, ClientCapability.Semantic),
  	], () => {
  		const provider = new DocumentSemanticTokensProvider(client);

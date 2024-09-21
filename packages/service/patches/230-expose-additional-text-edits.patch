@@ -1,8 +1,8 @@
 diff --git a/src/languageFeatures/completions.ts b/src/languageFeatures/completions.ts
-index 708d7e0..98401e7 100644
+index 749e74b..fd3d08b 100644
 --- a/src/languageFeatures/completions.ts
 +++ b/src/languageFeatures/completions.ts
-@@ -201,7 +201,7 @@ class MyCompletionItem extends vscode.CompletionItem {
+@@ -202,7 +202,7 @@ class MyCompletionItem extends vscode.CompletionItem {
  
  			this.documentation = this.getDocumentation(client, detail, this.document.uri);
  
@@ -11,7 +11,7 @@ index 708d7e0..98401e7 100644
  			const commands: vscode.Command[] = [{
  				command: CompletionAcceptedCommand.ID,
  				title: '',
-@@ -314,7 +314,8 @@ class MyCompletionItem extends vscode.CompletionItem {
+@@ -315,7 +315,8 @@ class MyCompletionItem extends vscode.CompletionItem {
  
  	private getCodeActions(
  		detail: Proto.CompletionEntryDetails,
@@ -21,7 +21,7 @@ index 708d7e0..98401e7 100644
  	): { command?: vscode.Command; additionalTextEdits?: vscode.TextEdit[] } {
  		if (!detail.codeActions?.length) {
  			return {};
-@@ -333,7 +334,8 @@ class MyCompletionItem extends vscode.CompletionItem {
+@@ -334,7 +335,8 @@ class MyCompletionItem extends vscode.CompletionItem {
  			// Apply all edits in the current file using `additionalTextEdits`
  			if (tsAction.changes) {
  				for (const change of tsAction.changes) {
@@ -31,7 +31,7 @@ index 708d7e0..98401e7 100644
  						additionalTextEdits.push(...change.textChanges.map(typeConverters.TextEdit.fromCodeEdit));
  					} else {
  						hasRemainingCommandsOrEdits = true;
-@@ -586,7 +588,7 @@ class ApplyCompletionCommand implements Command {
+@@ -602,7 +604,7 @@ class ApplyCompletionCommand implements Command {
  
  		const { edits, commands } = resolved;
  
@@ -40,7 +40,7 @@ index 708d7e0..98401e7 100644
  			const workspaceEdit = new vscode.WorkspaceEdit();
  			for (const edit of edits) {
  				workspaceEdit.replace(item.document.uri, edit.range, edit.newText);
-@@ -883,7 +885,8 @@ class TypeScriptCompletionItemProvider implements vscode.CompletionItemProvider<
+@@ -893,7 +895,8 @@ class TypeScriptCompletionItemProvider implements vscode.CompletionItemProvider<
  		item: MyCompletionItem,
  		token: vscode.CancellationToken
  	): Promise<MyCompletionItem | undefined> {

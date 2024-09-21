@@ -79,10 +79,10 @@ index 6036e4c..1d3efd6 100644
  	}
  }
 diff --git a/src/tsServer/spawner.ts b/src/tsServer/spawner.ts
-index 364c0f0..0088fff 100644
+index aac3186..3b362e8 100644
 --- a/src/tsServer/spawner.ts
 +++ b/src/tsServer/spawner.ts
-@@ -253,7 +253,7 @@ export class TypeScriptServerSpawner {
+@@ -250,7 +250,7 @@ export class TypeScriptServerSpawner {
  
  			const isUsingBundledTypeScriptVersion = currentVersion.path === this._versionProvider.defaultVersion.path;
  			for (const plugin of pluginManager.plugins) {

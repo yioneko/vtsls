@@ -1,5 +1,5 @@
 diff --git a/src/configuration/configuration.ts b/src/configuration/configuration.ts
-index 639f3d3..196c6eb 100644
+index d70b8f7..7cf087f 100644
 --- a/src/configuration/configuration.ts
 +++ b/src/configuration/configuration.ts
 @@ -101,6 +101,7 @@ export class ImplicitProjectConfiguration {
