@@ -501,7 +501,7 @@
     },
     "js/ts.implicitProjectConfig.target": {
       "type": "string",
-      "default": "ES2020",
+      "default": "ES2022",
       "markdownDescription": "Set target JavaScript language version for emitted JavaScript and include library declarations. See more: https://www.typescriptlang.org/tsconfig#target.",
       "enum": [
         "ES3",
@@ -515,6 +515,8 @@
         "ES2020",
         "ES2021",
         "ES2022",
+        "ES2023",
+        "ES2024",
         "ESNext"
       ]
     },
@@ -805,6 +807,20 @@
       },
       "markdownDescription": "Specify glob patterns of files to exclude from auto imports. Relative paths are resolved relative to the workspace root. Patterns are evaluated using tsconfig.json [`exclude`](https://www.typescriptlang.org/tsconfig#exclude) semantics."
     },
+    "typescript.preferences.autoImportSpecifierExcludeRegexes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "markdownDescription": "Specify regular expressions to exclude auto imports with matching import specifiers. Examples:\n\n- `^node:`\n- `lib/internal` (slashes don't need to be escaped...)\n- `/lib\\/internal/i` (...unless including surrounding slashes for `i` or `u` flags)\n- `^lodash$` (only allow subpath imports from lodash)"
+    },
+    "javascript.preferences.autoImportSpecifierExcludeRegexes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "markdownDescription": "Specify regular expressions to exclude auto imports with matching import specifiers. Examples:\n\n- `^node:`\n- `lib/internal` (slashes don't need to be escaped...)\n- `/lib\\/internal/i` (...unless including surrounding slashes for `i` or `u` flags)\n- `^lodash$` (only allow subpath imports from lodash)"
+    },
     "typescript.preferences.preferTypeOnlyAutoImports": {
       "type": "boolean",
       "default": false,
@@ -841,6 +857,146 @@
       "type": "boolean",
       "default": true,
       "description": "When on a JSX tag, try to rename the matching tag instead of renaming the symbol. Requires using TypeScript 5.1+ in the workspace."
+    },
+    "typescript.preferences.organizeImports": {
+      "type": "object",
+      "markdownDescription": "Advanced preferences that control how imports are ordered.",
+      "properties": {
+        "caseSensitivity": {
+          "type": "string",
+          "enum": [
+            "auto",
+            "caseInsensitive",
+            "caseSensitive"
+          ],
+          "markdownEnumDescriptions": [
+            "Detect case-sensitivity for import sorting.",
+            null,
+            "Sort imports case-sensitively."
+          ],
+          "default": "auto"
+        },
+        "typeOrder": {
+          "type": "string",
+          "enum": [
+            "auto",
+            "last",
+            "inline",
+            "first"
+          ],
+          "default": "auto",
+          "markdownEnumDescriptions": [
+            "Detect where type-only named imports should be sorted.",
+            "Type only named imports are sorted to the end of the import list.",
+            "Named imports are sorted by name only.",
+            "Type only named imports are sorted to the end of the import list."
+          ]
+        },
+        "unicodeCollation": {
+          "type": "string",
+          "enum": [
+            "ordinal",
+            "unicode"
+          ],
+          "markdownEnumDescriptions": [
+            "Sort imports using the numeric value of each code point.",
+            "Sort imports using the Unicode code collation."
+          ],
+          "default": "ordinal"
+        },
+        "locale": {
+          "type": "string",
+          "markdownDescription": "Overrides the locale used for collation. Specify `auto` to use the UI locale. Only applies to `organizeImportsCollation: 'unicode'`."
+        },
+        "numericCollation": {
+          "type": "boolean",
+          "markdownDescription": "Sort numeric strings by integer value."
+        },
+        "accentCollation": {
+          "type": "boolean",
+          "markdownDescription": "Compare characters with diacritical marks as unequal to base character."
+        },
+        "caseFirst": {
+          "type": "string",
+          "markdownDescription": "Indicates whether upper-case comes before lower-case. Only applies to `organizeImportsCollation: 'unicode'`.",
+          "enum": [
+            "default",
+            "upper",
+            "lower"
+          ],
+          "default": "default"
+        }
+      }
+    },
+    "javascript.preferences.organizeImports": {
+      "type": "object",
+      "markdownDescription": "Advanced preferences that control how imports are ordered.",
+      "properties": {
+        "caseSensitivity": {
+          "type": "string",
+          "enum": [
+            "auto",
+            "caseInsensitive",
+            "caseSensitive"
+          ],
+          "markdownEnumDescriptions": [
+            "Detect case-sensitivity for import sorting.",
+            null,
+            "Sort imports case-sensitively."
+          ],
+          "default": "auto"
+        },
+        "typeOrder": {
+          "type": "string",
+          "enum": [
+            "auto",
+            "last",
+            "inline",
+            "first"
+          ],
+          "default": "auto",
+          "markdownEnumDescriptions": [
+            "Detect where type-only named imports should be sorted.",
+            "Type only named imports are sorted to the end of the import list.",
+            "Named imports are sorted by name only.",
+            "Type only named imports are sorted to the end of the import list."
+          ]
+        },
+        "unicodeCollation": {
+          "type": "string",
+          "enum": [
+            "ordinal",
+            "unicode"
+          ],
+          "markdownEnumDescriptions": [
+            "Sort imports using the numeric value of each code point.",
+            "Sort imports using the Unicode code collation."
+          ],
+          "default": "ordinal"
+        },
+        "locale": {
+          "type": "string",
+          "markdownDescription": "Overrides the locale used for collation. Specify `auto` to use the UI locale. Only applies to `organizeImportsCollation: 'unicode'`."
+        },
+        "numericCollation": {
+          "type": "boolean",
+          "markdownDescription": "Sort numeric strings by integer value."
+        },
+        "accentCollation": {
+          "type": "boolean",
+          "markdownDescription": "Compare characters with diacritical marks as unequal to base character."
+        },
+        "caseFirst": {
+          "type": "string",
+          "markdownDescription": "Indicates whether upper-case comes before lower-case. Only applies to `organizeImportsCollation: 'unicode'`.",
+          "enum": [
+            "default",
+            "upper",
+            "lower"
+          ],
+          "default": "default"
+        }
+      }
     },
     "typescript.updateImportsOnFileMove.enabled": {
       "type": "string",
@@ -1010,12 +1166,12 @@
     },
     "typescript.tsserver.web.projectWideIntellisense.suppressSemanticErrors": {
       "type": "boolean",
-      "default": true,
+      "default": false,
       "description": "Suppresses semantic errors on web even when project wide IntelliSense is enabled. This is always on when project wide IntelliSense is not enabled or available. See `#typescript.tsserver.web.projectWideIntellisense.enabled#`"
     },
     "typescript.tsserver.web.typeAcquisition.enabled": {
       "type": "boolean",
-      "default": false,
+      "default": true,
       "description": "Enable/disable package acquisition on the web. This enables IntelliSense for imported packages. Requires `#typescript.tsserver.web.projectWideIntellisense.enabled#`. Currently not supported for Safari."
     },
     "typescript.tsserver.nodePath": {
