@@ -1,8 +1,8 @@
 diff --git a/src/languageFeatures/updatePathsOnRename.ts b/src/languageFeatures/updatePathsOnRename.ts
-index 91ca961..011854c 100644
+index bdaa1fc..3c3e9a8 100644
 --- a/src/languageFeatures/updatePathsOnRename.ts
 +++ b/src/languageFeatures/updatePathsOnRename.ts
-@@ -100,13 +100,13 @@ class UpdateImportsOnFileRenameHandler extends Disposable {
+@@ -98,13 +98,13 @@ class UpdateImportsOnFileRenameHandler extends Disposable {
  			const resourcesBeingRenamed: vscode.Uri[] = [];
  
  			for (const { oldUri, newUri, newFilePath, oldFilePath, jsTsFileThatIsBeingMoved } of group) {
@@ -19,7 +19,7 @@ index 91ca961..011854c 100644
  					resourcesBeingRenamed.push(newUri);
  				}
  			}
-@@ -206,8 +206,7 @@ class UpdateImportsOnFileRenameHandler extends Disposable {
+@@ -204,8 +204,7 @@ class UpdateImportsOnFileRenameHandler extends Disposable {
  		}
  
  		if (await isDirectory(resource)) {
@@ -29,7 +29,7 @@ index 91ca961..011854c 100644
  		}
  
  		return (await this._handles(resource)) ? resource : undefined;
-@@ -215,12 +214,12 @@ class UpdateImportsOnFileRenameHandler extends Disposable {
+@@ -213,12 +212,12 @@ class UpdateImportsOnFileRenameHandler extends Disposable {
  
  	private async withEditsForFileRename(
  		edits: vscode.WorkspaceEdit,

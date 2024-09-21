@@ -1,5 +1,5 @@
 diff --git a/src/languageFeatures/fileConfigurationManager.ts b/src/languageFeatures/fileConfigurationManager.ts
-index bddd062..1556037 100644
+index 0b5a4c6..6b0b762 100644
 --- a/src/languageFeatures/fileConfigurationManager.ts
 +++ b/src/languageFeatures/fileConfigurationManager.ts
 @@ -46,26 +46,27 @@ export default class FileConfigurationManager extends Disposable {

@@ -164,7 +164,7 @@ function bindServiceHandlers(
   conn.onPrepareRename(safeRun(service.prepareRename, null));
   conn.onRenameRequest(safeRun(service.rename, null));
   conn.onFoldingRanges(safeRun(service.foldingRanges, null));
-  conn.onSelectionRanges(safeRun(service.selectionRanges, null, true));
+  conn.onSelectionRanges(safeRun(service.selectionRanges, null));
   conn.onCodeLens(safeRun(service.codeLens, null));
   conn.onCodeLensResolve(service.codeLensResolve);
   conn.languages.callHierarchy.onPrepare(safeRun(service.prepareCallHierarchy, null, true));

@@ -1,8 +1,8 @@
 diff --git a/src/languageFeatures/util/textRendering.ts b/src/languageFeatures/util/textRendering.ts
-index fe26dd6..e258a88 100644
+index af1a7e6..f5540a7 100644
 --- a/src/languageFeatures/util/textRendering.ts
 +++ b/src/languageFeatures/util/textRendering.ts
-@@ -173,15 +173,12 @@ function convertLinkTags(
+@@ -155,15 +155,12 @@ function convertLinkTags(
  			case 'link':
  				if (currentLink) {
  					if (currentLink.target) {
