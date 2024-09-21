@@ -1,0 +1,13 @@
+diff --git a/src/configuration/languageIds.ts b/src/configuration/languageIds.ts
+index 5decbc6..a53a4ed 100644
+--- a/src/configuration/languageIds.ts
++++ b/src/configuration/languageIds.ts
+@@ -19,7 +19,7 @@ export const jsTsLanguageModes = [
+ ];
+ 
+ export function isSupportedLanguageMode(doc: vscode.TextDocument) {
+-	return vscode.languages.match([typescript, typescriptreact, javascript, javascriptreact], doc) > 0;
++	return true;
+ }
+ 
+ export function isTypeScriptDocument(doc: vscode.TextDocument) {
