@@ -57,6 +57,9 @@ importers:
       jsonc-parser:
         specifier: ^3.2.0
         version: 3.2.0
+      picomatch:
+        specifier: ^4.0.2
+        version: 4.0.2
       semver:
         specifier: 7.5.2
         version: 7.5.2
@@ -73,6 +76,9 @@ importers:
         specifier: ^3.0.8
         version: 3.0.8
     devDependencies:
+      '@types/picomatch':
+        specifier: ^2.3.3
+        version: 2.3.3
       '@types/semver':
         specifier: ^7.5.0
         version: 7.5.0
@@ -721,6 +727,10 @@ packages:
 
   /@types/node@16.18.108:
     resolution: {integrity: sha512-fj42LD82fSv6yN9C6Q4dzS+hujHj+pTv0IpRR3kI20fnYeS0ytBpjFO9OjmDowSPPt4lNKN46JLaKbCyP+BW2A==}
+    dev: true
+
+  /@types/picomatch@2.3.3:
+    resolution: {integrity: sha512-Yll76ZHikRFCyz/pffKGjrCwe/le2CDwOP5F210KQo27kpRE46U2rDnzikNlVn6/ezH3Mhn46bJMTfeVTtcYMg==}
     dev: true
 
   /@types/semver@7.5.0:
@@ -1855,6 +1865,11 @@ packages:
     resolution: {integrity: sha512-JU3teHTNjmE2VCGFzuY8EXzCDVwEqB2a8fsIvwaStHhAWJEeVd1o1QD80CU6+ZdEXXSLbSsuLwJjkCBWqRQUVA==}
     engines: {node: '>=8.6'}
     dev: true
+
+  /picomatch@4.0.2:
+    resolution: {integrity: sha512-M7BAV6Rlcy5u+m6oPhAPFgJTzAioX/6B0DxyvDlo9l8+T3nLKbrczg2WLUyzd45L8RqfUMyGPzekbMvX2Ldkwg==}
+    engines: {node: '>=12'}
+    dev: false
 
   /pidtree@0.6.0:
     resolution: {integrity: sha512-eG2dWTVw5bzqGRztnHExczNxt5VGsE6OwTeCG3fdUf9KBsZzO3R5OIIIzWR+iZA0NtZ+RDVdaoE2dK1cn6jH4g==}
