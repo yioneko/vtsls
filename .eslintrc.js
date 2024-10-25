@@ -35,5 +35,6 @@ module.exports = {
     // "@typescript-eslint/unbound-method": "warn",
     "@typescript-eslint/no-non-null-assertion": "off",
     "@typescript-eslint/array-type": "off",
+    "@typescript-eslint/prefer-string-starts-ends-with": "off",
   },
 };
