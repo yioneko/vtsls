@@ -1,25 +1,25 @@
 diff --git a/src/configuration/fileSchemes.ts b/src/configuration/fileSchemes.ts
-index ca268e2..96c9f0b 100644
+index 9d54f0b..c77603c 100644
 --- a/src/configuration/fileSchemes.ts
 +++ b/src/configuration/fileSchemes.ts
-@@ -23,6 +23,7 @@ export const chatCodeBlock = 'vscode-chat-code-block';
+@@ -20,6 +20,7 @@ export const officeScript = 'office-script';
  
- /** Used for code blocks in chat by copilot. */
- export const chatBackingCodeBlock = 'vscode-copilot-chat-code-block';
+ /** Used for code blocks in chat by vs code core */
+ export const chatCodeBlock = 'vscode-chat-code-block';
 +export const zipfile = 'zipfile';
  
  export function getSemanticSupportedSchemes() {
- 	if (isWeb() && vscode.workspace.workspaceFolders) {
-@@ -36,6 +37,7 @@ export function getSemanticSupportedSchemes() {
+ 	const alwaysSupportedSchemes = [
+@@ -27,6 +28,7 @@ export function getSemanticSupportedSchemes() {
+ 		walkThroughSnippet,
  		vscodeNotebookCell,
  		chatCodeBlock,
- 		chatBackingCodeBlock,
 +		zipfile
  	];
- }
  
+ 	if (isWeb()) {
 diff --git a/src/typescriptServiceClient.ts b/src/typescriptServiceClient.ts
-index 41d3419..6378806 100644
+index d196d68..40a1269 100644
 --- a/src/typescriptServiceClient.ts
 +++ b/src/typescriptServiceClient.ts
 @@ -596,7 +596,7 @@ export default class TypeScriptServiceClient extends Disposable implements IType
@@ -31,7 +31,7 @@ index 41d3419..6378806 100644
  			preferences: {
  				providePrefixAndSuffixTextForRename: true,
  				allowRenameOfImportPath: true,
-@@ -772,6 +772,10 @@ export default class TypeScriptServiceClient extends Disposable implements IType
+@@ -768,6 +768,10 @@ export default class TypeScriptServiceClient extends Disposable implements IType
  			return resource.fsPath;
  		}
  
@@ -42,7 +42,7 @@ index 41d3419..6378806 100644
  		return (this.isProjectWideIntellisenseOnWebEnabled() ? '' : inMemoryResourcePrefix)
  			+ '/' + resource.scheme
  			+ '/' + (resource.authority || emptyAuthority)
-@@ -820,6 +824,17 @@ export default class TypeScriptServiceClient extends Disposable implements IType
+@@ -816,6 +820,17 @@ export default class TypeScriptServiceClient extends Disposable implements IType
  				return this.bufferSyncSupport.toVsCodeResource(resource);
  			}
  		}

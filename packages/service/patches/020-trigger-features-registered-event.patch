@@ -1,10 +1,10 @@
 diff --git a/src/languageProvider.ts b/src/languageProvider.ts
-index 7b95591..eb8fe90 100644
+index 09a4fe3..3c9d29b 100644
 --- a/src/languageProvider.ts
 +++ b/src/languageProvider.ts
-@@ -92,6 +92,7 @@ export default class LanguageProvider extends Disposable {
- 			import('./languageFeatures/tagClosing').then(provider => this._register(provider.register(selector, this.description, this.client))),
+@@ -93,6 +93,7 @@ export default class LanguageProvider extends Disposable {
  			import('./languageFeatures/typeDefinitions').then(provider => this._register(provider.register(selector, this.client))),
+ 			import('./languageFeatures/copilotRelated').then(provider => this._register(provider.register(selector, this.client))),
  		]);
 +		(vscode.languages as any).$triggerStaticFeaturesRegistered();
  	}

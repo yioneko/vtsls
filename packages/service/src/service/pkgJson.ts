@@ -22,6 +22,7 @@ function getDefaultConfig() {
   const overrideDefaults = {
     "typescript.tsserver.enableRegionDiagnostics": false,
     "typescript.tsserver.experimental.useVsCodeWatcher": false,
+    "typescript.tsserver.watchOptions": {},
   };
 
   const res: TSLanguageServiceConfig = {};
@@ -42,7 +43,7 @@ function getDefaultConfig() {
 
   for (const [key, val] of Object.entries(contributed)) {
     let defaultVal = "default" in val ? val.default : undefined;
-    if (!defaultVal) {
+    if (!defaultVal && "type" in val) {
       if (val.type === "string") {
         defaultVal = "";
       } else if (val.type === "array") {

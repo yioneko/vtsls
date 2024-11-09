@@ -1,5 +1,5 @@
 diff --git a/src/commands/tsserverRequests.ts b/src/commands/tsserverRequests.ts
-index ba545df..b5c020d 100644
+index 50aeedf..96ab233 100644
 --- a/src/commands/tsserverRequests.ts
 +++ b/src/commands/tsserverRequests.ts
 @@ -33,7 +33,8 @@ export class TSServerRequestCommand implements Command {
@@ -11,7 +11,7 @@ index ba545df..b5c020d 100644
 +			'getMoveToRefactoringFileSuggestions'
  		];
  
- 		if (!allowList.includes(requestID)) { return; }
+ 		if (allowList.includes(command) || command.startsWith('_')) {
 diff --git a/src/languageFeatures/refactor.ts b/src/languageFeatures/refactor.ts
 index 1317cda..3e28248 100644
 --- a/src/languageFeatures/refactor.ts

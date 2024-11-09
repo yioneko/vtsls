@@ -103,16 +103,25 @@ async function copyTsExtTo(targetDir) {
   await writePatchMark(targetDir, { sha, patched: false });
 }
 
-async function pressAnyKey() {
+/**
+ * @param {number} timeout
+ */
+async function pressAnyKey(timeout) {
   stdin.setRawMode(true);
   /**
    * @type {Buffer}
    */
   const buffer = await new Promise((resolve) => {
-    const timeout = setTimeout(() => resolve, 60 * 1000); // 60s
+    let timer;
+    if (timeout != 0) {
+      timer = setTimeout(() => resolve, timeout ?? 60 * 1000); // 60s
+    }
+    stdin.resume();
     stdin.once("data", (buffer) =>
       process.nextTick(() => {
-        clearTimeout(timeout);
+        if (timer) {
+          clearTimeout(timer);
+        }
         return resolve(buffer);
       })
     );
@@ -215,7 +224,7 @@ async function applyPatches(refresh) {
         stdout.write(
           `Patch file ${p} failed, press any key when the conflict has been resolved...`
         );
-        await pressAnyKey();
+        await pressAnyKey(0);
       }
       const { stdout: newPatchContent } = await exec("git", ["diff", "-U"], {
         cwd: tsExtPath,

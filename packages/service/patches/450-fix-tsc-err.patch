@@ -11,3 +11,35 @@ index 8fd7ce4..b1d24bc 100644
  import VsCodeTelemetryReporter from '@vscode/extension-telemetry';
  import * as vscode from 'vscode';
  import * as tas from 'vscode-tas-client';
+diff --git a/src/languageFeatures/copilotRelated.ts b/src/languageFeatures/copilotRelated.ts
+index 632b047..009d112 100644
+--- a/src/languageFeatures/copilotRelated.ts
++++ b/src/languageFeatures/copilotRelated.ts
+@@ -70,10 +70,12 @@ export function register(
+ 						if (!file) {
+ 							return { entries: [] };
+ 						}
++						// @ts-expect-error until ts 5.7
+ 						const response = await client.execute('copilotRelated', { file, }, token) as Proto.CopilotRelatedResponse;
+ 						if (response.type !== 'response' || !response.body) {
+ 							return { entries: [] };
+ 						}
++						// @ts-expect-error until ts 5.7
+ 						return { entries: response.body.relatedFiles.map(f => client.toResource(f)), traits: [] };
+ 					}));
+ 				}
+diff --git a/src/typescriptService.ts b/src/typescriptService.ts
+index 306769f..d432b63 100644
+--- a/src/typescriptService.ts
++++ b/src/typescriptService.ts
+@@ -77,8 +77,10 @@ interface StandardTsServerRequests {
+ 	'getMoveToRefactoringFileSuggestions': [Proto.GetMoveToRefactoringFileSuggestionsRequestArgs, Proto.GetMoveToRefactoringFileSuggestions];
+ 	'linkedEditingRange': [Proto.FileLocationRequestArgs, Proto.LinkedEditingRangeResponse];
+ 	'mapCode': [Proto.MapCodeRequestArgs, Proto.MapCodeResponse];
++	// @ts-expect-error until ts 5.7
+ 	'copilotRelated': [Proto.FileRequestArgs, Proto.CopilotRelatedResponse];
+ 	'getPasteEdits': [Proto.GetPasteEditsRequestArgs, Proto.GetPasteEditsResponse];
++	// @ts-expect-error until ts 5.7
+ 	'preparePasteEdits': [Proto.PreparePasteEditsRequestArgs, Proto.PreparePasteEditsResponse];
+ }
+ 

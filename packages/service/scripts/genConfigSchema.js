@@ -65,8 +65,9 @@ async function genSchema() {
     "typescript.surveys.enabled",
     "typescript.tsserver.enableRegionDiagnostics",
     "typescript.tsserver.experimental.useVsCodeWatcher",
-    "javascript.experimental.updateImportsOnPaste",
-    "typescript.experimental.updateImportsOnPaste",
+    "javascript.updateImportsOnPaste.enabled",
+    "typescript.updateImportsOnPaste.enabled",
+    "typescript.experimental.expandableHover",
   ];
 
   for (const p of unavailableOptions) {
