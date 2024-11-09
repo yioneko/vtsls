@@ -1,47 +1,29 @@
 diff --git a/src/languageFeatures/fileConfigurationManager.ts b/src/languageFeatures/fileConfigurationManager.ts
-index 0b5a4c6..6b0b762 100644
+index 9b0c10a..f5578f2 100644
 --- a/src/languageFeatures/fileConfigurationManager.ts
 +++ b/src/languageFeatures/fileConfigurationManager.ts
-@@ -46,26 +46,27 @@ export default class FileConfigurationManager extends Disposable {
+@@ -52,10 +52,7 @@ export default class FileConfigurationManager extends Disposable {
+ 		document: vscode.TextDocument,
  		token: vscode.CancellationToken
  	): Promise<void> {
- 		const formattingOptions = this.getFormattingOptions(document);
+-		const formattingOptions = this.getFormattingOptions(document);
 -		if (formattingOptions) {
-+		// if (formattingOptions) {
- 			return this.ensureConfigurationOptions(document, formattingOptions, token);
+-			return this.ensureConfigurationOptions(document, formattingOptions, token);
 -		}
-+		// }
++			return this.ensureConfigurationOptions(document, undefined, token);
  	}
  
- 	private getFormattingOptions(
- 		document: vscode.TextDocument
--	): vscode.FormattingOptions | undefined {
--		const editor = vscode.window.visibleTextEditors.find(editor => editor.document.fileName === document.fileName);
--		return editor
--			? {
--				tabSize: editor.options.tabSize,
--				insertSpaces: editor.options.insertSpaces
--			} as vscode.FormattingOptions
--			: undefined;
-+	): undefined {
-+		// const editor = vscode.window.visibleTextEditors.find(editor => editor.document.fileName === document.fileName);
-+		// return editor
-+		// 	? {
-+		// 		tabSize: editor.options.tabSize,
-+		// 		insertSpaces: editor.options.insertSpaces
-+		// 	} as vscode.FormattingOptions
-+		// 	: undefined;
-+		return;
- 	}
+ 	private getFormattingOptions(document: vscode.TextDocument): FormattingOptions | undefined {
+@@ -72,7 +69,7 @@ export default class FileConfigurationManager extends Disposable {
  
  	public async ensureConfigurationOptions(
  		document: vscode.TextDocument,
--		options: vscode.FormattingOptions,
-+		options: vscode.FormattingOptions | undefined,
+-		options: FormattingOptions,
++		options: FormattingOptions | undefined,
  		token: vscode.CancellationToken
  	): Promise<void> {
  		const file = this.client.toOpenTsFilePath(document);
-@@ -104,14 +105,14 @@ export default class FileConfigurationManager extends Disposable {
+@@ -111,14 +108,9 @@ export default class FileConfigurationManager extends Disposable {
  		document: vscode.TextDocument,
  		token: vscode.CancellationToken,
  	): Promise<void> {
@@ -49,11 +31,7 @@ index 0b5a4c6..6b0b762 100644
 -		if (!formattingOptions) {
 -			return;
 -		}
-+		// const formattingOptions = this.getFormattingOptions(document);
-+		// if (!formattingOptions) {
-+		// 	return;
-+		// }
- 
+-
  		const args: Proto.ConfigureRequestArguments = {
  			file: undefined /*global*/,
 -			...this.getFileOptions(document, formattingOptions),
@@ -61,28 +39,29 @@ index 0b5a4c6..6b0b762 100644
  		};
  		await this.client.execute('configure', args, token);
  	}
-@@ -122,7 +123,7 @@ export default class FileConfigurationManager extends Disposable {
+@@ -129,7 +121,7 @@ export default class FileConfigurationManager extends Disposable {
  
  	private getFileOptions(
  		document: vscode.TextDocument,
--		options: vscode.FormattingOptions
-+		options?: vscode.FormattingOptions,
+-		options: FormattingOptions
++		options?: FormattingOptions
  	): FileConfiguration {
  		return {
  			formatOptions: this.getFormatOptions(document, options),
-@@ -132,18 +133,24 @@ export default class FileConfigurationManager extends Disposable {
+@@ -139,18 +131,25 @@ export default class FileConfigurationManager extends Disposable {
  
  	private getFormatOptions(
  		document: vscode.TextDocument,
--		options: vscode.FormattingOptions
-+		options: vscode.FormattingOptions | undefined
+-		options: FormattingOptions
++		options?: FormattingOptions
  	): Proto.FormatCodeSettings {
  		const config = vscode.workspace.getConfiguration(
  			isTypeScriptDocument(document) ? 'typescript.format' : 'javascript.format',
  			document.uri);
 +		const tsEditorConfig = vscode.workspace.getConfiguration(
-+			isTypeScriptDocument(document) ? 'vtsls.typescript.format' : 'vtsls.javascript.format',
-+			document.uri);
++			isTypeScriptDocument(document) ? "vtsls.typescript.format" : "vtsls.javascript.format",
++			document.uri
++		);
  
  		return {
 -			tabSize: options.tabSize,
@@ -96,7 +75,7 @@ index 0b5a4c6..6b0b762 100644
 +			convertTabsToSpaces: options?.insertSpaces ?? tsEditorConfig.get("convertTabsToSpaces"),
  			// We can use \n here since the editor normalizes later on to its line endings.
 -			newLineCharacter: '\n',
-+      newLineCharacter: tsEditorConfig.get("newLineCharacter") ?? '\n',
++			newLineCharacter: tsEditorConfig.get("newLineCharacter") ?? '\n',
  			insertSpaceAfterCommaDelimiter: config.get<boolean>('insertSpaceAfterCommaDelimiter'),
  			insertSpaceAfterConstructor: config.get<boolean>('insertSpaceAfterConstructor'),
  			insertSpaceAfterSemicolonInForStatements: config.get<boolean>('insertSpaceAfterSemicolonInForStatements'),

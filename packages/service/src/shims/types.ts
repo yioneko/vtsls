@@ -1008,6 +1008,23 @@ export class Hover {
 	}
 }
 
+export class VerboseHover extends Hover {
+
+	public canIncreaseVerbosity: boolean | undefined;
+	public canDecreaseVerbosity: boolean | undefined;
+
+	constructor(
+		contents: vscode.MarkdownString | vscode.MarkedString | (vscode.MarkdownString | vscode.MarkedString)[],
+		range?: Range,
+		canIncreaseVerbosity?: boolean,
+		canDecreaseVerbosity?: boolean,
+	) {
+		super(contents, range);
+		this.canIncreaseVerbosity = canIncreaseVerbosity;
+		this.canDecreaseVerbosity = canDecreaseVerbosity;
+	}
+}
+
 export enum DocumentHighlightKind {
 	Text = 0,
 	Read = 1,

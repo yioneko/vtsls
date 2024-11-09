@@ -1,8 +1,8 @@
 diff --git a/package.json b/package.json
-index 92a36e5..5278491 100644
+index c6363df..634a567 100644
 --- a/package.json
 +++ b/package.json
-@@ -67,7 +67,7 @@
+@@ -68,7 +68,7 @@
      "onCommand:typescript.tsserverRequest",
      "onCommand:_typescript.configurePlugin",
      "onCommand:_typescript.learnMoreAboutRefactorings",

@@ -2,7 +2,7 @@
   "compilerOptions": {
     "target": "ES6",
     "module": "ESNext",
-    "lib": ["ES2020"],
+    "lib": ["ES2020", "ES2021.Promise"],
     "moduleResolution": "node",
     "experimentalDecorators": true,
     "noImplicitAny": true,
