@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.2.7](https://github.com/yioneko/vtsls/compare/service-v0.2.6...service-v0.2.7) (2024-11-16)
+
+
+### Bug Fixes
+
+* **deps:** update dependency typescript to v5.6.3 ([037c2b6](https://github.com/yioneko/vtsls/commit/037c2b615bf4cfe9dd65d9affc7a155fbb2ca255))
+* **deps:** update packages/service/vscode digest to 05f13ec ([#207](https://github.com/yioneko/vtsls/issues/207)) ([b67eb34](https://github.com/yioneko/vtsls/commit/b67eb348d45bc77869f4e543928678d44d3786f1))
+
 ## [0.2.6](https://github.com/yioneko/vtsls/compare/service-v0.2.5...service-v0.2.6) (2024-09-21)
 
 
