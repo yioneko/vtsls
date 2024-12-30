@@ -19,10 +19,10 @@ index 9d54f0b..c77603c 100644
  
  	if (isWeb()) {
 diff --git a/src/typescriptServiceClient.ts b/src/typescriptServiceClient.ts
-index d196d68..40a1269 100644
+index f45f4bf..c4cd5cd 100644
 --- a/src/typescriptServiceClient.ts
 +++ b/src/typescriptServiceClient.ts
-@@ -596,7 +596,7 @@ export default class TypeScriptServiceClient extends Disposable implements IType
+@@ -586,7 +586,7 @@ export default class TypeScriptServiceClient extends Disposable implements IType
  			: undefined;
  
  		const configureOptions: Proto.ConfigureRequestArguments = {
@@ -31,7 +31,7 @@ index d196d68..40a1269 100644
  			preferences: {
  				providePrefixAndSuffixTextForRename: true,
  				allowRenameOfImportPath: true,
-@@ -768,6 +768,10 @@ export default class TypeScriptServiceClient extends Disposable implements IType
+@@ -758,6 +758,10 @@ export default class TypeScriptServiceClient extends Disposable implements IType
  			return resource.fsPath;
  		}
  
@@ -42,7 +42,7 @@ index d196d68..40a1269 100644
  		return (this.isProjectWideIntellisenseOnWebEnabled() ? '' : inMemoryResourcePrefix)
  			+ '/' + resource.scheme
  			+ '/' + (resource.authority || emptyAuthority)
-@@ -816,6 +820,17 @@ export default class TypeScriptServiceClient extends Disposable implements IType
+@@ -807,6 +811,17 @@ export default class TypeScriptServiceClient extends Disposable implements IType
  				return this.bufferSyncSupport.toVsCodeResource(resource);
  			}
  		}

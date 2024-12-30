@@ -1,5 +1,5 @@
 diff --git a/src/languageFeatures/util/textRendering.ts b/src/languageFeatures/util/textRendering.ts
-index af1a7e6..f5540a7 100644
+index f44ac0c..1929087 100644
 --- a/src/languageFeatures/util/textRendering.ts
 +++ b/src/languageFeatures/util/textRendering.ts
 @@ -155,15 +155,12 @@ function convertLinkTags(
