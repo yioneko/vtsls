@@ -245,16 +245,6 @@
         ]
       }
     },
-    "javascript.inlayHints.enumMemberValues.enabled": {
-      "type": "boolean",
-      "default": false,
-      "markdownDescription": {
-        "message": "Enable/disable inlay hints for member values in enum declarations:\n```typescript\n\nenum MyValue {\n\tA /* = 0 */;\n\tB /* = 1 */;\n}\n \n```",
-        "comment": [
-          "The text inside the ``` block is code and should not be localized."
-        ]
-      }
-    },
     "javascript.suggest.includeCompletionsForImportStatements": {
       "type": "boolean",
       "default": true,
