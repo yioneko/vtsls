@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.2.7](https://github.com/yioneko/vtsls/compare/service-v0.2.6...service-v0.2.7) (2024-12-30)
+
+
+### Bug Fixes
+
+* **deps:** update dependency typescript to v5.6.3 ([037c2b6](https://github.com/yioneko/vtsls/commit/037c2b615bf4cfe9dd65d9affc7a155fbb2ca255))
+* **deps:** update dependency typescript to v5.7.2 ([#215](https://github.com/yioneko/vtsls/issues/215)) ([384e894](https://github.com/yioneko/vtsls/commit/384e89432d6d9866348dee8bcfb0df3c2d55368c))
+* **deps:** update packages/service/vscode digest to 05f13ec ([#207](https://github.com/yioneko/vtsls/issues/207)) ([b67eb34](https://github.com/yioneko/vtsls/commit/b67eb348d45bc77869f4e543928678d44d3786f1))
+* **deps:** update packages/service/vscode digest to a3261ea ([#217](https://github.com/yioneko/vtsls/issues/217)) ([40f1f6e](https://github.com/yioneko/vtsls/commit/40f1f6e33eb110e00b4818b6d47d230fb0c9d465))
+* do not ask client to open file from server ([6553bab](https://github.com/yioneko/vtsls/commit/6553bab5701e4fdd46adb920dcd89f5c95e6b2e2))
+
 ## [0.2.6](https://github.com/yioneko/vtsls/compare/service-v0.2.5...service-v0.2.6) (2024-09-21)
 
 
