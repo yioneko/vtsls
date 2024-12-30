@@ -29,17 +29,14 @@ index 632b047..009d112 100644
  					}));
  				}
 diff --git a/src/typescriptService.ts b/src/typescriptService.ts
-index 306769f..d432b63 100644
+index 306769f..3a72428 100644
 --- a/src/typescriptService.ts
 +++ b/src/typescriptService.ts
-@@ -77,8 +77,10 @@ interface StandardTsServerRequests {
+@@ -77,6 +77,7 @@ interface StandardTsServerRequests {
  	'getMoveToRefactoringFileSuggestions': [Proto.GetMoveToRefactoringFileSuggestionsRequestArgs, Proto.GetMoveToRefactoringFileSuggestions];
  	'linkedEditingRange': [Proto.FileLocationRequestArgs, Proto.LinkedEditingRangeResponse];
  	'mapCode': [Proto.MapCodeRequestArgs, Proto.MapCodeResponse];
 +	// @ts-expect-error until ts 5.7
  	'copilotRelated': [Proto.FileRequestArgs, Proto.CopilotRelatedResponse];
  	'getPasteEdits': [Proto.GetPasteEditsRequestArgs, Proto.GetPasteEditsResponse];
-+	// @ts-expect-error until ts 5.7
  	'preparePasteEdits': [Proto.PreparePasteEditsRequestArgs, Proto.PreparePasteEditsResponse];
- }
- 
