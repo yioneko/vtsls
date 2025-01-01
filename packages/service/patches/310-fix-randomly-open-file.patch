@@ -1,17 +1,20 @@
 diff --git a/src/typeScriptServiceClientHost.ts b/src/typeScriptServiceClientHost.ts
-index 0268e5f..b58be99 100644
+index 0268e5f..bb83303 100644
 --- a/src/typeScriptServiceClientHost.ts
 +++ b/src/typeScriptServiceClientHost.ts
-@@ -206,12 +206,6 @@ export default class TypeScriptServiceClientHost extends Disposable {
- 					return language;
+@@ -207,11 +207,10 @@ export default class TypeScriptServiceClientHost extends Disposable {
  				}
  			}
--
+ 
 -			// If that doesn't work, fallback to using a text document language mode.
 -			// This is not ideal since we have to open the document but should always
 -			// be correct
 -			const doc = await vscode.workspace.openTextDocument(resource);
 -			return this.languages.find(language => language.handlesDocument(doc));
++			if (this.client.toOpenTsFilePath(resource)) {
++				const doc = await vscode.workspace.openTextDocument(resource);
++				return this.languages.find(language => language.handlesDocument(doc));
++			}
  		} catch {
  			return undefined;
  		}
