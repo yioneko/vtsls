@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.8](https://github.com/yioneko/vtsls/compare/service-v0.2.7...service-v0.2.8) (2025-01-01)
+
+
+### Bug Fixes
+
+* no diagnostics on plugin handled files ([56ac3da](https://github.com/yioneko/vtsls/commit/56ac3dada75a16776a73b97e43b228f49321a720)), closes [#218](https://github.com/yioneko/vtsls/issues/218)
+
 ## [0.2.7](https://github.com/yioneko/vtsls/compare/service-v0.2.6...service-v0.2.7) (2024-12-30)
 
 
