@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.9](https://github.com/yioneko/vtsls/compare/service-v0.2.8...service-v0.2.9) (2025-01-22)
+
+
+### Bug Fixes
+
+* **deps:** update dependency typescript to v5.7.3 ([#225](https://github.com/yioneko/vtsls/issues/225)) ([0508adf](https://github.com/yioneko/vtsls/commit/0508adf3b6f6d3bd48e2cdddd7753f67d68f7d7c))
+
 ## [0.2.8](https://github.com/yioneko/vtsls/compare/service-v0.2.7...service-v0.2.8) (2025-01-01)
 
 

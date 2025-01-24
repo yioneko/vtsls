@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.2.9](https://github.com/yioneko/vtsls/compare/server-v0.2.8...server-v0.2.9) (2025-01-22)
+
+
+### Miscellaneous Chores
+
+* **server:** Synchronize vtsls versions
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @vtsls/language-service bumped from 0.2.8 to 0.2.9
+
 ## [0.2.8](https://github.com/yioneko/vtsls/compare/server-v0.2.7...server-v0.2.8) (2025-01-01)
 
 
