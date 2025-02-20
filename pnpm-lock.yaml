@@ -39,8 +39,8 @@ importers:
         specifier: ^9.0.1
         version: 9.0.1
       vscode-uri:
-        specifier: ^3.0.8
-        version: 3.0.8
+        specifier: ^3.1.0
+        version: 3.1.0
     devDependencies:
       esbuild:
         specifier: ^0.25.0
@@ -70,8 +70,8 @@ importers:
         specifier: ^1.0.12
         version: 1.0.12
       vscode-uri:
-        specifier: ^3.0.8
-        version: 3.0.8
+        specifier: ^3.1.0
+        version: 3.1.0
     devDependencies:
       '@types/semver':
         specifier: ^7.5.0
@@ -2267,8 +2267,8 @@ packages:
       vscode-languageserver-protocol: 3.17.5
     dev: false
 
-  /vscode-uri@3.0.8:
-    resolution: {integrity: sha512-AyFQ0EVmsOZOlAnxoFOGOq1SQDWAB7C6aqMGS23svWAllfOaxbuFvcT8D1i8z3Gyn8fraVeZNNmN6e9bxxXkKw==}
+  /vscode-uri@3.1.0:
+    resolution: {integrity: sha512-/BpdSx+yCQGnCvecbyXdxHDkuk55/G3xwnC0GqY4gmQ3j+A+g8kzzgB4Nk/SINjqn6+waqw3EgbVF2QKExkRxQ==}
     dev: false
 
   /which@2.0.2:
