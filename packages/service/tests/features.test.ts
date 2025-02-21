@@ -464,4 +464,30 @@ function abc(a) {}`,
       ],
     });
   });
+
+  it("auto close jsx tag", async () => {
+    const handle = await openDoc("index.tsx", {
+      text: "const a = <div",
+      languageId: "typescriptreact",
+    });
+    const edit = await waitWorkspaceEdit(service, () => {
+      handle.changeContent(">", {
+        start: { line: 0, character: 14 },
+        end: { line: 0, character: 14 },
+      });
+    });
+    expect(edit).toMatchObject({
+      documentChanges: [
+        {
+          edits: [
+            {
+              range: { start: { character: 15, line: 0 }, end: { character: 15, line: 0 } },
+              snippet: { kind: "snippet", value: "${0:}</div>" },
+            },
+          ],
+          textDocument: { uri: handle.uri },
+        },
+      ],
+    });
+  });
 });

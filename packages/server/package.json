@@ -14,7 +14,7 @@
     "language-server-protocol"
   ],
   "dependencies": {
-    "vscode-languageserver": "^9.0.1",
+    "vscode-languageserver": "^10.0.0-next.16",
     "vscode-uri": "^3.1.0",
     "@vtsls/language-service": "workspace:*"
   },
