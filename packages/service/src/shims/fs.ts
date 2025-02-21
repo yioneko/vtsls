@@ -78,7 +78,7 @@ async function symLinkStat(path: string) {
     if (!lstats.isSymbolicLink()) {
       return { stat: lstats };
     }
-  } catch (error) {
+  } catch {
     /* ignore - use stat() instead */
   }
 

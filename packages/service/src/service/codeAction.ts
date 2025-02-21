@@ -112,11 +112,7 @@ export class TSCodeActionFeature extends Disposable {
       };
 
       for (const { id, provider, args } of providers) {
-        if (
-          vscKind &&
-          args.metadata &&
-          args.metadata.providedCodeActionKinds?.every((k) => !vscKind.contains(k))
-        ) {
+        if (vscKind && args.metadata?.providedCodeActionKinds?.every((k) => !vscKind.contains(k))) {
           continue;
         }
         let actions = await provider.provideCodeActions(

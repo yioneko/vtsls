@@ -442,7 +442,6 @@ export class TSLspConverter extends LspInvariantConverter {
           param.documentation as string | lsp.MarkupContent
         );
       }
-      param.documentation;
     }
     return result;
   };

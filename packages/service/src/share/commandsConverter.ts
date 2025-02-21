@@ -7,13 +7,14 @@ import { TSLspConverter } from "../utils/converter";
 
 type AnyFunction = (...args: any[]) => any;
 
-export type GenericCommandsConverter = {
-  [key in string]?: {
+export type GenericCommandsConverter = Record<
+  string,
+  {
     toArgs?: AnyFunction;
     fromArgs?: AnyFunction;
     toRes?: AnyFunction;
-  };
-};
+  }
+>;
 
 export function createCommandsConverter(
   converter: TSLspConverter,
