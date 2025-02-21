@@ -16,7 +16,7 @@ function format(args: any): string {
     if (typeof a === "object") {
       try {
         a = JSON.stringify(a);
-      } catch (e) {
+      } catch {
         /* empty */
       }
     }

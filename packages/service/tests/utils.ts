@@ -91,7 +91,7 @@ async function readFsUriContent(uri: string) {
     const fsPath = URI.parse(uri).fsPath;
     const content = await fs.readFile(fsPath, { encoding: "utf-8" });
     return content;
-  } catch (e) {
+  } catch {
     return "";
   }
 }
