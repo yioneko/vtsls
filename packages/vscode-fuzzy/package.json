@@ -3,21 +3,18 @@
   "description": "Fuzzy matcher extracted from VSCode",
   "version": "0.0.1",
   "license": "MIT",
-  "types": "./dist/index.d.ts",
-  "main": "./dist/cjs/index.js",
-  "module": "./dist/esm/index.js",
+  "type": "module",
   "files": [
     "./dist/**/*"
   ],
   "exports": {
     ".": {
-      "import": "./dist/esm/index.js",
-      "require": "./dist/cjs/index.js",
-      "types": "./dist/index.d.ts"
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
     }
   },
   "scripts": {
-    "build": "tsc & tsc -p tsconfig.cjs.json"
+    "build": "tsc"
   },
   "repository": {
     "type": "git",

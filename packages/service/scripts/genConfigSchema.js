@@ -60,8 +60,6 @@ async function genSchema() {
     // needs memento support
     "typescript.enablePromptUseWorkspaceTsdk",
     "typescript.tsc.autoDetect",
-    "typescript.autoClosingTags",
-    "javascript.autoClosingTags",
     "typescript.surveys.enabled",
     "typescript.tsserver.enableRegionDiagnostics",
     "typescript.tsserver.experimental.useVsCodeWatcher",
