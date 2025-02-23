@@ -6,9 +6,7 @@
   "engines": {
     "node": ">=16"
   },
-  "types": "./dist/index.d.ts",
-  "main": "./dist/index.js",
-  "module": "./dist/index.mjs",
+  "type": "module",
   "files": [
     "./dist/index.js",
     "./dist/index.mjs",
@@ -16,9 +14,8 @@
   ],
   "exports": {
     ".": {
-      "import": "./dist/index.mjs",
-      "require": "./dist/index.js",
-      "types": "./dist/index.d.ts"
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
     }
   },
   "dependencies": {
@@ -37,8 +34,8 @@
     "vitest": "^3.0.3"
   },
   "scripts": {
-    "build": "node scripts/build.js && tsc",
-    "build:watch": "node scripts/build.js watch & tsc --watch",
+    "build": "node scripts/build.cjs && tsc",
+    "build:watch": "node scripts/build.cjs watch & tsc --watch",
     "type-check": "tsc --noEmit --emitDeclarationOnly false",
     "test": "vitest run",
     "test:watch": "vitest",

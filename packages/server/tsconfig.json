@@ -1,8 +1,11 @@
 {
-  "extends": "../../tsconfig.json",
   "compilerOptions": {
     "baseUrl": ".",
-    "skipLibCheck": true
+    "module": "esnext",
+    "target": "es2021",
+    "moduleResolution": "bundler",
+    "strictNullChecks": true,
+    "strict": true,
   },
   "include": ["src/**/*"]
 }

@@ -1,9 +1,15 @@
 {
-  "extends": "../../tsconfig.json",
   "compilerOptions": {
     "baseUrl": "./",
+    "module": "esnext",
+    "target": "es2021",
+    "moduleResolution": "bundler",
+    "experimentalDecorators": true,
     "resolveJsonModule": true,
     "esModuleInterop": true,
+    "strictNullChecks": true,
+    "strict": true,
+    "useUnknownInCatchVariables": false,
     "paths": {
       "@vsc-ts/*": ["src/typescript-language-features/src/*"]
     }

@@ -1,9 +1,11 @@
 {
-  "extends": "../../tsconfig.json",
   "compilerOptions": {
+    "module": "node16",
+    "target": "es2021",
     "declaration": true,
-    "outDir": "./dist/esm",
-    "declarationDir": "./dist"
+    "strict": true,
+    "verbatimModuleSyntax": true,
+    "rootDir": ".",
+    "outDir": "./dist",
   },
-  "include": ["."]
 }

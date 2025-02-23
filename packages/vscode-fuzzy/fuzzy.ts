@@ -3,8 +3,8 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { CharCode } from './charCode';
-import * as strings from './strings';
+import { CharCode } from './charCode.js';
+import * as strings from './strings.js';
 
 export interface IMatch {
 	start: number;

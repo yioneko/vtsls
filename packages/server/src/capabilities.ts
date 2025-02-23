@@ -1,17 +1,17 @@
-import {
-  codeActionKinds,
-  commands,
-  completionTriggerCharacters,
-  onTypeFormatFirstTriggerCharacter,
-  onTypeFormatMoreTriggerCharacter,
-  semanticTokenModifiers,
-  semanticTokenTypes,
-  signatureHelpReTriggerCharacters,
-  signatureHelpTriggerCharacters,
-} from "@vtsls/language-service";
 import { ServerCapabilities, TextDocumentSyncKind } from "vscode-languageserver/node";
 
-export function getTsLspDefaultCapabilities(): ServerCapabilities {
+export async function getTsLspDefaultCapabilities(): Promise<ServerCapabilities> {
+  const {
+    codeActionKinds,
+    commands,
+    completionTriggerCharacters,
+    onTypeFormatFirstTriggerCharacter,
+    onTypeFormatMoreTriggerCharacter,
+    semanticTokenModifiers,
+    semanticTokenTypes,
+    signatureHelpReTriggerCharacters,
+    signatureHelpTriggerCharacters,
+  } = await import("@vtsls/language-service");
   return {
     textDocumentSync: {
       openClose: true,
