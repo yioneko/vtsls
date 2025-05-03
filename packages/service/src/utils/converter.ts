@@ -352,7 +352,7 @@ export class TSLspConverter extends LspInvariantConverter {
     }
   }
 
-  convertHover = (hover: vscode.Hover): lsp.Hover => {
+  convertHover = (hover: vscode.Hover): lsp.Hover | null => {
     const mergedString = new types.MarkdownString();
     for (const content of hover.contents) {
       if (lsp.MarkedString.is(content)) {
@@ -365,10 +365,10 @@ export class TSLspConverter extends LspInvariantConverter {
         mergedString.appendMarkdown(content.value);
       }
     }
-    return {
+    return mergedString.value ? {
       contents: mergedString.value,
       range: hover.range ? this.convertRangeToLsp(hover.range) : undefined,
-    };
+    } : null;
   };
 
   convertSymbol = (
