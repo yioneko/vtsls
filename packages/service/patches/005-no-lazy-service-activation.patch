@@ -1,5 +1,5 @@
 diff --git a/src/lazyClientHost.ts b/src/lazyClientHost.ts
-index be832b3..9a92ece 100644
+index 3fc8a37..7484a84 100644
 --- a/src/lazyClientHost.ts
 +++ b/src/lazyClientHost.ts
 @@ -57,40 +57,11 @@ export function lazilyActivateClient(

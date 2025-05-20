@@ -9,7 +9,7 @@ async function genSchema() {
     .readFile(path.resolve(__dirname, "../src/typescript-language-features/package.nls.json"))
     .then(JSON.parse);
 
-  const { properties } = pkgJson.contributes.configuration;
+  const properties = Object.assign(...pkgJson.contributes.configuration.map(c => c.properties));
 
   /**
    * @param {string} key
@@ -68,6 +68,7 @@ async function genSchema() {
     "javascript.updateImportsOnPaste.enabled",
     "typescript.updateImportsOnPaste.enabled",
     "typescript.experimental.expandableHover",
+    "typescript.experimental.useTsgo",
   ];
 
   for (const p of unavailableOptions) {

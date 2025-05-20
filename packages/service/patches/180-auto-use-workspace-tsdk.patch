@@ -1,8 +1,8 @@
 diff --git a/src/configuration/configuration.ts b/src/configuration/configuration.ts
-index 693e7ad..2d969a6 100644
+index 6a0a2e7..b2a3d28 100644
 --- a/src/configuration/configuration.ts
 +++ b/src/configuration/configuration.ts
-@@ -101,6 +101,7 @@ export class ImplicitProjectConfiguration {
+@@ -99,6 +99,7 @@ export class ImplicitProjectConfiguration {
  }
  
  export interface TypeScriptServiceConfiguration {
@@ -10,7 +10,7 @@ index 693e7ad..2d969a6 100644
  	readonly locale: string | null;
  	readonly globalTsdk: string | null;
  	readonly localTsdk: string | null;
-@@ -144,6 +145,7 @@ export abstract class BaseServiceConfigurationProvider implements ServiceConfigu
+@@ -142,6 +143,7 @@ export abstract class BaseServiceConfigurationProvider implements ServiceConfigu
  	public loadFromWorkspace(): TypeScriptServiceConfiguration {
  		const configuration = vscode.workspace.getConfiguration();
  		return {

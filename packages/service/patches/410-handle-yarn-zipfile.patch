@@ -19,7 +19,7 @@ index 9d54f0b..c77603c 100644
  
  	if (isWeb()) {
 diff --git a/src/typescriptServiceClient.ts b/src/typescriptServiceClient.ts
-index f45f4bf..c4cd5cd 100644
+index 97ea40b..0697378 100644
 --- a/src/typescriptServiceClient.ts
 +++ b/src/typescriptServiceClient.ts
 @@ -586,7 +586,7 @@ export default class TypeScriptServiceClient extends Disposable implements IType

@@ -49,6 +49,8 @@ export class IsomorphicTextDocument implements vscode.TextDocument {
     return this.$documentModel.lineCount;
   }
 
+  encoding = 'utf8';
+
   getText = this.$documentModel.getText.bind(this.$documentModel);
 
   offsetAt = this.$documentModel.offsetAt.bind(this.$documentModel);

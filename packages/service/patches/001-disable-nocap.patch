@@ -1,8 +1,8 @@
 diff --git a/src/extension.ts b/src/extension.ts
-index dee3929..a37805d 100644
+index 29f809b..63298a9 100644
 --- a/src/extension.ts
 +++ b/src/extension.ts
-@@ -3,14 +3,11 @@
+@@ -3,7 +3,6 @@
   *  Licensed under the MIT License. See License.txt in the project root for license information.
   *--------------------------------------------------------------------------------------------*/
  
@@ -10,22 +10,24 @@ index dee3929..a37805d 100644
  import * as fs from 'fs';
  import * as vscode from 'vscode';
  import { Api, getExtensionApi } from './api';
- import { CommandManager } from './commands/commandManager';
+@@ -11,8 +10,6 @@ import { CommandManager } from './commands/commandManager';
+ import { DisableTsgoCommand } from './commands/useTsgo';
  import { registerBaseCommands } from './commands/index';
+ import { ElectronServiceConfigurationProvider } from './configuration/configuration.electron';
 -import { ExperimentationTelemetryReporter, IExperimentationTelemetryReporter } from './experimentTelemetryReporter';
 -import { ExperimentationService } from './experimentationService';
  import { createLazyClientHost, lazilyActivateClient } from './lazyClientHost';
- import { nodeRequestCancellerFactory } from './tsServer/cancellation.electron';
- import { NodeLogDirectoryProvider } from './tsServer/logDirectoryProvider.electron';
-@@ -20,7 +17,6 @@ import { ActiveJsTsEditorTracker } from './ui/activeJsTsEditorTracker';
- import { ElectronServiceConfigurationProvider } from './configuration/configuration.electron';
- import { onCaseInsensitiveFileSystem } from './utils/fs.electron';
  import { Logger } from './logging/logger';
+ import { nodeRequestCancellerFactory } from './tsServer/cancellation.electron';
+@@ -23,7 +20,6 @@ import { DiskTypeScriptVersionProvider } from './tsServer/versionProvider.electr
+ import { ActiveJsTsEditorTracker } from './ui/activeJsTsEditorTracker';
+ import { onCaseInsensitiveFileSystem } from './utils/fs.electron';
+ import { Lazy } from './utils/lazy';
 -import { getPackageInfo } from './utils/packageInfo';
- import { PluginManager } from './tsServer/plugins';
  import * as temp from './utils/temp.electron';
  
-@@ -42,18 +38,18 @@ export function activate(
+ export function activate(
+@@ -58,18 +54,7 @@ export function activate(
  	const activeJsTsEditorTracker = new ActiveJsTsEditorTracker();
  	context.subscriptions.push(activeJsTsEditorTracker);
  
@@ -36,40 +38,27 @@ index dee3929..a37805d 100644
 -		const vscTelemetryReporter = new VsCodeTelemetryReporter(aiKey);
 -		experimentTelemetryReporter = new ExperimentationTelemetryReporter(vscTelemetryReporter);
 -		context.subscriptions.push(experimentTelemetryReporter);
-+	let experimentTelemetryReporter;
-+	// const packageInfo = getPackageInfo(context);
-+	// if (packageInfo) {
-+	// 	const { name: id, version, aiKey } = packageInfo;
-+	// 	const vscTelemetryReporter = new VsCodeTelemetryReporter(aiKey);
-+	// 	experimentTelemetryReporter = new ExperimentationTelemetryReporter(vscTelemetryReporter);
-+	// 	context.subscriptions.push(experimentTelemetryReporter);
- 
- 		// Currently we have no experiments, but creating the service adds the appropriate
- 		// shared properties to the ExperimentationTelemetryReporter we just created.
+-
+-		// Currently we have no experiments, but creating the service adds the appropriate
+-		// shared properties to the ExperimentationTelemetryReporter we just created.
 -		new ExperimentationService(experimentTelemetryReporter, id, version, context.globalState);
 -	}
-+	// new ExperimentationService(experimentTelemetryReporter, id, version, context.globalState);
-+	// }
++	let experimentTelemetryReporter;
  
  	const logger = new Logger();
  
-@@ -74,13 +70,13 @@ export function activate(
+@@ -90,14 +75,6 @@ export function activate(
  
  	registerBaseCommands(commandManager, lazyClientHost, pluginManager, activeJsTsEditorTracker);
  
 -	import('./task/taskProvider').then(module => {
--		context.subscriptions.push(module.register(lazyClientHost.map(x => x.serviceClient)));
+-		context.subscriptions.push(module.register(new Lazy(() => lazyClientHost.value.serviceClient)));
 -	});
-+	// import('./task/taskProvider').then(module => {
-+	// 	context.subscriptions.push(module.register(lazyClientHost.map(x => x.serviceClient)));
-+	// });
- 
+-
 -	import('./languageFeatures/tsconfig').then(module => {
 -		context.subscriptions.push(module.register());
 -	});
-+	// import('./languageFeatures/tsconfig').then(module => {
-+	// 	context.subscriptions.push(module.register());
-+	// });
- 
+-
  	context.subscriptions.push(lazilyActivateClient(lazyClientHost, pluginManager, activeJsTsEditorTracker));
  
+ 	return getExtensionApi(onCompletionAccepted.event, pluginManager);

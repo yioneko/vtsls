@@ -10,7 +10,7 @@ export { tsDefaultNls };
 export type TSLanguageServiceConfig = any;
 
 function getDefaultConfig() {
-  const contributed = pkgJsonContributes.configuration.properties;
+  const contributed = Object.assign({}, ...pkgJsonContributes.configuration.map(c => c.properties));
   const excludedDefaults = {
     "vtsls.experimental.completion.enableServerSideFuzzyMatch": false,
     "vtsls.experimental.completion.entriesLimit": null,
@@ -24,7 +24,8 @@ function getDefaultConfig() {
     "typescript.tsserver.experimental.useVsCodeWatcher": false,
     "typescript.tsserver.watchOptions": {},
     "javascript.updateImportsOnPaste.enabled": false,
-    "typescript.updateImportsOnPaste.enabled": false
+    "typescript.updateImportsOnPaste.enabled": false,
+    "typescript.experimental.expandableHover": false
   };
 
   const res: TSLanguageServiceConfig = {};
@@ -41,7 +42,7 @@ function getDefaultConfig() {
     }
   }
 
-  for (const [key, val] of Object.entries(contributed)) {
+  for (const [key, val] of Object.entries<any>(contributed)) {
     let defaultVal = "default" in val ? val.default : undefined;
     if (!defaultVal && "type" in val) {
       if (val.type === "string") {

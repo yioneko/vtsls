@@ -1,8 +1,8 @@
 diff --git a/src/tsServer/bufferSyncSupport.ts b/src/tsServer/bufferSyncSupport.ts
-index 56d2896..73aa59f 100644
+index 7b47be8..cea92d0 100644
 --- a/src/tsServer/bufferSyncSupport.ts
 +++ b/src/tsServer/bufferSyncSupport.ts
-@@ -756,10 +756,6 @@ export default class BufferSyncSupport extends Disposable {
+@@ -769,10 +769,6 @@ export default class BufferSyncSupport extends Disposable {
  			return false;
  		}
  
