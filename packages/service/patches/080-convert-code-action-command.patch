@@ -1,5 +1,5 @@
 diff --git a/src/languageFeatures/quickFix.ts b/src/languageFeatures/quickFix.ts
-index f724cfd..68c3109 100644
+index 8da3ab3..07d30fe 100644
 --- a/src/languageFeatures/quickFix.ts
 +++ b/src/languageFeatures/quickFix.ts
 @@ -19,6 +19,7 @@ import FileConfigurationManager from './fileConfigurationManager';

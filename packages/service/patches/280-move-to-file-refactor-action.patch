@@ -1,8 +1,8 @@
 diff --git a/src/commands/tsserverRequests.ts b/src/commands/tsserverRequests.ts
-index 0fc70b3..e4c0a5d 100644
+index 7c92502..458b007 100644
 --- a/src/commands/tsserverRequests.ts
 +++ b/src/commands/tsserverRequests.ts
-@@ -53,7 +53,8 @@ export class TSServerRequestCommand implements Command {
+@@ -61,7 +61,8 @@ export class TSServerRequestCommand implements Command {
  			// Introspecting code at a position
  			'quickinfo',
  			'quickinfo-full',
