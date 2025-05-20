@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.2.9](https://github.com/yioneko/vtsls/compare/server-v0.2.8...server-v0.2.9) (2025-05-20)
+
+
+### Bug Fixes
+
+* **deps:** update dependency vscode-uri to ^3.1.0 ([#235](https://github.com/yioneko/vtsls/issues/235)) ([efb3d5e](https://github.com/yioneko/vtsls/commit/efb3d5e3fb0c38858f55e87f5d36062820e230f7))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @vtsls/language-service bumped from 0.2.8 to 0.2.9
+
 ## [0.2.8](https://github.com/yioneko/vtsls/compare/server-v0.2.7...server-v0.2.8) (2025-01-01)
 
 

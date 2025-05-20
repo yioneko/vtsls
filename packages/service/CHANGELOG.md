@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.2.9](https://github.com/yioneko/vtsls/compare/service-v0.2.8...service-v0.2.9) (2025-05-20)
+
+
+### Bug Fixes
+
+* **deps:** update dependency typescript to v5.7.3 ([#225](https://github.com/yioneko/vtsls/issues/225)) ([0508adf](https://github.com/yioneko/vtsls/commit/0508adf3b6f6d3bd48e2cdddd7753f67d68f7d7c))
+* **deps:** update dependency typescript to v5.8.2 ([#239](https://github.com/yioneko/vtsls/issues/239)) ([0aca445](https://github.com/yioneko/vtsls/commit/0aca445f9fa0f482c0d9d11e041408d9036beb80))
+* **deps:** update dependency typescript to v5.8.3 ([#246](https://github.com/yioneko/vtsls/issues/246)) ([d0096cf](https://github.com/yioneko/vtsls/commit/d0096cfc01b635e5920751856236bb6912afc0f3))
+* **deps:** update dependency vscode-uri to ^3.1.0 ([#235](https://github.com/yioneko/vtsls/issues/235)) ([efb3d5e](https://github.com/yioneko/vtsls/commit/efb3d5e3fb0c38858f55e87f5d36062820e230f7))
+* **deps:** update packages/service/vscode digest to bda84a7 ([#224](https://github.com/yioneko/vtsls/issues/224)) ([13be2fc](https://github.com/yioneko/vtsls/commit/13be2fcbad08c6f7e93339e960d19cfc347ce083))
+* remove internal whitelist for tsserver commands ([c577c46](https://github.com/yioneko/vtsls/commit/c577c461954199efdc8f743c0466089e7236a383)), closes [#249](https://github.com/yioneko/vtsls/issues/249)
+
 ## [0.2.8](https://github.com/yioneko/vtsls/compare/service-v0.2.7...service-v0.2.8) (2025-01-01)
 
 
