@@ -51,7 +51,7 @@ export class CompletionCache extends Disposable {
   resolveData(
     data?: any
   ): ({ cachedItem: vscode.CompletionItem } & CompletionItemData) | undefined {
-    const { providerId: _providerId, index: _index, cacheId: _cacheId } = data || {};
+    const { providerId: _providerId, index: _index, cacheId: _cacheId } = data ?? {};
     if ([_providerId, _index, _cacheId].some(isNil)) {
       return;
     }
@@ -89,9 +89,9 @@ export class TSCompletionFeature extends Disposable {
 
   private lastCompleteResult:
     | {
-        items: vscode.CompletionItem[];
-        providerId: number;
-      }[]
+      items: vscode.CompletionItem[];
+      providerId: number;
+    }[]
     | null = null;
 
   async completion(
@@ -127,13 +127,13 @@ export class TSCompletionFeature extends Disposable {
 
       const ctx = params.context
         ? {
-            triggerKind: (params.context.triggerKind - 1) as types.CompletionTriggerKind,
-            triggerCharacter: params.context.triggerCharacter,
-          }
+          triggerKind: (params.context.triggerKind - 1) as types.CompletionTriggerKind,
+          triggerCharacter: params.context.triggerCharacter,
+        }
         : {
-            triggerKind: types.CompletionTriggerKind.Invoke,
-            triggerCharacter: undefined,
-          };
+          triggerKind: types.CompletionTriggerKind.Invoke,
+          triggerCharacter: undefined,
+        };
       const inWord = wordRange?.contains(new types.Position(pos.line, pos.character - 1));
 
       for (const {
@@ -177,11 +177,11 @@ export class TSCompletionFeature extends Disposable {
     const shouldFuzzy = enableServerSideFuzzyMatch && wordRange;
     const fuzzyScorer = shouldFuzzy
       ? this.getCompletionItemFuzzyScorer(
-          results.map((r) => r.items.length).reduce((a, b) => a + b),
-          pos,
-          wordRange,
-          leadingLineContent
-        )
+        results.map((r) => r.items.length).reduce((a, b) => a + b),
+        pos,
+        wordRange,
+        leadingLineContent
+      )
       : () => void 0;
 
     let resultItems: lsp.CompletionItem[] = [];

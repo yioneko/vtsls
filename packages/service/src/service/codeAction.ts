@@ -34,7 +34,7 @@ export class CodeActionCache extends Disposable {
   resolveData(
     data?: any
   ): ({ cachedItem: vscode.Command | vscode.CodeAction } & CodeActionData) | undefined {
-    const { providerId: _providerId, index: _index, cacheId: _cacheId } = data || {};
+    const { providerId: _providerId, index: _index, cacheId: _cacheId } = data ?? {};
     if ([_providerId, _index, _cacheId].some(isNil)) {
       return;
     }

@@ -33,9 +33,7 @@ function getDefaultConfig() {
     const parts = key.split(".");
     let node = res;
     for (let i = 0; node && i < parts.length - 1; i++) {
-      if (!node[parts[i]]) {
-        node[parts[i]] = {};
-      }
+      node[parts[i]] ??= {};
       node = node[parts[i]];
     }
     if (node && parts.length) {
