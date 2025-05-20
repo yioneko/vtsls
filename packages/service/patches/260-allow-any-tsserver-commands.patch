@@ -1,0 +1,31 @@
+diff --git a/src/commands/tsserverRequests.ts b/src/commands/tsserverRequests.ts
+index 7c92502..8c1a966 100644
+--- a/src/commands/tsserverRequests.ts
++++ b/src/commands/tsserverRequests.ts
+@@ -48,25 +48,6 @@ export class TSServerRequestCommand implements Command {
+ 			}
+ 		}
+ 
+-		// The list can be found in the TypeScript compiler as `const enum CommandTypes`,
+-		// to avoid extensions making calls which could affect the internal tsserver state
+-		// these are only read-y sorts of commands
+-		const allowList = [
+-			// Seeing the JS/DTS output for a file
+-			'emit-output',
+-			// Grabbing a file's diagnostics
+-			'semanticDiagnosticsSync',
+-			'syntacticDiagnosticsSync',
+-			'suggestionDiagnosticsSync',
+-			// Introspecting code at a position
+-			'quickinfo',
+-			'quickinfo-full',
+-			'completionInfo'
+-		];
+-
+-		if (allowList.includes(command) || command.startsWith('_')) {
+-			return this.lazyClientHost.value.serviceClient.execute(command, args, token, config);
+-		}
+-		return undefined;
++		return this.lazyClientHost.value.serviceClient.execute(command, args, token, config);
+ 	}
+ }

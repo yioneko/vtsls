@@ -1,17 +1,3 @@
-diff --git a/src/commands/tsserverRequests.ts b/src/commands/tsserverRequests.ts
-index 7c92502..458b007 100644
---- a/src/commands/tsserverRequests.ts
-+++ b/src/commands/tsserverRequests.ts
-@@ -61,7 +61,8 @@ export class TSServerRequestCommand implements Command {
- 			// Introspecting code at a position
- 			'quickinfo',
- 			'quickinfo-full',
--			'completionInfo'
-+			'completionInfo',
-+			'getMoveToRefactoringFileSuggestions'
- 		];
- 
- 		if (allowList.includes(command) || command.startsWith('_')) {
 diff --git a/src/languageFeatures/refactor.ts b/src/languageFeatures/refactor.ts
 index 1317cda..3e28248 100644
 --- a/src/languageFeatures/refactor.ts
