@@ -20,9 +20,7 @@ function update<T = any>(tree: any, key: string, val: T) {
   const parts = key.split(".");
   let node = tree;
   for (let i = 0; node && !isPrimitive(node) && i < parts.length - 1; i++) {
-    if (!node[parts[i]]) {
-      node[parts[i]] = {};
-    }
+    node[parts[i]] ??= {};
     node = node[parts[i]];
   }
   if (node && !isPrimitive(node) && parts.length) {
