@@ -47,7 +47,11 @@ export class WorkspaceShimService extends Disposable {
 
   private _workspaceFolderIdGen = 0;
   private _workspaceFolders: ResourceMap<vscode.WorkspaceFolder>;
-
+  private onGetErr = this._register(new lsp.Emitter<number>());
+  private onGetBegin = this._register(new lsp.Emitter<number>());
+  private isDirty = false
+  private sentSeq = 0
+  private recvSeq = 0
   constructor(
     private readonly delegate: TSLanguageServiceDelegate,
     private readonly configurationShim: ConfigurationShimService,
@@ -110,6 +114,7 @@ export class WorkspaceShimService extends Disposable {
     const doc = TextDocument.create(uri, languageId, version, text);
     this._documents.set(URI.parse(uri), doc);
     this._onDidOpenTextDocument.fire(doc);
+    this.isDirty = true
   }
 
   $changeTextDocument(params: lsp.DidChangeTextDocumentParams) {
@@ -141,6 +146,8 @@ export class WorkspaceShimService extends Disposable {
       }),
       reason: undefined,
     });
+    this.delegate.logMessage(lsp.MessageType.Debug, `changeTextDocument ${uri}`)
+    this.isDirty = true
   }
 
   $closeTextDocument(params: lsp.DidCloseTextDocumentParams) {
@@ -153,6 +160,7 @@ export class WorkspaceShimService extends Disposable {
       this._onDidCloseTextDocument.fire(doc);
       this._documents.delete(vsUri);
     }
+    this.isDirty = true
   }
 
   $changeWorkspaceFolders(params: lsp.DidChangeWorkspaceFoldersParams) {
@@ -273,5 +281,43 @@ export class WorkspaceShimService extends Disposable {
 
   async requestWorkspaceTrust() {
     return true;
+  }
+  async waitForGetErr(): Promise<undefined> {
+    // We want to make sure the getErr request has been sent 
+    // This is applicable when we just did a didChange request, since tsserver will take some time to actually send the request.
+    if (this.isDirty && this.recvSeq === this.sentSeq) {
+      // Case 1: We've changed the document but haven't queued the getErr request yet. 
+      // We can tell this is the case because this.sentSeq === this.recvSeq
+      // We should wait for the request to be started.
+      const oldSeq = this.sentSeq
+      await new Promise<void>(resolve => this.onGetBegin.event((seq: number) => {
+        if (seq > oldSeq) {
+          resolve()
+        }
+      }))
+    } else {
+      // Case 2: There is an in-progress getErr request, so we can move onto the next block 
+    }
+    // Since sentSeq > recvSeq, we can be sure that we've sent a getErr request which hasn't returned yet.
+    // We do this in a while loop because we might have edited a document while a request was pending, meaning we need to wait for the first request to finish and for the second one to finish. 
+    while (this.sentSeq > this.recvSeq) {
+      const oldSeq = this.recvSeq
+      await new Promise<void>(resolve => this.onGetErr.event((seq: number) => {
+        if (seq > oldSeq) {
+          resolve()
+        }
+      }))
+    }
+  }
+  startGetErr(seq: number): void {
+    this.delegate.logMessage(lsp.MessageType.Debug, "getErr called")
+    this.sentSeq = seq
+    this.onGetBegin.fire(this.sentSeq)
+  }
+  finishGetErr(seq: number): void {
+    this.delegate.logMessage(lsp.MessageType.Debug, "getErr finished")
+    this.isDirty = false
+    this.recvSeq = seq
+    this.onGetErr.fire(this.recvSeq)
   }
 }

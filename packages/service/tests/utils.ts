@@ -11,6 +11,8 @@ export async function createTestService(workspacePath: string) {
       textDocument: {
         documentSymbol: { hierarchicalDocumentSymbolSupport: true },
         definition: { linkSupport: true },
+        publishDiagnostics: {},
+        diagnostic: {},
       },
     },
     workspaceFolders: [{ name: "test", uri: URI.file(workspacePath).toString() }],
