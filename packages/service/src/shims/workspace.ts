@@ -50,8 +50,8 @@ export class WorkspaceShimService extends Disposable {
   private onGetErr = this._register(new lsp.Emitter<number>());
   private onGetBegin = this._register(new lsp.Emitter<number>());
   private isDirty = false
-  private sentSeq = 0
-  private recvSeq = 0
+  private sentSeq = -1
+  private recvSeq = -1
   constructor(
     private readonly delegate: TSLanguageServiceDelegate,
     private readonly configurationShim: ConfigurationShimService,
