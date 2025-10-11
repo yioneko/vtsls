@@ -1,3 +1,3 @@
 /* eslint-disable no-var */
 
-declare var VTSLS_VRESION: string;
+declare var VTSLS_VERSION: string;
