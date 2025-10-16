@@ -20,7 +20,7 @@ async function build({ watch }) {
     external: Object.keys(dependencies).flatMap((d) => [d, `${d}/*`]),
     target: "node16",
     platform: "node",
-    define: { VTSLS_VRESION: `"${version}"` },
+    define: { VTSLS_VERSION: `"${version}"` },
   };
   if (!watch) {
     return esbuild.build(opts);

@@ -74,7 +74,7 @@ function onServerInitialize(conn: Connection, params: InitializeParams) {
 
   return {
     capabilities,
-    serverInfo: { name: "vtsls", version: VTSLS_VRESION },
+    serverInfo: { name: "vtsls", version: VTSLS_VERSION },
   };
 }
 
