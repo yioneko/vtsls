@@ -47,6 +47,11 @@ export function getTsLspDefaultCapabilities(): ServerCapabilities {
     },
     codeLensProvider: { resolveProvider: true },
     // documentLinkProvider: { resolveProvider: false },
+    diagnosticProvider: {
+      identifier: "vtsls",
+      interFileDependencies: false,
+      workspaceDiagnostics: false,
+    },
     documentLinkProvider: undefined,
     colorProvider: false,
     workspaceSymbolProvider: { resolveProvider: false },
