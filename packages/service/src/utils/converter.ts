@@ -367,7 +367,10 @@ export class TSLspConverter extends LspInvariantConverter {
       }
     }
     return mergedString.value ? {
-      contents: mergedString.value,
+      contents: {
+        kind: lsp.MarkupKind.Markdown,
+        value: mergedString.value
+      },
       range: hover.range ? this.convertRangeToLsp(hover.range) : undefined,
     } : null;
   };
