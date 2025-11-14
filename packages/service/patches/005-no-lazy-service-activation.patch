@@ -1,8 +1,8 @@
 diff --git a/src/lazyClientHost.ts b/src/lazyClientHost.ts
-index 3fc8a37..7484a84 100644
+index ff03830..6796cc5 100644
 --- a/src/lazyClientHost.ts
 +++ b/src/lazyClientHost.ts
-@@ -57,40 +57,11 @@ export function lazilyActivateClient(
+@@ -53,40 +53,11 @@ export function lazilyActivateClient(
  	activeJsTsEditorTracker: ActiveJsTsEditorTracker,
  	onActivate: () => Promise<void> = () => Promise.resolve(),
  ): vscode.Disposable {

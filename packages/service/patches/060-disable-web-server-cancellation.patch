@@ -1,5 +1,5 @@
 diff --git a/src/tsServer/server.ts b/src/tsServer/server.ts
-index cce320d..00b3b7b 100644
+index 58b94ff..70a28cd 100644
 --- a/src/tsServer/server.ts
 +++ b/src/tsServer/server.ts
 @@ -3,7 +3,6 @@
@@ -8,10 +8,10 @@ index cce320d..00b3b7b 100644
  
 -import { Cancellation } from '@vscode/sync-api-common/lib/common/messageCancellation';
  import * as vscode from 'vscode';
+ import { RequestArgs } from '../commands/tsserverRequests';
  import { TypeScriptServiceConfiguration } from '../configuration/configuration';
- import { TelemetryReporter } from '../logging/telemetry';
-@@ -239,12 +238,12 @@ export class SingleTsServer extends Disposable implements ITypeScriptServer {
- 
+@@ -254,12 +253,12 @@ export class SingleTsServer extends Disposable implements ITypeScriptServer {
+ 				this._callbacks.add(request.seq, item, executeInfo.isAsync);
  				if (executeInfo.token) {
  
 -					const cancelViaSAB = isWebAndHasSharedArrayBuffers()
