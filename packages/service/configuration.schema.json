@@ -41,6 +41,11 @@
       "default": false,
       "description": "Enable/disable implementations CodeLens on interface methods."
     },
+    "typescript.implementationsCodeLens.showOnAllClassMethods": {
+      "type": "boolean",
+      "default": false,
+      "description": "Enable/disable showing implementations CodeLens above all class methods instead of only on abstract methods."
+    },
     "typescript.reportStyleChecksAsWarnings": {
       "type": "boolean",
       "default": true,
@@ -77,7 +82,7 @@
     },
     "js/ts.implicitProjectConfig.target": {
       "type": "string",
-      "default": "ES2022",
+      "default": "ES2024",
       "markdownDescription": "Set target JavaScript language version for emitted JavaScript and include library declarations. See more: https://www.typescriptlang.org/tsconfig#target.",
       "enum": [
         "ES3",
@@ -115,6 +120,11 @@
       "type": "boolean",
       "default": true,
       "markdownDescription": "Enable/disable [strict function types](https://www.typescriptlang.org/tsconfig#strictFunctionTypes) in JavaScript and TypeScript files that are not part of a project. Existing `jsconfig.json` or `tsconfig.json` files override this setting."
+    },
+    "js/ts.implicitProjectConfig.strict": {
+      "type": "boolean",
+      "default": true,
+      "markdownDescription": "Enable/disable [strict mode](https://www.typescriptlang.org/tsconfig#strict) in JavaScript and TypeScript files that are not part of a project. Existing `jsconfig.json` or `tsconfig.json` files override this setting."
     },
     "typescript.locale": {
       "type": "string",
@@ -1175,7 +1185,8 @@
         "off",
         "terse",
         "normal",
-        "verbose"
+        "verbose",
+        "requestTime"
       ],
       "default": "off",
       "description": "Enables logging of the TS server to a file. This log can be used to diagnose TS Server issues. The log may contain file paths, source code, and other potentially sensitive information from your project."

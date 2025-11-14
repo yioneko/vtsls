@@ -1,5 +1,5 @@
 diff --git a/src/commands/tsserverRequests.ts b/src/commands/tsserverRequests.ts
-index 7c92502..8c1a966 100644
+index 77c07d6..e301c3c 100644
 --- a/src/commands/tsserverRequests.ts
 +++ b/src/commands/tsserverRequests.ts
 @@ -48,25 +48,6 @@ export class TSServerRequestCommand implements Command {
