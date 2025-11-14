@@ -1,5 +1,5 @@
 diff --git a/src/languageFeatures/organizeImports.ts b/src/languageFeatures/organizeImports.ts
-index 8219943..9372b15 100644
+index 25c3a92..83d5175 100644
 --- a/src/languageFeatures/organizeImports.ts
 +++ b/src/languageFeatures/organizeImports.ts
 @@ -26,7 +26,7 @@ interface OrganizeImportsCommandMetadata {

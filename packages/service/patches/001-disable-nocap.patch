@@ -1,5 +1,5 @@
 diff --git a/src/extension.ts b/src/extension.ts
-index 29f809b..63298a9 100644
+index 58e47a6..89491dd 100644
 --- a/src/extension.ts
 +++ b/src/extension.ts
 @@ -3,7 +3,6 @@
@@ -11,7 +11,7 @@ index 29f809b..63298a9 100644
  import * as vscode from 'vscode';
  import { Api, getExtensionApi } from './api';
 @@ -11,8 +10,6 @@ import { CommandManager } from './commands/commandManager';
- import { DisableTsgoCommand } from './commands/useTsgo';
+ import { DisableTsgoCommand, tsNativeExtensionId } from './commands/useTsgo';
  import { registerBaseCommands } from './commands/index';
  import { ElectronServiceConfigurationProvider } from './configuration/configuration.electron';
 -import { ExperimentationTelemetryReporter, IExperimentationTelemetryReporter } from './experimentTelemetryReporter';
@@ -25,11 +25,11 @@ index 29f809b..63298a9 100644
  import { Lazy } from './utils/lazy';
 -import { getPackageInfo } from './utils/packageInfo';
  import * as temp from './utils/temp.electron';
- 
- export function activate(
-@@ -58,18 +54,7 @@ export function activate(
- 	const activeJsTsEditorTracker = new ActiveJsTsEditorTracker();
- 	context.subscriptions.push(activeJsTsEditorTracker);
+ import { conditionalRegistration, requireGlobalConfiguration, requireHasVsCodeExtension } from './languageFeatures/util/dependentRegistration';
+ import { DisposableStore } from './utils/dispose';
+@@ -40,18 +36,7 @@ export function activate(
+ 	const logDirectoryProvider = new NodeLogDirectoryProvider(context);
+ 	const versionProvider = new DiskTypeScriptVersionProvider();
  
 -	let experimentTelemetryReporter: IExperimentationTelemetryReporter | undefined;
 -	const packageInfo = getPackageInfo(context);
@@ -45,20 +45,20 @@ index 29f809b..63298a9 100644
 -	}
 +	let experimentTelemetryReporter;
  
- 	const logger = new Logger();
+ 	context.subscriptions.push(conditionalRegistration([
+ 		requireGlobalConfiguration('typescript', 'experimental.useTsgo'),
+@@ -91,14 +76,6 @@ export function activate(
+ 		// Register features
+ 		registerBaseCommands(commandManager, lazyClientHost, pluginManager, activeJsTsEditorTracker);
  
-@@ -90,14 +75,6 @@ export function activate(
- 
- 	registerBaseCommands(commandManager, lazyClientHost, pluginManager, activeJsTsEditorTracker);
- 
--	import('./task/taskProvider').then(module => {
--		context.subscriptions.push(module.register(new Lazy(() => lazyClientHost.value.serviceClient)));
--	});
+-		import('./task/taskProvider').then(module => {
+-			disposables.add(module.register(new Lazy(() => lazyClientHost.value.serviceClient)));
+-		});
 -
--	import('./languageFeatures/tsconfig').then(module => {
--		context.subscriptions.push(module.register());
--	});
+-		import('./languageFeatures/tsconfig').then(module => {
+-			disposables.add(module.register());
+-		});
 -
- 	context.subscriptions.push(lazilyActivateClient(lazyClientHost, pluginManager, activeJsTsEditorTracker));
+ 		disposables.add(lazilyActivateClient(lazyClientHost, pluginManager, activeJsTsEditorTracker));
  
- 	return getExtensionApi(onCompletionAccepted.event, pluginManager);
+ 		return disposables;
