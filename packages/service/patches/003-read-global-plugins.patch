@@ -1,5 +1,5 @@
 diff --git a/src/tsServer/plugins.ts b/src/tsServer/plugins.ts
-index 6036e4c..1d3efd6 100644
+index a4f56f0..388b81e 100644
 --- a/src/tsServer/plugins.ts
 +++ b/src/tsServer/plugins.ts
 @@ -9,7 +9,7 @@ import { Disposable } from '../utils/dispose';
@@ -79,10 +79,10 @@ index 6036e4c..1d3efd6 100644
  	}
  }
 diff --git a/src/tsServer/spawner.ts b/src/tsServer/spawner.ts
-index aac3186..3b362e8 100644
+index 944ff39..dfde8e5 100644
 --- a/src/tsServer/spawner.ts
 +++ b/src/tsServer/spawner.ts
-@@ -250,7 +250,7 @@ export class TypeScriptServerSpawner {
+@@ -249,7 +249,7 @@ export class TypeScriptServerSpawner {
  
  			const isUsingBundledTypeScriptVersion = currentVersion.path === this._versionProvider.defaultVersion.path;
  			for (const plugin of pluginManager.plugins) {
