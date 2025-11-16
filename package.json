@@ -5,13 +5,13 @@
   },
   "packageManager": "pnpm@8.15.9",
   "devDependencies": {
-    "@eslint/js": "^9.35.0",
+    "@eslint/js": "^9.39.1",
     "@types/node": "^16.18.126",
-    "eslint": "^9.35.0",
-    "lint-staged": "^16.1.6",
+    "eslint": "^9.39.1",
+    "lint-staged": "^16.2.6",
     "simple-git-hooks": "^2.13.1",
     "typescript": "5.8.3",
-    "typescript-eslint": "^8.44.0"
+    "typescript-eslint": "^8.46.4"
   },
   "scripts": {
     "build": "pnpm run -r build",
