@@ -10,6 +10,7 @@
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "files": [
+    "./configuration.schema.json",
     "./dist/index.js",
     "./dist/index.mjs",
     "./dist/**/*.d.ts"
@@ -19,7 +20,8 @@
       "import": "./dist/index.mjs",
       "require": "./dist/index.js",
       "types": "./dist/index.d.ts"
-    }
+    },
+    "./configuration-schema": "./configuration.schema.json"
   },
   "dependencies": {
     "@vscode/l10n": "^0.0.18",
