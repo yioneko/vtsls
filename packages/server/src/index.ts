@@ -136,6 +136,7 @@ function bindServiceHandlers(
   conn.onDidChangeTextDocument(service.changeTextDocument);
   conn.onDidChangeConfiguration(service.changeConfiguration);
   conn.workspace.onDidRenameFiles(service.renameFiles);
+  conn.workspace.onWillRenameFiles(safeRun(service.willRenameFiles, null));
   /* eslint-enable @typescript-eslint/unbound-method*/
   if (clientCapabilities.workspace?.workspaceFolders) {
     // otherwise this will throw error 😈
