@@ -5,6 +5,7 @@ import * as types from "../shims/types";
 import { onCaseInsensitiveFileSystem } from "../utils/fs";
 import { ResourceMap } from "../utils/resourceMap";
 import { deepClone } from "./objects";
+import type { VerboseHover } from "../service/types";
 
 function isStringOrFalsy(val: unknown): val is string | undefined | null {
   return typeof val === "string" || val === undefined || val === null;
@@ -352,7 +353,7 @@ export class TSLspConverter extends LspInvariantConverter {
     }
   }
 
-  convertHover = (hover: vscode.Hover): lsp.Hover | null => {
+  convertHover = (hover: vscode.VerboseHover): VerboseHover | null => {
     const mergedString = new types.MarkdownString();
     for (const content of hover.contents) {
       if (lsp.MarkedString.is(content)) {
@@ -365,9 +366,12 @@ export class TSLspConverter extends LspInvariantConverter {
         mergedString.appendMarkdown(content.value);
       }
     }
+    const { canDecreaseVerbosity, canIncreaseVerbosity } = hover;
     return mergedString.value ? {
       contents: mergedString.value,
       range: hover.range ? this.convertRangeToLsp(hover.range) : undefined,
+      canDecreaseVerbosity,
+      canIncreaseVerbosity
     } : null;
   };
 
