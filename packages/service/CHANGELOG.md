@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.10](https://github.com/yioneko/vtsls/compare/service-v0.2.9...service-v0.2.10) (2025-07-18)
+
+
+### Bug Fixes
+
+* **hover:** return null instead of empty contents ([#248](https://github.com/yioneko/vtsls/issues/248)) ([2ad37c1](https://github.com/yioneko/vtsls/commit/2ad37c1694fccdc14c9cac243973ba93b3e704fa))
+
 ## [0.2.9](https://github.com/yioneko/vtsls/compare/service-v0.2.8...service-v0.2.9) (2025-05-20)
 
 
