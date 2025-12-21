@@ -67,7 +67,6 @@ async function genSchema() {
     "typescript.tsserver.experimental.useVsCodeWatcher",
     "javascript.updateImportsOnPaste.enabled",
     "typescript.updateImportsOnPaste.enabled",
-    "typescript.experimental.expandableHover",
     "typescript.experimental.useTsgo",
   ];
 

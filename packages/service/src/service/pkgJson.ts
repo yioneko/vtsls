@@ -25,7 +25,6 @@ function getDefaultConfig() {
     "typescript.tsserver.watchOptions": {},
     "javascript.updateImportsOnPaste.enabled": false,
     "typescript.updateImportsOnPaste.enabled": false,
-    "typescript.experimental.expandableHover": false
   };
 
   const res: TSLanguageServiceConfig = {};
