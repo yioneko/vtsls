@@ -180,4 +180,52 @@ function bindServiceHandlers(
   );
 }
 
-createLanguageServer();
+function printHelp() {
+  console.log(`vtsls v${VTSLS_VERSION}
+
+Usage: vtsls [options]
+
+Language Server Options:
+  --stdio                 Use stdio for communication (default)
+  --node-ipc              Use node-ipc for communication
+  --socket=<number>       Use socket for communication
+
+Other Options:
+  --help, -h              Show this help message
+  --version, -V           Print version information
+  --print-config-schema   Print the configuration schema as JSON
+`);
+}
+
+function printVersion() {
+  console.log(VTSLS_VERSION);
+}
+
+function printConfigSchema() {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const schema = require("@vtsls/language-service/configuration-schema");
+    console.log(JSON.stringify(schema, null, 2));
+  } catch (error) {
+    console.error(`Error: Could not load configuration schema: ${error}`);
+    console.log("{}");
+  }
+}
+
+function main() {
+  const args = process.argv.slice(2);
+  if (args.includes("--help") || args.includes("-h")) {
+    printHelp();
+    process.exit(0);
+  } else if (args.includes("--version") || args.includes("-V")) {
+    printVersion();
+    process.exit(0);
+  } else if (args.includes("--print-config-schema")) {
+    printConfigSchema();
+    process.exit(0);
+  } else {
+    createLanguageServer();
+  }
+}
+
+main();
