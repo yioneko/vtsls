@@ -1,16 +1,17 @@
 diff --git a/src/languageFeatures/quickFix.ts b/src/languageFeatures/quickFix.ts
-index 8da3ab3..07d30fe 100644
+index c0c8967..f3ff309 100644
 --- a/src/languageFeatures/quickFix.ts
 +++ b/src/languageFeatures/quickFix.ts
-@@ -19,6 +19,7 @@ import FileConfigurationManager from './fileConfigurationManager';
- import { applyCodeActionCommands, getEditForCodeAction } from './util/codeAction';
- import { conditionalRegistration, requireSomeCapability } from './util/dependentRegistration';
- import { Expand, EditorChatFollowUp_Args, CompositeCommand, EditorChatFollowUp } from './util/copilot';
-+import { commandsConverter } from '../../../share';
+@@ -3,6 +3,8 @@
+  *  Licensed under the MIT License. See License.txt in the project root for license information.
+  *--------------------------------------------------------------------------------------------*/
  
- type ApplyCodeActionCommand_args = {
- 	readonly document: vscode.TextDocument;
-@@ -59,7 +60,8 @@ class ApplyCodeActionCommand implements Command {
++import { commandsConverter } from '../../../share';
++
+ import * as vscode from 'vscode';
+ import { Command, CommandManager } from '../commands/commandManager';
+ import { DocumentSelector } from '../configuration/documentSelector';
+@@ -59,7 +61,8 @@ class ApplyCodeActionCommand implements Command {
  }
  
  type ApplyFixAllCodeAction_args = {
@@ -20,7 +21,7 @@ index 8da3ab3..07d30fe 100644
  };
  
  class ApplyFixAllCodeAction implements Command {
-@@ -82,11 +84,11 @@ class ApplyFixAllCodeAction implements Command {
+@@ -82,11 +85,11 @@ class ApplyFixAllCodeAction implements Command {
  			}
  		*/
  		this.telemetryReporter.logTelemetry('quickFixAll.execute', {
@@ -35,7 +36,7 @@ index 8da3ab3..07d30fe 100644
  		}
  	}
  }
-@@ -311,9 +313,17 @@ class TypeScriptQuickFixProvider implements vscode.CodeActionProvider<VsCodeCode
+@@ -310,9 +313,17 @@ class TypeScriptQuickFixProvider implements vscode.CodeActionProvider<VsCodeCode
  		};
  
  		const response = await this.client.execute('getCombinedCodeFix', arg, token);
@@ -55,7 +56,7 @@ index 8da3ab3..07d30fe 100644
  		}
  
  		return codeAction;
-@@ -356,7 +366,7 @@ class TypeScriptQuickFixProvider implements vscode.CodeActionProvider<VsCodeCode
+@@ -355,7 +366,7 @@ class TypeScriptQuickFixProvider implements vscode.CodeActionProvider<VsCodeCode
  		codeAction.ranges = [diagnostic.range];
  		codeAction.command = {
  			command: ApplyCodeActionCommand.ID,
@@ -64,7 +65,7 @@ index 8da3ab3..07d30fe 100644
  			title: ''
  		};
  		actions.push(codeAction);
-@@ -471,7 +481,7 @@ class TypeScriptQuickFixProvider implements vscode.CodeActionProvider<VsCodeCode
+@@ -467,7 +478,7 @@ class TypeScriptQuickFixProvider implements vscode.CodeActionProvider<VsCodeCode
  		action.ranges = [diagnostic.range];
  		action.command = {
  			command: ApplyFixAllCodeAction.ID,

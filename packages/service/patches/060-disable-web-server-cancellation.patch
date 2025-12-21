@@ -1,5 +1,5 @@
 diff --git a/src/tsServer/server.ts b/src/tsServer/server.ts
-index cce320d..00b3b7b 100644
+index 58b94ff..158781e 100644
 --- a/src/tsServer/server.ts
 +++ b/src/tsServer/server.ts
 @@ -3,7 +3,6 @@
@@ -8,22 +8,26 @@ index cce320d..00b3b7b 100644
  
 -import { Cancellation } from '@vscode/sync-api-common/lib/common/messageCancellation';
  import * as vscode from 'vscode';
+ import { RequestArgs } from '../commands/tsserverRequests';
  import { TypeScriptServiceConfiguration } from '../configuration/configuration';
- import { TelemetryReporter } from '../logging/telemetry';
-@@ -239,12 +238,12 @@ export class SingleTsServer extends Disposable implements ITypeScriptServer {
- 
+@@ -14,7 +13,6 @@ import { RequestItem, RequestQueue, RequestQueueingType } from '../tsServer/requ
+ import { TypeScriptServerError } from '../tsServer/serverError';
+ import { ServerResponse, ServerType, TypeScriptRequests } from '../typescriptService';
+ import { Disposable } from '../utils/dispose';
+-import { isWebAndHasSharedArrayBuffers } from '../utils/platform';
+ import { OngoingRequestCanceller } from './cancellation';
+ import { NodeVersionManager } from './nodeManager';
+ import type * as Proto from './protocol/protocol';
+@@ -254,12 +252,7 @@ export class SingleTsServer extends Disposable implements ITypeScriptServer {
+ 				this._callbacks.add(request.seq, item, executeInfo.isAsync);
  				if (executeInfo.token) {
  
 -					const cancelViaSAB = isWebAndHasSharedArrayBuffers()
 -						? Cancellation.addData(request)
 -						: undefined;
-+					// const cancelViaSAB = isWebAndHasSharedArrayBuffers()
-+					// 	? Cancellation.addData(request)
-+					// 	: undefined;
- 
+-
  					executeInfo.token.onCancellationRequested(() => {
 -						cancelViaSAB?.();
-+						// cancelViaSAB?.();
  						this.tryCancelRequest(request, command);
  					});
  				}

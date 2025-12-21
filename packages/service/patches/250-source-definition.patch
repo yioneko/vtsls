@@ -1,5 +1,5 @@
 diff --git a/src/languageFeatures/sourceDefinition.ts b/src/languageFeatures/sourceDefinition.ts
-index 301f860..2b21930 100644
+index f3798a0..8b6372b 100644
 --- a/src/languageFeatures/sourceDefinition.ts
 +++ b/src/languageFeatures/sourceDefinition.ts
 @@ -22,24 +22,24 @@ class SourceDefinitionCommand implements Command {
