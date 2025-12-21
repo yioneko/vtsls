@@ -346,6 +346,7 @@ export class TSLspConverter extends LspInvariantConverter {
         kind: ac.kind?.value,
         edit: convertOrFalsy(ac.edit, this.convertWorkspaceEdit),
         isPreferred: ac.isPreferred,
+        disabled: ac.disabled,
         data,
       };
       return result;
