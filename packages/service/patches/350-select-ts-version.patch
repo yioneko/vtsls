@@ -1,8 +1,8 @@
 diff --git a/src/tsServer/versionManager.ts b/src/tsServer/versionManager.ts
-index edc7001..6171985 100644
+index c09e51e..f94ca31 100644
 --- a/src/tsServer/versionManager.ts
 +++ b/src/tsServer/versionManager.ts
-@@ -76,19 +76,29 @@ export class TypeScriptVersionManager extends Disposable {
+@@ -77,6 +77,20 @@ export class TypeScriptVersionManager extends Disposable {
  		this._currentVersion = this.versionProvider.bundledVersion;
  	}
  
@@ -21,26 +21,27 @@ index edc7001..6171985 100644
 +	}
 +
  	public async promptUserForVersion(): Promise<void> {
--		const selected = await vscode.window.showQuickPick<QuickPickItem>([
--			this.getBundledPickItem(),
--			...this.getLocalPickItems(),
+ 		const nativePreviewItem = this.getNativePreviewPickItem();
+ 		const items: QuickPickItem[] = [
+@@ -89,17 +103,13 @@ export class TypeScriptVersionManager extends Disposable {
+ 		}
+ 
+ 		items.push(
 -			{
 -				kind: vscode.QuickPickItemKind.Separator,
 -				label: '',
 -				run: () => { /* noop */ },
 -			},
--			LearnMorePickItem,
--		], {
+ 			LearnMorePickItem,
+ 		);
+ 
+-		const selected = await vscode.window.showQuickPick<QuickPickItem>(items, {
 -			placeHolder: vscode.l10n.t("Select the TypeScript version used for JavaScript and TypeScript language features"),
 -		});
 +		const selected = await vscode.window.showInformationMessage(
 +			vscode.l10n.t("Select the TypeScript version used for JavaScript and TypeScript language features"),
-+			...[
-+				this.getBundledPickItem(),
-+				...this.getLocalPickItems(),
-+				LearnMorePickItem,
-+			].map(this.pickItemToMessage),
-+		)
++			...items.map(this.pickItemToMessage),
++		);
  
  		return selected?.run();
  	}

@@ -1,5 +1,5 @@
 diff --git a/src/languageFeatures/util/textRendering.ts b/src/languageFeatures/util/textRendering.ts
-index f44ac0c..1929087 100644
+index ccb9e0f..1929087 100644
 --- a/src/languageFeatures/util/textRendering.ts
 +++ b/src/languageFeatures/util/textRendering.ts
 @@ -155,15 +155,12 @@ function convertLinkTags(
@@ -18,7 +18,7 @@ index f44ac0c..1929087 100644
 +								fragment: `L${currentLink.target.start.line},${currentLink.target.start.offset}`
 +							});
  						const linkText = currentLink.text ? currentLink.text : escapeMarkdownSyntaxTokensForCode(currentLink.name ?? '');
--						out.push(`[${currentLink.linkcode ? '`' + linkText + '`' : linkText}](${command})`);
+-						out.push(`[${currentLink.linkcode ? '`' + linkText + '`' : linkText}](${command} "${vscode.l10n.t('Open symbol link')}")`);
 +						out.push(`[${currentLink.linkcode ? '`' + linkText + '`' : linkText}](${link.toString()})`);
  					} else {
  						const text = currentLink.text ?? currentLink.name;
