@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.2.10](https://github.com/yioneko/vtsls/compare/server-v0.2.9...server-v0.2.10) (2025-12-21)
+
+
+### Bug Fixes
+
+* fixed a typo ([#275](https://github.com/yioneko/vtsls/issues/275)) ([1a59f57](https://github.com/yioneko/vtsls/commit/1a59f574304e33a53dd5645f23b668a649a8a91e))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @vtsls/language-service bumped from 0.2.9 to 0.2.10
+
 ## [0.2.9](https://github.com/yioneko/vtsls/compare/server-v0.2.8...server-v0.2.9) (2025-05-20)
 
 

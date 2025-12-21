@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.2.10](https://github.com/yioneko/vtsls/compare/service-v0.2.9...service-v0.2.10) (2025-12-21)
+
+
+### Bug Fixes
+
+* **deps:** update dependency typescript to v5.9.3 ([#270](https://github.com/yioneko/vtsls/issues/270)) ([989058a](https://github.com/yioneko/vtsls/commit/989058abbf5fc44628587a99f9b69a84648e463e))
+* **deps:** update packages/service/vscode digest to ec6406b ([#263](https://github.com/yioneko/vtsls/issues/263)) ([83fc386](https://github.com/yioneko/vtsls/commit/83fc3863b1b4500b0cb11bb9760d9d8af04b7c07))
+* **hover:** return null instead of empty contents ([#248](https://github.com/yioneko/vtsls/issues/248)) ([2ad37c1](https://github.com/yioneko/vtsls/commit/2ad37c1694fccdc14c9cac243973ba93b3e704fa))
+* passthrough `disabled` field of code action ([4a1aa0d](https://github.com/yioneko/vtsls/commit/4a1aa0d19c28d3ceeea353421360f900bb32c173))
+
 ## [0.2.9](https://github.com/yioneko/vtsls/compare/service-v0.2.8...service-v0.2.9) (2025-05-20)
 
 
