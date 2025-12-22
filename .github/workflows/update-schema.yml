@@ -19,9 +19,7 @@ jobs:
       - uses: actions/setup-node@v6
         with:
           node-version: 24
-      - uses: pnpm/action-setup@v2
-        with:
-          version: 10
+      - uses: pnpm/action-setup@v4
       - run: pnpm install
       - run: pnpm --filter ./packages/service patch-extension
       - run: pnpm --filter ./packages/service gen-schema

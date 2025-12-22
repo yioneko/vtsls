@@ -20,9 +20,7 @@ jobs:
         with:
           node-version: 24
           registry-url: "https://registry.npmjs.org"
-      - uses: pnpm/action-setup@v2
-        with:
-          version: 10
+      - uses: pnpm/action-setup@v4
       - run: pnpm install
       - run: pnpm build
       - name: Publish package
