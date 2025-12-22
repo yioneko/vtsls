@@ -21,8 +21,6 @@ jobs:
         with:
           node-version: 24
       - uses: pnpm/action-setup@v4
-        with:
-          version: 10
       - run: pnpm install
       - run: pnpm build
       - run: pnpm lint
@@ -47,8 +45,6 @@ jobs:
         with:
           node-version: 24
       - uses: pnpm/action-setup@v4
-        with:
-          version: 10
       - run: pnpm install
       - uses: actions/setup-node@v6
         with:
