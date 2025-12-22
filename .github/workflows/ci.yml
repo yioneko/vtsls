@@ -31,13 +31,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        node: [16, 18, 20]
+        node: [18, 20, 22, 24]
         os: [ubuntu-latest]
         include:
           - os: macos-latest
-            node: 20
+            node: 24
           - os: windows-latest
-            node: 20
+            node: 24
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v6

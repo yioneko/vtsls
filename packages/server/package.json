@@ -4,7 +4,7 @@
   "version": "0.2.10",
   "license": "MIT",
   "engines": {
-    "node": ">=16"
+    "node": ">=18"
   },
   "main": "./dist/main.js",
   "bin": {
@@ -16,7 +16,7 @@
   "dependencies": {
     "vscode-languageserver": "^9.0.1",
     "vscode-uri": "^3.1.0",
-    "@vtsls/language-service": "0.2.10"
+    "@vtsls/language-service": "workspace:0.2.10"
   },
   "devDependencies": {
     "esbuild": "^0.27.0"

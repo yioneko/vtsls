@@ -18,7 +18,7 @@ async function build({ watch }) {
     format: "cjs",
     // TODO: peerDependencies
     external: Object.keys(dependencies).flatMap((d) => [d, `${d}/*`]),
-    target: "node16",
+    target: "node18",
     platform: "node",
     define: { VTSLS_VERSION: `"${version}"` },
   };

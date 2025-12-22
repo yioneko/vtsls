@@ -224,7 +224,7 @@ class LanguageFeaturesRegistryStore extends Disposable {
 export class LanguageFeaturesShimService extends Disposable {
   private _registryStore = this._register(new LanguageFeaturesRegistryStore());
 
-  readonly onDidChangeDiagnostics = this.diagnostics.onDidChangeDiagnostics.event;
+  readonly onDidChangeDiagnostics: lsp.Event<vscode.DiagnosticChangeEvent>;
 
   constructor(
     delegate: TSLanguageServiceDelegate,
@@ -232,6 +232,7 @@ export class LanguageFeaturesShimService extends Disposable {
   ) {
     super();
 
+    this.onDidChangeDiagnostics = diagnostics.onDidChangeDiagnostics.event;
     this._register(
       this.onDidChangeDiagnostics((e) => {
         for (const uri of e.uris) {
@@ -359,7 +360,7 @@ export class LanguageFeaturesShimService extends Disposable {
   }
 
   // TODO: not available in LSP yet
-  registerMultiDocumentHighlightProvider() {}
+  registerMultiDocumentHighlightProvider() { }
 
   registerDocumentSymbolProvider(
     selector: vscode.DocumentSelector,

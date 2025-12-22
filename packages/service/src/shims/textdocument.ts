@@ -51,9 +51,13 @@ export class IsomorphicTextDocument implements vscode.TextDocument {
 
   encoding = 'utf8';
 
-  getText = this.$documentModel.getText.bind(this.$documentModel);
+  offsetAt(position: vscode.Position | lsp.Position): number {
+    return this.$documentModel.offsetAt(position);
+  }
 
-  offsetAt = this.$documentModel.offsetAt.bind(this.$documentModel);
+  getText(range?: vscode.Range | lsp.Range): string {
+    return this.$documentModel.getText(range);
+  }
 
   positionAt = (offset: number) => {
     const pos = this.$documentModel.positionAt(offset);
