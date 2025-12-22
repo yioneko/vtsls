@@ -33,7 +33,7 @@ export class WorkspaceShimService extends Disposable {
   private _onDidRenameFiles = this._register(new lsp.Emitter<vscode.FileRenameEvent>());
   readonly onDidRenameFiles = this._onDidRenameFiles.event;
 
-  readonly onDidChangeConfiguration = this.configurationShim.onDidChangeConfiguration;
+  readonly onDidChangeConfiguration: lsp.Event<vscode.ConfigurationChangeEvent>;
 
   private _onDidChangeWorkspaceFolders = this._register(
     new lsp.Emitter<vscode.WorkspaceFoldersChangeEvent>()
@@ -62,6 +62,8 @@ export class WorkspaceShimService extends Disposable {
       onCaseInsensitiveFileSystem: onCaseInsensitiveFileSystem(),
     });
 
+    this.onDidChangeConfiguration = configurationShim.onDidChangeConfiguration;
+
     for (const f of initWorkspaceFolders ?? []) {
       const id = this._workspaceFolderIdGen++;
       const uri = URI.parse(f.uri);
@@ -74,7 +76,6 @@ export class WorkspaceShimService extends Disposable {
   }
 
   private readonly _fs = createFileSystemShim();
-
   get fs() {
     return this._fs;
   }
