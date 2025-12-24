@@ -1109,14 +1109,14 @@
         {
           "type": "string",
           "const": "vscode",
-          "description": "%configuration.tsserver.watchOptions.vscode%"
+          "description": "Use VS Code's file watchers instead of TypeScript's. Requires using TypeScript 5.4+ in the workspace."
         },
         {
           "type": "object",
           "properties": {
             "watchFile": {
               "type": "string",
-              "description": "%configuration.tsserver.watchOptions.watchFile%",
+              "description": "Strategy for how individual files are watched.",
               "enum": [
                 "fixedChunkSizePolling",
                 "fixedPollingInterval",
@@ -1126,18 +1126,18 @@
                 "useFsEventsOnParentDirectory"
               ],
               "enumDescriptions": [
-                "%configuration.tsserver.watchOptions.watchFile.fixedChunkSizePolling%",
-                "%configuration.tsserver.watchOptions.watchFile.fixedPollingInterval%",
-                "%configuration.tsserver.watchOptions.watchFile.priorityPollingInterval%",
-                "%configuration.tsserver.watchOptions.watchFile.dynamicPriorityPolling%",
-                "%configuration.tsserver.watchOptions.watchFile.useFsEvents%",
-                "%configuration.tsserver.watchOptions.watchFile.useFsEventsOnParentDirectory%"
+                "Polls files in chunks at regular interval.",
+                "Check every file for changes several times a second at a fixed interval.",
+                "Check every file for changes several times a second, but use heuristics to check certain types of files less frequently than others.",
+                "Use a dynamic queue where less-frequently modified files will be checked less often.",
+                "Attempt to use the operating system/file system's native events for file changes.",
+                "Attempt to use the operating system/file system's native events to listen for changes on a file's containing directories. This can use fewer file watchers, but might be less accurate."
               ],
               "default": "useFsEvents"
             },
             "watchDirectory": {
               "type": "string",
-              "description": "%configuration.tsserver.watchOptions.watchDirectory%",
+              "description": "Strategy for how entire directory trees are watched under systems that lack recursive file-watching functionality.",
               "enum": [
                 "fixedChunkSizePolling",
                 "fixedPollingInterval",
@@ -1145,30 +1145,30 @@
                 "useFsEvents"
               ],
               "enumDescriptions": [
-                "%configuration.tsserver.watchOptions.watchDirectory.fixedChunkSizePolling%",
-                "%configuration.tsserver.watchOptions.watchDirectory.fixedPollingInterval%",
-                "%configuration.tsserver.watchOptions.watchDirectory.dynamicPriorityPolling%",
-                "%configuration.tsserver.watchOptions.watchDirectory.useFsEvents%"
+                "Polls directories in chunks at regular interval.",
+                "Check every directory for changes several times a second at a fixed interval.",
+                "Use a dynamic queue where less-frequently modified directories will be checked less often.",
+                "Attempt to use the operating system/file system's native events for directory changes."
               ],
               "default": "useFsEvents"
             },
             "fallbackPolling": {
               "type": "string",
-              "description": "%configuration.tsserver.watchOptions.fallbackPolling%",
+              "description": "When using file system events, this option specifies the polling strategy that gets used when the system runs out of native file watchers and/or doesn't support native file watchers.",
               "enum": [
                 "fixedPollingInterval",
                 "priorityPollingInterval",
                 "dynamicPriorityPolling"
               ],
               "enumDescriptions": [
-                "configuration.tsserver.watchOptions.fallbackPolling.fixedPollingInterval",
-                "configuration.tsserver.watchOptions.fallbackPolling.priorityPollingInterval",
-                "configuration.tsserver.watchOptions.fallbackPolling.dynamicPriorityPolling"
+                "Check every file for changes several times a second at a fixed interval.",
+                "Check every file for changes several times a second, but use heuristics to check certain types of files less frequently than others.",
+                null
               ]
             },
             "synchronousWatchDirectory": {
               "type": "boolean",
-              "description": "%configuration.tsserver.watchOptions.synchronousWatchDirectory%"
+              "description": "Disable deferred watching on directories. Deferred watching is useful when lots of file changes might occur at once (e.g. a change in node_modules from running npm install), but you might want to disable it with this flag for some less-common setups."
             }
           }
         }

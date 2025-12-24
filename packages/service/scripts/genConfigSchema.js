@@ -19,50 +19,55 @@ async function genSchema() {
     return (key && (nls[key.slice(1, key.length - 1)] ?? nls[key])) ?? null;
   }
 
+  function processProperty(p) {
+    if (p.description) {
+      p.description = lookUpDescription(p.description);
+    }
+    if (p.markdownDescription) {
+      p.markdownDescription = lookUpDescription(p.markdownDescription);
+    }
+    if (p.items?.description) {
+      p.items.description = lookUpDescription(p.items.description);
+    }
+    if (p.enumDescriptions) {
+      p.enumDescriptions = p.enumDescriptions.map(lookUpDescription);
+    }
+    if (p.markdownEnumDescriptions) {
+      p.markdownEnumDescriptions = p.markdownEnumDescriptions.map(lookUpDescription);
+    }
+    if (p.deprecationMessage) {
+      p.deprecationMessage = lookUpDescription(p.deprecationMessage);
+    }
+    if (p.markdownDeprecationMessage) {
+      p.markdownDeprecationMessage = lookUpDescription(p.markdownDeprecationMessage);
+    }
+    if (p.enumItemLabels) {
+      p.enumItemLabels = p.enumItemLabels.map(lookUpDescription);
+    }
+    delete p.scope;
+    delete p.tags;
+    if (p.properties) {
+      processProperties(p.properties);
+    }
+    if (p.oneOf) {
+      p.oneOf.forEach(processProperty);
+    }
+  }
+
   function processProperties(ps) {
     for (const p of Object.values(ps)) {
-      if (p.description) {
-        p.description = lookUpDescription(p.description);
-      }
-      if (p.markdownDescription) {
-        p.markdownDescription = lookUpDescription(p.markdownDescription);
-      }
-      if (p.items?.description) {
-        p.items.description = lookUpDescription(p.items.description);
-      }
-      if (p.enumDescriptions) {
-        p.enumDescriptions = p.enumDescriptions.map(lookUpDescription);
-      }
-      if (p.markdownEnumDescriptions) {
-        p.markdownEnumDescriptions = p.markdownEnumDescriptions.map(lookUpDescription);
-      }
-      if (p.deprecationMessage) {
-        p.deprecationMessage = lookUpDescription(p.deprecationMessage);
-      }
-      if (p.markdownDeprecationMessage) {
-        p.markdownDeprecationMessage = lookUpDescription(p.markdownDeprecationMessage);
-      }
-      if (p.enumItemLabels) {
-        p.enumItemLabels = p.enumItemLabels.map(lookUpDescription);
-      }
-      delete p.scope;
-      delete p.tags;
-      if (p.properties) {
-        processProperties(p.properties);
-      }
+      processProperty(p);
     }
   }
 
   processProperties(properties);
 
   const unavailableOptions = [
-    "typescript.experimental.aiCodeActions",
     // needs memento support
     "typescript.enablePromptUseWorkspaceTsdk",
     "typescript.tsc.autoDetect",
     "typescript.autoClosingTags",
     "javascript.autoClosingTags",
-    "typescript.surveys.enabled",
     "typescript.tsserver.enableRegionDiagnostics",
     "typescript.tsserver.experimental.useVsCodeWatcher",
     "javascript.updateImportsOnPaste.enabled",
@@ -172,6 +177,8 @@ async function genSchema() {
       ...additionalConfig,
     },
   };
+
+
 }
 
 async function genSchemaDoc() {
