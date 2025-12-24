@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.3.0](https://github.com/yioneko/vtsls/compare/server-v0.2.10...server-v0.3.0) (2025-12-24)
+
+
+### ⚠ BREAKING CHANGES
+
+* bump minimum required node version to 18 ([#295](https://github.com/yioneko/vtsls/issues/295))
+
+### Miscellaneous Chores
+
+* bump minimum required node version to 18 ([#295](https://github.com/yioneko/vtsls/issues/295)) ([5bdf6f3](https://github.com/yioneko/vtsls/commit/5bdf6f3e05fdca439b72dd7ccf9f5e9b13e50d88))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @vtsls/language-service bumped to 0.3.0
+
 ## [0.2.10](https://github.com/yioneko/vtsls/compare/server-v0.2.9...server-v0.2.10) (2025-12-21)
 
 
