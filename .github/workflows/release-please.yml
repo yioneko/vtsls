@@ -7,15 +7,34 @@ permissions:
   contents: write
   issues: write
   pull-requests: write
+  id-token: write
 
 name: release-please
 
 jobs:
-  release-please:
+  release:
     runs-on: ubuntu-latest
+    outputs:
+      package_names: ${{ steps.extract_names.outputs.names }}
     steps:
       - uses: googleapis/release-please-action@v4
+        id: release
         with:
-          token: ${{ secrets.RELEASE_PLEASE_TOKEN }}
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
+      - name: Extract package names
+        id: extract_names
+        run: |
+          PATHS='${{ steps.release.outputs.paths_released }}'
+          NAMES=$(echo "$PATHS" | jq -c 'map(sub("packages/"; ""))')
+          echo "names=$NAMES" >> "$GITHUB_OUTPUT"
+
+  publish:
+    needs: release
+    if: ${{ needs.release.outputs.package_names != '[]' && needs.release-please.outputs.package_names != '' }}
+    strategy:
+      matrix:
+        package: ${{ fromJSON(needs.release.outputs.package_names) }}
+    uses: ./.github/workflows/publish.yml
+    with:
+      package: ${{ matrix.package }}
