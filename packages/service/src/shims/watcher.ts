@@ -7,6 +7,7 @@ import { Delayer } from "../utils/async";
 import { Disposable, IDisposable, MutableDisposable } from "../utils/dispose";
 import { isEqualOrParent, onCaseInsensitiveFileSystem, relativeParent } from "../utils/fs";
 import { ResourceMap } from "../utils/resourceMap";
+import { TernarySearchTree } from "../utils/ternarySearchTree";
 
 interface FileEvent {
   uri: URI;
@@ -108,10 +109,8 @@ function isRecurisveGlobPattern(pattern: string) {
 }
 
 export class RegisteredWatcherCollection {
-  private registeredWatchers = new ResourceMap<RegisteredWatcherRef>(undefined, {
-    onCaseInsensitiveFileSystem: onCaseInsensitiveFileSystem(),
-  });
-  private registeredNonRecursiveWatchers = new ResourceMap<RegisteredWatcherRef>(undefined, {
+  private registeredWatchers = TernarySearchTree.forUris<FileSystemWatcher>(onCaseInsensitiveFileSystem);
+  private registeredNonRecursiveWatchers = new ResourceMap<FileSystemWatcher>(undefined, {
     onCaseInsensitiveFileSystem: onCaseInsensitiveFileSystem(),
   });
 
