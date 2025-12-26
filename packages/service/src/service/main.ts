@@ -153,6 +153,9 @@ export function createTSLanguageService(initOptions: TSLanguageServiceOptions) {
     changeWorkspaceFolders(params: lsp.DidChangeWorkspaceFoldersParams) {
       shims.workspaceService.$changeWorkspaceFolders(params);
     },
+    changeWatchedFiles(params: lsp.DidChangeWatchedFilesParams) {
+      shims.workspaceService.$changeWatchedFiles(params);
+    },
     completion: wrapRequestHandler((params: lsp.CompletionParams, token) => {
       const { textDocument, ...rest } = params;
       const doc = getOpenedDoc(textDocument.uri);
