@@ -366,7 +366,7 @@ export class TernarySearchTree<K, V> {
 		}
 	}
 
-	set(key: K, element: V): V | undefined {
+	_set(key: K, element: (oldElement: V | undefined) => V): [V | undefined, V] {
 		const iter = this._iter.reset(key);
 		let node: TernarySearchTreeNode<K, V>;
 
@@ -414,7 +414,8 @@ export class TernarySearchTree<K, V> {
 
 		// set value
 		const oldElement = Undef.unwrap(node.value);
-		node.value = Undef.wrap(element);
+		const newElement = element(oldElement);
+		node.value = Undef.wrap(newElement);
 		node.key = key;
 
 		// balance
@@ -470,7 +471,15 @@ export class TernarySearchTree<K, V> {
 			}
 		}
 
-		return oldElement;
+		return [oldElement, newElement];
+	}
+
+	set(key: K, element: V): V | undefined {
+		return this._set(key, () => element)[0];
+	}
+
+	ensure(key: K, defaultVal: (oldElement: V | undefined) => V): V {
+		return this._set(key, defaultVal)[1];
 	}
 
 	get(key: K): V | undefined {

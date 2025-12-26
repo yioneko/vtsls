@@ -57,6 +57,9 @@ importers:
       jsonc-parser:
         specifier: ^3.2.0
         version: 3.3.1
+      picomatch:
+        specifier: ^4.0.2
+        version: 4.0.3
       semver:
         specifier: 7.5.2
         version: 7.5.2
@@ -74,8 +77,8 @@ importers:
         version: 3.1.0
     devDependencies:
       '@types/picomatch':
-        specifier: ^2.3.3
-        version: 2.3.3
+        specifier: ^4.0.2
+        version: 4.0.2
       '@types/semver':
         specifier: ^7.5.0
         version: 7.7.1
@@ -577,6 +580,9 @@ packages:
 
   '@types/node@20.19.27':
     resolution: {integrity: sha512-N2clP5pJhB2YnZJ3PIHFk5RkygRX5WO/5f0WC08tp0wd+sv0rsJk3MqWn3CbNmT2J505a5336jaQj4ph1AdMug==}
+
+  '@types/picomatch@4.0.2':
+    resolution: {integrity: sha512-qHHxQ+P9PysNEGbALT8f8YOSHW0KJu6l2xU8DYY0fu/EmGxXdVnuTLvFUvBgPJMSqXq29SYHveejeAha+4AYgA==}
 
   '@types/semver@7.7.1':
     resolution: {integrity: sha512-FmgJfu+MOcQ370SD0ev7EI8TlCAfKYU+B4m5T3yXc1CiRN94g/SZPtsCkk506aUDtlMnFZvasDwHHUcZUEaYuA==}
@@ -1654,6 +1660,8 @@ snapshots:
   '@types/node@20.19.27':
     dependencies:
       undici-types: 6.21.0
+
+  '@types/picomatch@4.0.2': {}
 
   '@types/semver@7.7.1': {}
 
