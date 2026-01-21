@@ -12,6 +12,11 @@ export async function createTestService(workspacePath: string) {
         documentSymbol: { hierarchicalDocumentSymbolSupport: true },
         definition: { linkSupport: true },
       },
+      workspace: {
+        workspaceEdit: {
+          snippetEditSupport: true
+        }
+      }
     },
     workspaceFolders: [{ name: "test", uri: URI.file(workspacePath).toString() }],
   });
@@ -28,6 +33,7 @@ export async function createTestService(workspacePath: string) {
         // log: "verbose",
         useSyntaxServer: "never",
       },
+      autoClosingTags: true
     },
     vtsls: {
       typescript: {
@@ -70,12 +76,13 @@ export async function createTestService(workspacePath: string) {
         service.closeTextDocument({ textDocument: { uri } });
         openedDocuments.delete(docPath);
       },
-      changeContent: (text: string) => {
+      changeContent: (text: string, range?: lsp.Range) => {
+        const event = { text, ...(range ? { range } : {}) }
         service.changeTextDocument({
           textDocument: { uri, version: doc.version + 1 },
-          contentChanges: [{ text }],
+          contentChanges: [event],
         });
-        TextDocument.update(doc, [{ text }], doc.version + 1);
+        TextDocument.update(doc, [event], doc.version + 1);
       },
     };
 

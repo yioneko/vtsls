@@ -20,11 +20,16 @@ function getDefaultConfig() {
     "vtsls.tsserver.globalPlugins": [],
   };
   const overrideDefaults = {
+    // unavailable options
     "typescript.tsserver.enableRegionDiagnostics": false,
     "typescript.tsserver.experimental.useVsCodeWatcher": false,
-    "typescript.tsserver.watchOptions": {},
     "javascript.updateImportsOnPaste.enabled": false,
     "typescript.updateImportsOnPaste.enabled": false,
+
+    // available options
+    "typescript.tsserver.watchOptions": {},
+    "typescript.autoClosingTags": false,
+    "javascript.autoClosingTags": false,
   };
 
   const res: TSLanguageServiceConfig = {};
