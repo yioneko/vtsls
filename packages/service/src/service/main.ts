@@ -15,7 +15,7 @@ import { createTSLanguageServiceDelegate } from "./delegate";
 import { TSInlayHintFeature } from "./inlayHint";
 import { tsDefaultConfig, tsDefaultNls } from "./pkgJson";
 import { ProviderNotFoundError } from "./protocol";
-import { TSLanguageServiceConfig, TSLanguageServiceOptions } from "./types";
+import { TSLanguageServiceConfig, TSLanguageServiceOptions, VerboseHoverParams } from "./types";
 
 async function startVsTsExtension(context: vscode.ExtensionContext) {
   const tsExtension = await import("@vsc-ts/extension");
@@ -75,6 +75,9 @@ export function createTSLanguageService(initOptions: TSLanguageServiceOptions) {
     shims.configurationService,
     converter
   );
+
+  // eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
+  let previousHover: vscode.VerboseHover | undefined = undefined;
 
   const { commandsConverter } = initializeShareMod(converter, shims.workspaceService);
 
@@ -245,14 +248,19 @@ export function createTSLanguageService(initOptions: TSLanguageServiceOptions) {
         return result.map(converter.convertLocation);
       }
     }),
-    hover: wrapRequestHandler(async (params: lsp.HoverParams, token) => {
+    hover: wrapRequestHandler(async (params: VerboseHoverParams, token) => {
       const doc = getOpenedDoc(params.textDocument.uri);
       const { provider } = providers.$getHighestProvider(doc, providers.hover);
+      const hoverContext = params.context?.verbosityRequest?.verbosityDelta
+        ? { verbosityDelta: params.context.verbosityRequest.verbosityDelta, previousHover }
+        : undefined;
       const result = await provider.provideHover(
         doc,
         converter.convertPositionFromLsp(params.position),
-        token
+        token,
+        hoverContext
       );
+      previousHover = result ?? undefined;
       if (result) {
         return converter.convertHover(result);
       }
