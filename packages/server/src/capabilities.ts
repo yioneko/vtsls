@@ -84,6 +84,24 @@ export function getTsLspDefaultCapabilities(): ServerCapabilities {
         changeNotifications: true,
       },
       fileOperations: {
+        willRename: {
+          filters: [
+            {
+              scheme: "file",
+              pattern: {
+                glob: "**/*.{ts,cts,mts,tsx,js,cjs,mjs,jsx}",
+                matches: "file",
+              },
+            },
+            {
+              scheme: "file",
+              pattern: {
+                glob: "**/*",
+                matches: "folder",
+              },
+            },
+          ],
+        },
         didRename: {
           filters: [
             {
