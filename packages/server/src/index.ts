@@ -13,6 +13,7 @@ import {
   LogMessageNotification,
   ProposedFeatures,
   ShowDocumentRequest,
+  DocumentDiagnosticReport,
   ShowMessageRequest,
 } from "vscode-languageserver/node";
 import { URI } from "vscode-uri";
@@ -148,6 +149,10 @@ function bindServiceHandlers(
   conn.onDocumentHighlight(safeRun(service.documentHighlight, null));
   conn.onSignatureHelp(safeRun(service.signatureHelp, null));
   // conn.onDocumentLinks(service.documentLinks);
+  if (clientCapabilities.textDocument?.diagnostic) {
+    const nullDiagnostics: DocumentDiagnosticReport = { items: [], kind: "full" };
+    conn.languages.diagnostics.on(safeRun(service.diagnostics, nullDiagnostics, true))
+  }
   conn.onDefinition(safeRun(service.definition, null));
   conn.onReferences(safeRun(service.references, null));
   conn.onHover(safeRun(service.hover, null));
