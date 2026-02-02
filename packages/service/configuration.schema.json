@@ -1087,7 +1087,7 @@
         "auto"
       ],
       "enumDescriptions": [
-        "Use a lighter weight syntax server to handle all IntelliSense operations. This syntax server can only provide IntelliSense for opened files.",
+        "Use a lighter weight syntax server to handle all IntelliSense operations. This disables project-wide features including auto-imports, cross-file completions, and go to definition for symbols in other files. Only use this for very large projects where performance is critical.",
         "Don't use a dedicated syntax server. Use a single server to handle all IntelliSense operations.",
         "Spawn both a full server and a lighter weight server dedicated to syntax operations. The syntax server is used to speed up syntax operations and provide IntelliSense while projects are loading."
       ]
