@@ -1,4 +1,5 @@
 import * as lsp from "vscode-languageserver-protocol";
+import type * as vscode from "vscode";
 
 export interface TSLanguageServiceOptions {
   locale?: string;
@@ -41,3 +42,14 @@ export type TSLanguageServiceEvents = {
     handler: EventHandlersMapping[K]
   ) => lsp.Disposable;
 };
+
+export interface VerboseHover extends lsp.Hover {
+  canDecreaseVerbosity?: boolean;
+  canIncreaseVerbosity?: boolean;
+}
+
+export interface VerboseHoverParams extends lsp.HoverParams {
+  context?: {
+    verbosityRequest: vscode.HoverContext;
+  }
+}
