@@ -1,0 +1,28 @@
+diff --git a/src/tsServer/bufferSyncSupport.ts b/src/tsServer/bufferSyncSupport.ts
+index b1199e5..41ee321 100644
+--- a/src/tsServer/bufferSyncSupport.ts
++++ b/src/tsServer/bufferSyncSupport.ts
+@@ -522,7 +522,7 @@ export default class BufferSyncSupport extends Disposable {
+ 
+ 	private readonly _onWillChange = this._register(new vscode.EventEmitter<vscode.Uri>());
+ 	public readonly onWillChange = this._onWillChange.event;
+-
++  private getErrSeq = 0
+ 	public listen(): void {
+ 		if (this.listening) {
+ 			return;
+@@ -746,9 +746,12 @@ export default class BufferSyncSupport extends Disposable {
+ 		}
+ 
+ 		if (orderedFileSet.size) {
+-      vscode.workspace.startGetErr()
++      // @ts-ignore
++      vscode.workspace.startGetErr(this.getErrSeq)
+ 			const getErr = this.pendingGetErr = GetErrRequest.executeGetErrRequest(this.client, orderedFileSet, () => {
+-        vscode.workspace.finishGetErr()
++
++        // @ts-ignore
++        vscode.workspace.finishGetErr(this.getErrSeq++)
+ 				if (this.pendingGetErr === getErr) {
+ 					this.pendingGetErr = undefined;
+ 				}
