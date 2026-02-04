@@ -21,6 +21,7 @@ export interface TSLanguageServiceDelegate {
   applyWorkspaceEdit(edit: lsp.WorkspaceEdit): Promise<boolean>;
   createWorkDoneProgress: () => Promise<WorkDoneProgressReporter | undefined>;
   publishDiagnostics: (uri: lsp.URI, diagnostics: lsp.Diagnostic[]) => void;
+  registerDidChangeWatchedFiles: (watchers: lsp.FileSystemWatcher[]) => Promise<lsp.Disposable>;
 }
 
 export function createTSLanguageServiceDelegate(converter: TSLspConverter) {
@@ -49,6 +50,7 @@ export function createTSLanguageServiceDelegate(converter: TSLspConverter) {
     onApplyWorkspaceEdit: onHandler("applyWorkspaceEdit"),
     onWorkDoneProgress: onHandler("workDoneProgress"),
     onDiagnostics: onHandler("diagnostics"),
+    onRegisterDidChangeWatchedFiles: onHandler("registerDidChangeWatchedFiles"),
   };
 
   const delegate: TSLanguageServiceDelegate = {
@@ -105,6 +107,13 @@ export function createTSLanguageServiceDelegate(converter: TSLspConverter) {
       if (handler) {
         void handler({ uri, diagnostics });
       }
+    },
+    async registerDidChangeWatchedFiles(watchers) {
+      const handler = getHandler("registerDidChangeWatchedFiles");
+      if (handler) {
+        return await handler({ watchers });
+      }
+      throw new Error("Register watchers failed");
     },
   };
 

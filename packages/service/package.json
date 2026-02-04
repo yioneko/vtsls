@@ -27,6 +27,7 @@
     "@vscode/l10n": "^0.0.18",
     "@vtsls/vscode-fuzzy": "workspace:*",
     "jsonc-parser": "^3.2.0",
+    "picomatch": "^4.0.2",
     "semver": "7.5.2",
     "typescript": "5.9.3",
     "vscode-languageserver-protocol": "^3.17.5",
@@ -34,6 +35,7 @@
     "vscode-uri": "^3.1.0"
   },
   "devDependencies": {
+    "@types/picomatch": "^4.0.2",
     "@types/semver": "^7.5.0",
     "esbuild": "^0.27.0",
     "vitest": "^4.0.17"
