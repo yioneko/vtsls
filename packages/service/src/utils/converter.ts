@@ -2,8 +2,6 @@ import type * as vscode from "vscode";
 import * as lsp from "vscode-languageserver-protocol";
 import { URI } from "vscode-uri";
 import * as types from "../shims/types";
-import { onCaseInsensitiveFileSystem } from "../utils/fs";
-import { ResourceMap } from "../utils/resourceMap";
 import { deepClone } from "./objects";
 
 function isStringOrFalsy(val: unknown): val is string | undefined | null {
@@ -54,22 +52,33 @@ export class TSLspConverter extends LspInvariantConverter {
     this.convertCodeAction = this.convertCodeAction.bind(this);
   }
 
+  // NOTE: could throw on unsupported client capability
   convertWorkspaceEdit = (edit: vscode.WorkspaceEdit): lsp.WorkspaceEdit => {
-    const resouceOpKinds =
-      this.clientCapabilities.workspace?.workspaceEdit?.resourceOperations ?? [];
-
-    const docChanges: (lsp.CreateFile | lsp.RenameFile | lsp.DeleteFile | URI)[] = [];
-    let hasResourceOp = false;
-
-    const textEditsByUri = new ResourceMap<lsp.TextEdit[]>(undefined, {
-      onCaseInsensitiveFileSystem: onCaseInsensitiveFileSystem(),
-    });
-
+    edit.entries();
     /* eslint-disable @typescript-eslint/no-unsafe-call, @typescript-eslint/ban-ts-comment */
     // @ts-ignore private api
-    for (const entry of edit._allEntries() as ReadonlyArray<types.WorkspaceEditEntry>) {
+    const entries = edit._allEntries() as ReadonlyArray<types.WorkspaceEditEntry>;
+
+    const isPlainTextEdit = entries.every((e) => e._type === types.FileEditType.Text);
+    if (isPlainTextEdit) {
+      const changes: lsp.WorkspaceEdit["changes"] = {};
+      for (const { uri: _uri, edit } of entries) {
+        const uri = _uri.toString();
+        if (changes[uri]) {
+          changes[uri].push(this.convertTextEdit(edit));
+        } else {
+          changes[uri] = [this.convertTextEdit(edit)];
+        }
+      }
+      return { changes };
+    }
+
+    // TODO: convert entry.metadata to changeAnnotations
+    const documentChanges: lsp.WorkspaceEdit["documentChanges"] = [];
+    const resouceOpKinds =
+      this.clientCapabilities.workspace?.workspaceEdit?.resourceOperations ?? [];
+    for (const entry of entries) {
       if (entry._type === types.FileEditType.File) {
-        hasResourceOp = true;
         // file operation
         // create
         if (!entry.from) {
@@ -81,7 +90,7 @@ export class TSLspConverter extends LspInvariantConverter {
             throw new Error("client doesn't support create operation");
           }
           if (entry.to) {
-            docChanges.push({
+            documentChanges.push({
               kind: "create",
               uri: entry.to.toString(),
               options: entry.options,
@@ -92,7 +101,7 @@ export class TSLspConverter extends LspInvariantConverter {
           if (!resouceOpKinds.includes(lsp.ResourceOperationKind.Rename)) {
             throw new Error("client doesn't support rename operation");
           }
-          docChanges.push({
+          documentChanges.push({
             kind: "rename",
             oldUri: entry.from.toString(),
             newUri: entry.to.toString(),
@@ -103,47 +112,39 @@ export class TSLspConverter extends LspInvariantConverter {
           if (!resouceOpKinds.includes(lsp.ResourceOperationKind.Delete)) {
             throw new Error("client doesn't support delete operation");
           }
-          docChanges.push({
+          documentChanges.push({
             kind: "delete",
             uri: entry.from.toString(),
             options: entry.options,
           });
         }
       } else if (entry._type === types.FileEditType.Text) {
-        // text edits
-        if (textEditsByUri.has(entry.uri)) {
-          textEditsByUri.get(entry.uri)?.push(this.convertTextEdit(entry.edit));
-        } else {
-          // mark for future use
-          docChanges.push(entry.uri);
-          textEditsByUri.set(entry.uri, [this.convertTextEdit(entry.edit)]);
+        documentChanges.push({
+          textDocument: { uri: entry.uri.toString(), version: null },
+          edits: [this.convertTextEdit(entry.edit)],
+        });
+      } else if (entry._type === types.FileEditType.Snippet) {
+        if (!this.clientCapabilities.workspace?.workspaceEdit?.snippetEditSupport) {
+          throw new Error("client doesn't support workspace snippet edit");
         }
+        documentChanges.push({
+          textDocument: { uri: entry.uri.toString(), version: null },
+          edits: [
+            {
+              range: this.convertRangeToLsp(entry.range),
+              snippet: {
+                kind: "snippet",
+                value: entry.edit.value,
+              },
+            },
+          ],
+        });
       } else {
         throw new Error(`Not supported type of edit entry: ${entry._type}`);
       }
     }
-    /* eslint-enable @typescript-eslint/no-unsafe-call, @typescript-eslint/ban-ts-comment */
 
-    if (hasResourceOp) {
-      return {
-        documentChanges: docChanges.map((d) => {
-          if (!URI.isUri(d)) {
-            return d;
-          } else {
-            return {
-              textDocument: { uri: d.toString(), version: null },
-              edits: textEditsByUri.get(d)!,
-            };
-          }
-        }),
-      };
-    } else {
-      const changes: lsp.WorkspaceEdit["changes"] = {};
-      for (const { resource: uri, value: edits } of textEditsByUri.entries()) {
-        changes[uri.toString()] = edits;
-      }
-      return { changes };
-    }
+    return { documentChanges };
   };
 
   convertCompletionItem = (item: vscode.CompletionItem, data?: any): lsp.CompletionItem => {
