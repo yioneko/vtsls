@@ -9,6 +9,7 @@ import {
   ConfigurationRequest,
   Connection,
   createConnection,
+  DidChangeWatchedFilesNotification,
   InitializeParams,
   LogMessageNotification,
   ProposedFeatures,
@@ -103,6 +104,11 @@ function bindServiceHandlers(
   if (clientCapabilities.textDocument?.publishDiagnostics) {
     service.onDiagnostics((params) => conn.sendDiagnostics(params));
   }
+  if (clientCapabilities.workspace?.didChangeWatchedFiles?.dynamicRegistration) {
+    service.onRegisterDidChangeWatchedFiles((params) =>
+      conn.client.register(DidChangeWatchedFilesNotification.type, params)
+    );
+  }
 
   conn.onExit(() => service.dispose());
   conn.onShutdown(() => service.dispose());
@@ -135,6 +141,7 @@ function bindServiceHandlers(
   conn.onDidCloseTextDocument(service.closeTextDocument);
   conn.onDidChangeTextDocument(service.changeTextDocument);
   conn.onDidChangeConfiguration(service.changeConfiguration);
+  conn.onDidChangeWatchedFiles(service.changeWatchedFiles);
   conn.workspace.onDidRenameFiles(service.renameFiles);
   /* eslint-enable @typescript-eslint/unbound-method*/
   if (clientCapabilities.workspace?.workspaceFolders) {
