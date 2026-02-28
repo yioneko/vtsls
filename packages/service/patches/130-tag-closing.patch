@@ -1,0 +1,65 @@
+diff --git a/src/languageFeatures/tagClosing.ts b/src/languageFeatures/tagClosing.ts
+index 6b47feb..15376b6 100644
+--- a/src/languageFeatures/tagClosing.ts
++++ b/src/languageFeatures/tagClosing.ts
+@@ -51,11 +51,6 @@ class TagClosing extends Disposable {
+ 			return;
+ 		}
+ 
+-		const activeDocument = vscode.window.activeTextEditor?.document;
+-		if (document !== activeDocument) {
+-			return;
+-		}
+-
+ 		const filepath = this.client.toOpenTsFilePath(document);
+ 		if (!filepath) {
+ 			return;
+@@ -107,18 +102,17 @@ class TagClosing extends Disposable {
+ 			if (this._disposed) {
+ 				return;
+ 			}
+-
+-			const activeEditor = vscode.window.activeTextEditor;
+-			if (!activeEditor) {
+-				return;
+-			}
+-
+-			const insertion = response.body;
+-			const activeDocument = activeEditor.document;
+-			if (document === activeDocument && activeDocument.version === version) {
+-				activeEditor.insertSnippet(
+-					this.getTagSnippet(insertion),
+-					this.getInsertionPositions(activeEditor, position));
++			if (document.version === version) {
++				const insertion = response.body;
++				const edit = new vscode.WorkspaceEdit();
++				edit.set(
++					document.uri,
++					[{
++						range: new vscode.Range(position, position),
++						snippet: this.getTagSnippet(insertion),
++					}]
++				);
++				return await vscode.workspace.applyEdit(edit);
+ 			}
+ 		}, 100);
+ 	}
+@@ -144,17 +138,10 @@ function requireActiveDocumentSetting(
+ ) {
+ 	return new Condition(
+ 		() => {
+-			const editor = vscode.window.activeTextEditor;
+-			if (!editor || !vscode.languages.match(selector, editor.document)) {
+-				return false;
+-			}
+-
+-			return !!vscode.workspace.getConfiguration(language.id, editor.document).get('autoClosingTags');
++			return !!vscode.workspace.getConfiguration(language.id).get('autoClosingTags');
+ 		},
+ 		handler => {
+ 			return vscode.Disposable.from(
+-				vscode.window.onDidChangeActiveTextEditor(handler),
+-				vscode.workspace.onDidOpenTextDocument(handler),
+ 				vscode.workspace.onDidChangeConfiguration(handler));
+ 		});
+ }
