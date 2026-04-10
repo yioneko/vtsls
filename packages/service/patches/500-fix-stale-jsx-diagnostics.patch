@@ -1,0 +1,41 @@
+diff --git a/src/tsServer/bufferSyncSupport.ts b/src/tsServer/bufferSyncSupport.ts
+index 6f7621c..f2e1ae5 100644
+--- a/src/tsServer/bufferSyncSupport.ts
++++ b/src/tsServer/bufferSyncSupport.ts
+@@ -642,6 +642,13 @@ export default class BufferSyncSupport extends Disposable {
+ 	}
+ 
+ 	public beforeCommand(command: string): void {
++		if (command !== 'updateOpen' && command !== 'geterr' && command !== 'geterrForProject') {
++			// Flush pending diagnostics so geterr reaches tsserver before semantic queries
++			if (!this.pendingGetErr && this.diagnosticDelayer.hasPending()) {
++				this.diagnosticDelayer.cancel();
++				this.sendPendingDiagnostics();
++			}
++		}
+ 		this.synchronizer.beforeCommand(command);
+ 	}
+ 
+diff --git a/src/utils/async.ts b/src/utils/async.ts
+index fa5a04e..0c41506 100644
+--- a/src/utils/async.ts
++++ b/src/utils/async.ts
+@@ -53,6 +53,18 @@ export class Delayer<T> {
+ 		return this.completionPromise;
+ 	}
+ 
++	public hasPending(): boolean {
++		return this.timeout !== null || this.completionPromise !== null;
++	}
++
++	public cancel(): void {
++		this.cancelTimeout();
++		this.onSuccess?.(undefined);
++		this.completionPromise = null;
++		this.onSuccess = null;
++		this.task = null;
++	}
++
+ 	private cancelTimeout(): void {
+ 		if (this.timeout !== null) {
+ 			clearTimeout(this.timeout);

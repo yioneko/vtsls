@@ -1,0 +1,9 @@
+{
+	"compilerOptions": {
+		"noEmit": true,
+		"skipLibCheck": true,
+		"jsx": "react-jsx",
+		"module": "esnext",
+		"moduleResolution": "bundler"
+	}
+}
