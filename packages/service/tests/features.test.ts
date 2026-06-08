@@ -199,6 +199,43 @@ function abc(a) {}`,
     });
   });
 
+  it("ignores unsupported text document uris without breaking existing documents", async () => {
+    const unsupportedUris = ["oil:////Users/me/project/src/", "oil:///Users/me/project/src/"];
+    for (const uri of unsupportedUris) {
+      expect(() =>
+        service.openTextDocument({
+          textDocument: {
+            uri,
+            languageId: "typescript",
+            version: 0,
+            text: "const fromOil = true;",
+          },
+        })
+      ).not.toThrow();
+      expect(() =>
+        service.changeTextDocument({
+          textDocument: { uri, version: 1 },
+          contentChanges: [{ text: "const changedFromOil = true;" }],
+        })
+      ).not.toThrow();
+      expect(() => service.closeTextDocument({ textDocument: { uri } })).not.toThrow();
+    }
+
+    const { uri } = await openDoc("index.ts", {
+      text: "function stillWorks() {} stillWorks()",
+    });
+    const response = await service.definition({
+      textDocument: { uri },
+      position: { line: 0, character: 25 },
+    });
+    assert(response);
+    const def = Array.isArray(response) ? response[0] : response;
+    expect(def).toMatchObject({
+      targetUri: uri,
+      targetSelectionRange: { end: { character: 19, line: 0 }, start: { character: 9, line: 0 } },
+    });
+  });
+
   it("provide quickfix", async () => {
     const { uri, changeContent } = await openDoc("index.ts");
     const diagnostics = await new Promise<lsp.Diagnostic[]>((resolve) => {
