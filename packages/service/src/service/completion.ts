@@ -177,7 +177,7 @@ export class TSCompletionFeature extends Disposable {
     const shouldFuzzy = enableServerSideFuzzyMatch && wordRange;
     const fuzzyScorer = shouldFuzzy
       ? this.getCompletionItemFuzzyScorer(
-        results.map((r) => r.items.length).reduce((a, b) => a + b),
+        results.map((r) => r.items.length).reduce((a, b) => a + b, 0),
         pos,
         wordRange,
         leadingLineContent
