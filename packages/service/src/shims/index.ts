@@ -47,6 +47,7 @@ export function initializeShimServices(
   const workspaceService = new WorkspaceShimService(
     delegate,
     configurationService,
+    initOptions.clientCapabilities,
     initOptions.workspaceFolders
   );
   const commandsService = new CommandsShimService(delegate);
