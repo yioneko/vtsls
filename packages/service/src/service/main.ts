@@ -150,6 +150,66 @@ export function createTSLanguageService(initOptions: TSLanguageServiceOptions) {
     renameFiles(params: lsp.RenameFilesParams) {
       shims.workspaceService.$renameFiles(params);
     },
+    willRenameFiles: wrapRequestHandler(async (params: lsp.RenameFilesParams) => {
+      const workspaceEdit: lsp.WorkspaceEdit = { changes: {} };
+
+      for (const file of params.files) {
+        const oldFilePath = URI.parse(file.oldUri).fsPath;
+        const newFilePath = URI.parse(file.newUri).fsPath;
+
+        try {
+          // Call tsserver's getEditsForFileRename command
+          const response = await shims.commandsService.executeCommand<
+            {
+              type: string;
+              body?: Array<{
+                fileName: string;
+                textChanges: Array<{
+                  start: { line: number; offset: number };
+                  end: { line: number; offset: number };
+                  newText: string;
+                }>;
+              }>;
+            },
+            [string, { oldFilePath: string; newFilePath: string }]
+          >("typescript.tsserverRequest", "getEditsForFileRename", {
+            oldFilePath,
+            newFilePath,
+          });
+
+          if (response?.body && Array.isArray(response.body)) {
+            for (const fileEdit of response.body) {
+              const fileUri = URI.file(fileEdit.fileName).toString();
+              if (!workspaceEdit.changes![fileUri]) {
+                workspaceEdit.changes![fileUri] = [];
+              }
+              for (const textChange of fileEdit.textChanges) {
+                workspaceEdit.changes![fileUri].push({
+                  range: {
+                    start: {
+                      line: textChange.start.line - 1, // tsserver uses 1-based lines
+                      character: textChange.start.offset - 1, // tsserver uses 1-based offsets
+                    },
+                    end: {
+                      line: textChange.end.line - 1,
+                      character: textChange.end.offset - 1,
+                    },
+                  },
+                  newText: textChange.newText,
+                });
+              }
+            }
+          }
+        } catch (e) {
+          // Log error but continue with other files
+          delegate.logMessage(lsp.MessageType.Warning, `Failed to get edits for file rename: ${String(e)}`);
+        }
+      }
+
+      // Return null if no edits, otherwise return the workspace edit
+      const hasEdits = Object.keys(workspaceEdit.changes!).length > 0;
+      return hasEdits ? workspaceEdit : null;
+    }),
     changeWorkspaceFolders(params: lsp.DidChangeWorkspaceFoldersParams) {
       shims.workspaceService.$changeWorkspaceFolders(params);
     },
