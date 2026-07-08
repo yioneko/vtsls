@@ -1,8 +1,9 @@
 import * as path from "node:path";
-import { afterAll, assert, describe, expect, it } from "vitest";
+import { afterAll, assert, beforeAll, describe, expect, it } from "vitest";
 import * as lsp from "vscode-languageserver-protocol";
 import { URI } from "vscode-uri";
 import { applyEditsToText, createTestService, waitWorkspaceEdit } from "./utils";
+import { generateUuid } from "../src/utils/uuid";
 
 describe("language features", async () => {
   const workspacePath = path.join(__dirname, "workspace");
@@ -198,12 +199,143 @@ function abc(a) {}`,
       targetSelectionRange: { end: { character: 10, line: 0 }, start: { character: 9, line: 0 } },
     });
   });
+  describe("provide diagnostics", () => {
+    let diagnosticsRecieved;
+    beforeAll(async () => {
+      await openDoc("index.ts");
 
+      diagnosticsRecieved = new Promise(resolve => service.onDiagnostics(async (params) => {
+        if (params.diagnostics.length > 0) {
+          resolve(undefined)
+        }
+      }))
+    })
+    it("simple", async () => {
+      const { uri, changeContent } = await openDoc("index.ts");
+      expect(await service.diagnostics({
+        textDocument: {
+          uri
+        }
+      })).toMatchObject({
+        kind: "full", items: []
+      })
+      await new Promise(resolve => setTimeout(resolve, 2000))
+
+      changeContent("let abc;");
+      await diagnosticsRecieved
+      const diagnostics = await service.diagnostics({
+        textDocument: {
+          uri
+        }
+      });
+      expect(diagnostics).toMatchObject({
+        kind: "full", items: [{
+          code: 7043,
+          message:
+            "Variable 'abc' implicitly has an 'any' type, but a better type may be inferred from usage.",
+        }]
+      })
+    })
+    it("unchanged", async () => {
+      const { uri, changeContent } = await openDoc("index.ts");
+      const request_1 = generateUuid()
+      const request_2 = generateUuid()
+      expect(await service.diagnostics({
+        textDocument: {
+          uri
+        }, identifier: request_1
+      })).toMatchObject({
+        kind: "full", items: []
+      })
+      const unchangedRequests: string[] = []
+      for (let i = 0; i < 3; i++) {
+        const unchangedRequest = generateUuid()
+        unchangedRequests.push(unchangedRequest)
+        expect(await service.diagnostics({
+          textDocument: {
+            uri
+          },
+          previousResultId: request_1,
+          identifier: unchangedRequest,
+        })).toEqual({
+          kind: "unchanged",
+          resultId: request_1
+        });
+      }
+      changeContent("let abc;");
+      const diagnostics = await service.diagnostics({
+        textDocument: {
+          uri
+        },
+        identifier: request_2,
+        previousResultId: request_1
+      });
+      expect(diagnostics).toMatchObject({
+        kind: "full", items: [{
+          code: 7043,
+          message:
+            "Variable 'abc' implicitly has an 'any' type, but a better type may be inferred from usage.",
+        }]
+      })
+      // Verify the diagnostics for the file are constant
+      expect(await service.diagnostics({
+        textDocument: {
+          uri
+        },
+      })).toEqual(diagnostics);
+      for (let i = 0; i < 3; i++) {
+        const unchangedRequest = generateUuid()
+        expect(await service.diagnostics({
+          textDocument: {
+            uri
+          },
+          previousResultId: request_2,
+          identifier: unchangedRequest,
+        })).toEqual({
+          kind: "unchanged",
+          resultId: request_2
+        });
+      }
+    })
+    it("parallel", async () => {
+      const files = ["foo.ts", "bar.ts", "baz.ts"]
+
+      const openedFiles = await Promise.all(files.map(async (file) => await openDoc(file, { text: "// Comment" })));
+      await Promise.all(openedFiles.map(async (openFile) => {
+        expect(await service.diagnostics({
+          textDocument: {
+            uri: openFile.uri
+          }
+        })).toMatchObject({
+          kind: "full", items: []
+        })
+      }))
+      for (const openFile of openedFiles) {
+        const varName = openFile.doc.uri.replace(".ts", "").split("/").pop();
+        openFile.changeContent(`let ${varName};`);
+      }
+      await Promise.all(openedFiles.map(async (openFile) => {
+        const varName = openFile.doc.uri.replace(".ts", "").split("/").pop();
+        expect(await service.diagnostics({
+          textDocument: {
+            uri: openFile.uri
+          }
+        })).toMatchObject({
+          kind: "full", items: expect.arrayContaining([expect.objectContaining({
+            code: 7043,
+            message:
+              `Variable '${varName}' implicitly has an 'any' type, but a better type may be inferred from usage.`,
+          })])
+        })
+      }))
+    })
+
+  })
   it("provide quickfix", async () => {
     const { uri, changeContent } = await openDoc("index.ts");
     const diagnostics = await new Promise<lsp.Diagnostic[]>((resolve) => {
       const disposeDiagHandler = service.onDiagnostics(async (p) => {
-        if (p.diagnostics.length > 0) {
+        if (p.diagnostics.length > 0 && p.uri === uri) {
           disposeDiagHandler.dispose();
           resolve(p.diagnostics);
         }
