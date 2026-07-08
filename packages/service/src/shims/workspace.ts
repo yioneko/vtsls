@@ -266,7 +266,16 @@ export class WorkspaceShimService extends Disposable {
   }
 
   applyEdit(edit: vscode.WorkspaceEdit): Promise<boolean> {
-    return this.delegate.applyWorkspaceEdit(this.delegate.converter.convertWorkspaceEdit(edit));
+    try {
+      return this.delegate.applyWorkspaceEdit(this.delegate.converter.convertWorkspaceEdit(edit));
+    } catch (e) {
+      if (e instanceof Error) {
+        this.delegate.logMessage(lsp.MessageType.Error, String(e));
+        return Promise.resolve(false);
+      } else {
+        throw e;
+      }
+    }
   }
 
   // TODO: should we handle this?

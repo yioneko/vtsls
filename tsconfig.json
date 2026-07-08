@@ -1,10 +1,7 @@
 {
   "compilerOptions": {
     "target": "ES2022",
-    "module": "ESNext",
     "lib": ["ES2022"],
-    "moduleResolution": "node",
-    "experimentalDecorators": true,
     "noImplicitAny": true,
     "noImplicitReturns": false,
     "noImplicitOverride": true,

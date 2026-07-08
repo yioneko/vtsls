@@ -197,6 +197,16 @@
       "default": "prompt",
       "description": "Enable/disable automatic updating of import paths when you rename or move a file in VS Code."
     },
+    "typescript.autoClosingTags": {
+      "type": "boolean",
+      "default": false,
+      "description": "Enable/disable automatic closing of JSX tags."
+    },
+    "javascript.autoClosingTags": {
+      "type": "boolean",
+      "default": false,
+      "description": "Enable/disable automatic closing of JSX tags."
+    },
     "typescript.workspaceSymbols.scope": {
       "type": "string",
       "enum": [
@@ -1104,7 +1114,6 @@
     },
     "typescript.tsserver.watchOptions": {
       "description": "Configure which watching strategies should be used to keep track of files and directories.",
-      "default": "vscode",
       "oneOf": [
         {
           "type": "string",
