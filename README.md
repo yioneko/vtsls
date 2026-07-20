@@ -112,6 +112,24 @@ Almost the same as the original VSCode extension, with a few additional settings
 
 See the configuration schema [here](./packages/service/configuration.schema.json).
 
+### Custom runtime
+
+A custom version of runtime may be specified by passing `settings.typescript.tsserver.nodePath` argument, for example to enable [pointer compression](https://v8.dev/blog/pointer-compression) in Node which significantly improves LSP startup, almost halves the memory footprint, and slightly improves the overall performance.
+
+At the moment of writing, it seems like the Node team [abandoned the idea of distributing pointer compressed builds](https://github.com/nodejs/build/issues/3204) and [unofficial Node builds repo](https://github.com/nodejs/unofficial-builds) stopped distributing them as well.
+
+#### Pointer compression mode with Electron on macOS
+
+Luckily, Electron comes with a version of Node compiled with pointer compression and should be available for your OS. The following was only tested on macOS but should work on other platforms.
+
+macOS:
+
+1. Install Electron (e.g. `brew install --cask electron`)
+2. If macOS says that Electron.app is corrupted run `xattr -d com.apple.quarantine /Applications/Electron.app/`
+3. Set `settings.typescript.tsserver.nodePath` to `/Applications/Electron.app/Contents/MacOs/Electron`
+4. Set `settings.typescript.tsserver.maxTsServerMemory` to `4096` or a smaller value
+5. (optional) To hide the Electron from the menu bar set env var `ELECTRON_RUN_AS_NODE=1`, e.g. by adding `export ELECTRON_RUN_AS_NODE=1` to `.zshrc`
+
 ## Troubleshooting
 
 Please see [Known issues](https://github.com/yioneko/vtsls/issues/26) first.
