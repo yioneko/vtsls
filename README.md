@@ -158,6 +158,29 @@ Or if the plugin resides elsewhere, typically when you want to test a plugin wit
 - Set `typescript.tsserver.log` in configuration
 - Execute command `typescript.openTsServerLog`
 
+<details>
+
+`nvim/after/lsp/vtsls.lua`
+
+```lua
+return {
+  settings = {
+    typescript = {
+			tsserver = { log = "verbose" },
+		},
+	},
+	on_attach = function(client, bufnr)
+		vim.keymap.set("<leader>cl", function()
+		 	client:exec_cmd({
+				command = "typescript.openTsServerLog",
+		 	}, { bufnr = bufnr })
+     end, { buffer = bufnr, desc = "Open debug log" })
+	end,
+}
+```
+
+</details>
+
 ## Editor Integration
 
 Neovim | [nvim-lspconfig](https://github.com/neovim/nvim-lspconfig/blob/master/doc/server_configurations.md#vtsls) [nvim-vtsls](https://github.com/yioneko/nvim-vtsls)
