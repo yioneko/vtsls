@@ -69,7 +69,6 @@ async function genSchema() {
     "typescript.autoClosingTags",
     "javascript.autoClosingTags",
     "typescript.tsserver.enableRegionDiagnostics",
-    "typescript.tsserver.experimental.useVsCodeWatcher",
     "javascript.updateImportsOnPaste.enabled",
     "typescript.updateImportsOnPaste.enabled",
     "typescript.experimental.useTsgo",
@@ -77,6 +76,14 @@ async function genSchema() {
 
   for (const p of unavailableOptions) {
     delete properties[p];
+  }
+
+  const overrideDefaults = {
+    "typescript.tsserver.experimental.useVsCodeWatcher": false,
+  };
+
+  for (const [key, val] of Object.entries(overrideDefaults)) {
+    properties[key].default = val;
   }
 
   const additionalConfigByLang = (lang) => ({
