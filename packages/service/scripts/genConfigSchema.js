@@ -66,8 +66,6 @@ async function genSchema() {
     // needs memento support
     "typescript.enablePromptUseWorkspaceTsdk",
     "typescript.tsc.autoDetect",
-    "typescript.autoClosingTags",
-    "javascript.autoClosingTags",
     "typescript.tsserver.enableRegionDiagnostics",
     "typescript.tsserver.experimental.useVsCodeWatcher",
     "javascript.updateImportsOnPaste.enabled",
@@ -77,6 +75,17 @@ async function genSchema() {
 
   for (const p of unavailableOptions) {
     delete properties[p];
+  }
+
+  // these options are available but with different defaults
+  const overrideDefaults = {
+    "typescript.autoClosingTags": false,
+    "javascript.autoClosingTags": false,
+    "typescript.tsserver.watchOptions": undefined
+  }
+
+  for (const [key, defaultVal] of Object.entries(overrideDefaults)) {
+    properties[key].default = defaultVal;
   }
 
   const additionalConfigByLang = (lang) => ({
