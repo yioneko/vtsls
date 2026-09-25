@@ -1,0 +1,48 @@
+diff --git a/src/typescriptServiceClient.ts b/src/typescriptServiceClient.ts
+index 41d3419..9850de4 100644
+--- a/src/typescriptServiceClient.ts
++++ b/src/typescriptServiceClient.ts
+@@ -973,6 +973,20 @@ export default class TypeScriptServiceClient extends Disposable implements IType
+ 		}
+ 	}
+ 
++	private rebasePatternOnWorkspaceRoot(basePath: string, pattern?: string) {
++		const baseUri = vscode.Uri.file(basePath);
++		const rebasedUri =
++			this.getWorkspaceRootForResource(baseUri) ||
++			vscode.Uri.file(pattern ? basePath : path.dirname(basePath)); // use dirname as basePath to ensure pattern non-empty
++		const rebasedPrePattern = baseUri.path.substring(rebasedUri.path.length + 1);
++		const rebasedPattern = pattern
++			? rebasedPrePattern
++				? `${rebasedPrePattern}/${pattern}`
++				: pattern
++			: rebasedPrePattern;
++		return new vscode.RelativePattern(rebasedUri, rebasedPattern);
++	}
++
+ 	private dispatchEvent(event: Proto.Event) {
+ 		switch (event.event) {
+ 			case EventName.syntaxDiag:
+@@ -1055,8 +1069,8 @@ export default class TypeScriptServiceClient extends Disposable implements IType
+ 
+ 				this.createFileSystemWatcher(
+ 					(event.body as Proto.CreateDirectoryWatcherEventBody).id,
+-					new vscode.RelativePattern(
+-						vscode.Uri.file(fpath),
++					this.rebasePatternOnWorkspaceRoot(
++						fpath,
+ 						(event.body as Proto.CreateDirectoryWatcherEventBody).recursive ? '**' : '*'
+ 					),
+ 					(event.body as Proto.CreateDirectoryWatcherEventBody).ignoreUpdate
+@@ -1071,10 +1085,7 @@ export default class TypeScriptServiceClient extends Disposable implements IType
+ 
+ 				this.createFileSystemWatcher(
+ 					(event.body as Proto.CreateFileWatcherEventBody).id,
+-					new vscode.RelativePattern(
+-						vscode.Uri.file(path),
+-						'*'
+-					)
++					this.rebasePatternOnWorkspaceRoot(path)
+ 				);
+ 				return;
+ 			}
