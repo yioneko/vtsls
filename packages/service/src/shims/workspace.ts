@@ -18,6 +18,24 @@ export class DocumentNotOpenedError extends Error {
   }
 }
 
+const supportedTextDocumentSchemes = new Set([
+  "file",
+  "untitled",
+  "walkthroughsnippet",
+  "vscode-notebook-cell",
+  "vscode-chat-code-block",
+  "office-script",
+  "zipfile",
+]);
+
+function getUriScheme(uri: string) {
+  return /^([a-zA-Z][a-zA-Z0-9+.-]*):/.exec(uri)?.[1];
+}
+
+function isSupportedTextDocumentUri(uri: URI) {
+  return supportedTextDocumentSchemes.has(uri.scheme.toLowerCase());
+}
+
 export class WorkspaceShimService extends Disposable {
   private _onDidOpenTextDocument = this._register(new lsp.Emitter<vscode.TextDocument>());
   readonly onDidOpenTextDocument = this._onDidOpenTextDocument.event;
@@ -80,6 +98,27 @@ export class WorkspaceShimService extends Disposable {
     return this._fs;
   }
 
+  private $parseTextDocumentUri(uri: lsp.URI) {
+    try {
+      const parsed = URI.parse(uri);
+      if (!isSupportedTextDocumentUri(parsed)) {
+        this.delegate.logTrace(
+          `Ignored text document with unsupported URI scheme "${parsed.scheme}": ${uri}`
+        );
+        return;
+      }
+      return parsed;
+    } catch (error) {
+      const scheme = getUriScheme(uri);
+      this.delegate.logTrace(
+        `Ignored text document with invalid URI${scheme ? ` scheme "${scheme}"` : ""}: ${String(
+          error
+        )}`
+      );
+      return;
+    }
+  }
+
   get textDocuments(): vscode.TextDocument[] {
     return Array.from(this._documents.values());
   }
@@ -93,7 +132,8 @@ export class WorkspaceShimService extends Disposable {
   }
 
   $getOpenedDoc(uri: lsp.URI) {
-    return this._documents.get(URI.parse(uri));
+    const vsUri = this.$parseTextDocumentUri(uri);
+    return vsUri ? this._documents.get(vsUri) : undefined;
   }
 
   $getOpenedDocThrow(uri: lsp.URI) {
@@ -108,8 +148,12 @@ export class WorkspaceShimService extends Disposable {
     const {
       textDocument: { uri, languageId, version, text },
     } = params;
+    const vsUri = this.$parseTextDocumentUri(uri);
+    if (!vsUri) {
+      return;
+    }
     const doc = TextDocument.create(uri, languageId, version, text);
-    this._documents.set(URI.parse(uri), doc);
+    this._documents.set(vsUri, doc);
     this._onDidOpenTextDocument.fire(doc);
   }
 
@@ -118,7 +162,11 @@ export class WorkspaceShimService extends Disposable {
       textDocument: { uri, version },
       contentChanges: changes,
     } = params;
-    const doc = this._documents.get(URI.parse(uri));
+    const vsUri = this.$parseTextDocumentUri(uri);
+    if (!vsUri) {
+      return;
+    }
+    const doc = this._documents.get(vsUri);
     if (!doc) {
       this.delegate.logMessage(lsp.MessageType.Error, `File ${uri} not found`);
       return;
@@ -148,7 +196,10 @@ export class WorkspaceShimService extends Disposable {
     const {
       textDocument: { uri },
     } = params;
-    const vsUri = URI.parse(uri);
+    const vsUri = this.$parseTextDocumentUri(uri);
+    if (!vsUri) {
+      return;
+    }
     const doc = this._documents.get(vsUri);
     if (doc) {
       this._onDidCloseTextDocument.fire(doc);
