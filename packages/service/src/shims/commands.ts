@@ -11,6 +11,7 @@ export interface ICommand {
 
 export class CommandsShimService extends Disposable {
   private readonly _commands = new Map<string, ICommand>();
+  private readonly _setContext: ICommand;
 
   private readonly _onDidRegisterCommand = this._register(new lsp.Emitter<string>());
   readonly onDidRegisterCommand = this._onDidRegisterCommand.event;
@@ -18,7 +19,8 @@ export class CommandsShimService extends Disposable {
   constructor(private readonly delegate: TSLanguageServiceDelegate) {
     super();
     // shim missing command
-    this._register(this.registerCommand("setContext", () => {}));
+    this._setContext = {id: "setContext", callback: () => {}};
+    this._commands.set("setContext", this._setContext);
   }
 
   async getCommands(filterInternal = false): Promise<string[]> {
@@ -71,6 +73,7 @@ export class CommandsShimService extends Disposable {
 
   public override dispose() {
     this._commands.clear();
+    this._commands.set("setContext", this._setContext);
     super.dispose();
   }
 }
