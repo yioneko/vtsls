@@ -18,7 +18,7 @@ jobs:
           submodules: "true"
       - uses: actions/setup-node@v7
         with:
-          node-version: 24
+          node-version: 26
       - uses: pnpm/action-setup@v6
       - run: pnpm install
       - run: pnpm --filter ./packages/service patch-extension
