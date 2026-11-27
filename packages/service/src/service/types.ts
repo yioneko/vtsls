@@ -29,6 +29,9 @@ export interface EventHandlersMapping {
   ) => Promise<lsp.ApplyWorkspaceEditResult>;
   workDoneProgress: () => Promise<WorkDoneProgressReporter>;
   diagnostics: (params: lsp.PublishDiagnosticsParams) => Promise<void>;
+  registerDidChangeWatchedFiles: (
+    params: lsp.DidChangeWatchedFilesRegistrationOptions
+  ) => Promise<lsp.Disposable>;
 }
 
 export type EventName = keyof EventHandlersMapping;
