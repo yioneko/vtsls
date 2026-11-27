@@ -76,6 +76,7 @@ export function createTSLanguageService(initOptions: TSLanguageServiceOptions) {
     converter
   );
 
+  const diagnosticReports = new Map<string, vscode.Diagnostic[]>();
   const { commandsConverter } = initializeShareMod(converter, shims.workspaceService);
 
   function wrapRequestHandler<P, R>(
@@ -217,6 +218,38 @@ export function createTSLanguageService(initOptions: TSLanguageServiceOptions) {
       }
 
       return results.length > 0 ? results : null;
+    }),
+    diagnostics: wrapRequestHandler(async (params: lsp.DocumentDiagnosticParams): Promise<lsp.DocumentDiagnosticReport> => {
+      const doc = getOpenedDoc(params.textDocument.uri);
+      delegate.logMessage(lsp.MessageType.Log, `diagnostics: ${doc.uri.fsPath}`);
+      // Execute and wait for geterr to finish. While it executes, tsserver sends the diagnostic events to the client.
+      await shims.workspaceService.waitForGetErr();
+      // There is a 50ms debounce between receiving diagnostics and reporting them to vtsls.
+      // See packages/service/vscode/extensions/typescript-language-features/src/languageFeatures/diagnostics.ts#L392 
+      await new Promise(resolve => setTimeout(resolve, 100))
+      delegate.logMessage(lsp.MessageType.Log, `diagnostics (end): ${doc.uri.fsPath}`);
+      // We can now be assured the diagnostics have been updated on our end.
+      const diagnostics = shims.diagnosticsSerivce.getDiagnostics(doc.uri);
+      if (params.identifier) {
+        if (params.previousResultId) {
+          const result = diagnosticReports.get(params.previousResultId);
+          // If result deep equals diagnostics, we can reuse the previous result and send an unchanged result
+          if (result !== undefined && result.length === diagnostics.length && result.every((d, i) => types.Diagnostic.isEqual(d as types.Diagnostic, diagnostics[i] as types.Diagnostic))) {
+
+            // We're copying the list of diagnostics each time, there may be a better way to do this. But the logic is much cleaner this way.
+            diagnosticReports.set(params.identifier, result);
+            return {
+              kind: "unchanged",
+              resultId: params.previousResultId
+            }
+          }
+        }
+        diagnosticReports.set(params.identifier, diagnostics);
+      }
+      return {
+        kind: "full",
+        items: diagnostics.map(converter.convertDiagnosticToLsp)
+      }
     }),
     definition: wrapRequestHandler(async (params: lsp.DefinitionParams, token) => {
       const doc = getOpenedDoc(params.textDocument.uri);
